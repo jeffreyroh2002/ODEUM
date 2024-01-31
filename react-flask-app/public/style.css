@@ -1,0 +1,20 @@
+* {
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  height: 100px;
+  background: #174441;
+  padding: 1px;
+  width: 100%;
+  max-width: 480px; /* Adjust this to suit the width you want for phones */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header--image {
+  height: 100%;
+  margin-right: 2px;
+}
