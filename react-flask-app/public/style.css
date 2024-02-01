@@ -2,6 +2,30 @@
   box-sizing: border-box;
 }
 
+.line-with-text {
+  position: relative;
+  text-align: center;
+  max-width: 430px; /* Set the maximum width for the container */
+  margin: 0 auto; /* Center the container horizontally */
+  margin-top: 70px
+}
+
+.line-with-text hr {
+  border: none;
+  border-top: 1px solid gray; /* Customize the line's appearance */
+  margin: 0;
+}
+
+.line-with-text .text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: gray;
+  background-color: white; /* Adjust background color to match your background */
+  padding: 0 10px; /* Add padding as needed */
+}
+
 /* HANDLING HEADER */
 
 .header {
@@ -117,7 +141,7 @@ input[type="radio"]{
   height: 100px;
   max-width: 480px;
   background: white;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
   margin-left: auto;
   margin-right: auto;
   margin-top: 70px;
@@ -128,6 +152,7 @@ input[type="radio"]{
 .radio-buttons {
   display: flex;
   align-items: center;
+  margin-top: 10px;
   margin-left: auto;
   margin-right: auto;
 }
