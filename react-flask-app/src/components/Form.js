@@ -93,30 +93,33 @@ export default function Form() {
   return (
     <form>
         <div className="rating-group">
-            <label className="rating--label">Overall Rating:</label>
+            <label className="rating--label">Rate the Song.</label>
             <div className="radio-buttons">
                 {renderCustomRadioButtons("overallRating", [-3, -2, -1, 1, 2, 3])}
             </div>
         </div>
 
-        <hr />
+        <div class="line-with-text">
+            <hr />
+            <div class="text">Optional Questions</div>
+        </div>
 
         <div className="rating-group">
-            <label>Genre Rating:</label>
+            <label>What do you think of the 'Genre' of this song?</label>
             <div className="radio-buttons">
                 {renderCustomRadioButtons("genreRating", [-3, -2, -1, 1, 2, 3])}
             </div>
         </div>
 
         <div className="rating-group">
-            <label>Mood Rating:</label>
+            <label>What do you think of the 'Mood' of this song?</label>
             <div className="radio-buttons">
                 {renderCustomRadioButtons("moodRating", [-3, -2, -1, 1, 2, 3])}
             </div>
         </div>
 
         <div className="rating-group">
-            <label>Vocal Timbre Rating:</label>
+            <label>What do you think of the 'Vocals' of this song?</label>
             <div className="radio-buttons">
                 {renderCustomRadioButtons("vocalRating", [-3, -2, -1, 1, 2, 3])}
             </div>
