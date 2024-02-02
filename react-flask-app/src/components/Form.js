@@ -1,128 +1,94 @@
-import React from "react";
+import React, { useState } from 'react';
 import empty_blue_circle from "../images/empty-blue-circle.png";
 import empty_red_circle from "../images/empty-red-circle.png";
 import filled_blue_circle from "../images/filled-blue-circle.png";
 import filled_red_circle from "../images/filled-red-circle.png";
 
 export default function Form() {
-  const [formData, setFormData] = React.useState({
-    overallRating: 0,
-    genreRating: 0,
-    moodRating: 0,
-    vocalRating: 0,
+  const [selections, setSelections] = useState({
+    overallRating: null,
+    genreRating: null,
+    moodRating: null,
+    vocalRating: null,
   });
 
-  function handleChange(event) {
-    const { name, value, type, checked } = event.target;
-    setFormData((prevFormData) => {
-      return {
-        ...prevFormData,
-        [name]: type === "checkbox" ? checked : parseInt(value, 10),
-      };
-    });
-  }
+  const handleSelection = (category, value) => {
+    setSelections(prev => ({
+      ...prev,
+      [category]: prev[category] === value ? null : value, // Toggle selection
+    }));
+  };
 
   const getImageStyle = (option) => {
-    let style = {};
+    const sizeMap = {
+      "-3": { width: "50px", height: "50px" },
+      "-2": { width: "40px", height: "40px" },
+      "-1": { width: "30px", height: "30px" },
+      "1": { width: "30px", height: "30px" },
+      "2": { width: "40px", height: "40px" },
+      "3": { width: "50px", height: "50px" },
+    };
+    return sizeMap[option.toString()] || { width: "30px", height: "30px" };
+  };
 
-    // Adjust image size based on option
-    if (option === -3) {
-      style.width = "50px"; 
-      style.height = "50px"; 
-    } else if (option === -2) {
-      style.width = "40px"; 
-      style.height = "40px"; 
-    } else if (option === -1) {
-        style.width = "30px"; 
-        style.height = "30px";
-    } else if (option === 1) {
-        style.width = "30px"; 
-        style.height = "30px";
-    } else if (option === 2) {
-        style.width = "40px"; 
-        style.height = "40px"; 
-    } else if (option === 3){
-        style.width = "50px";
-        style.height = "50px";
+  const getImage = (value, isSelected) => {
+    if (value <= 0) {
+      return isSelected ? filled_red_circle : empty_red_circle;
+    } else {
+      return isSelected ? filled_blue_circle : empty_blue_circle;
     }
-
-    return style;
   };
 
-  const renderCustomRadioButtons = (name, options) => {
-    return options.map((option) => (
-      <div key={option} className="custom-radio">
-        <input
-          type="radio"
-          id={`${name}-${option}`}
-          name={name}
-          value={option}
-          checked={formData[name] === option}
-          onChange={handleChange}
-        />
-        <label htmlFor={`${name}-${option}`} className="custom-radio-label">
-          {formData[name] === option ? (
-            <img
-              src={
-                option <= 0
-                  ? filled_red_circle // Use imported variable directly
-                  : filled_blue_circle // Use imported variable directly
-              }
-              alt={`Rating ${option}`}
-              style={getImageStyle(option)} // Apply inline styles
-            />
-          ) : (
-            <img
-              src={
-                option <= 0
-                  ? empty_red_circle // Use imported variable directly
-                  : empty_blue_circle // Use imported variable directly
-              }
-              alt={`Rating ${option}`}
-              style={getImageStyle(option)} // Apply inline styles
-            />
-          )}
-        </label>
+  const renderOptions = (category, options) => {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {options.map(value => {
+          const isSelected = selections[category] === value;
+          return (
+            <button
+              key={value}
+              onClick={() => handleSelection(category, value)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <img src={getImage(value, isSelected)} alt={`Rating ${value}`}
+                   style={getImageStyle(value)} />
+            </button>
+          );
+        })}
       </div>
-    ));
+    );
   };
+
 
   return (
-    <form>
-        <div className="rating-group">
-            <label className="rating--label">Rate the Song.</label>
-            <div className="radio-buttons">
-                {renderCustomRadioButtons("overallRating", [-3, -2, -1, 1, 2, 3])}
-            </div>
-        </div>
+    <div>
+      <div className="rating-group">
+        <h4 className="rating--label">Rate the Song.</h4>
+        {renderOptions('overallRating', [-3, -2, -1, 1, 2, 3])}
+      </div>
 
-        <div class="line-with-text">
+      <div class="line-with-text">
             <hr />
             <div class="text">Optional Questions</div>
         </div>
         <p class="gray">**Leave field(s) as empty if unsure**</p>
-
-
-        <div className="rating-group">
-            <label>What do you think of the 'Genre' of this song?</label>
-            <div className="radio-buttons">
-                {renderCustomRadioButtons("genreRating", [-3, -2, -1, 1, 2, 3])}
-            </div>
-        </div>
-
-        <div className="rating-group">
-            <label>What do you think of the 'Mood' of this song?</label>
-            <div className="radio-buttons">
-                {renderCustomRadioButtons("moodRating", [-3, -2, -1, 1, 2, 3])}
-            </div>
-        </div>
-
-        <div className="rating-group">
-            <label>What do you think of the 'Vocals' of this song?</label>
-            <div className="radio-buttons">
-                {renderCustomRadioButtons("vocalRating", [-3, -2, -1, 1, 2, 3])}
-            </div>
-        </div>
-    </form>
+      
+      <div className="rating-group">
+        <h4 className="rating--label">What do you think of the 'Genre' of this song?</h4>
+        {renderOptions('genreRating', [-3, -2, -1, 1, 2, 3])}
+      </div>
+      <div className="rating-group">
+        <h4 className="rating--label">What do you think of the 'Mood' of this song?</h4>
+        {renderOptions('moodRating', [-3, -2, -1, 1, 2, 3])}
+      </div>
+      <div className="rating-group">
+        <h4 className="rating--label">What do you think of the 'Vocals' of this song?</h4>
+        {renderOptions('vocalRating', [-3, -2, -1, 1, 2, 3])}
+      </div>
+    </div>
   );
 }
