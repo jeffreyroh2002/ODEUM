@@ -111,6 +111,15 @@ export default function Form() {
             </div>
         </div>
 
+        <input 
+          type="checkbox" 
+          id="noGenre"
+          checked={formData.noGenre}
+          onChange={handleChange}
+          name="noGenre"
+        />
+        <label htmlFor="noGenre">Not sure</label>
+
         <div className="rating-group">
             <label>What do you think of the 'Mood' of this song?</label>
             <div className="radio-buttons">
