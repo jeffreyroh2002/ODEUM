@@ -10,9 +10,6 @@ export default function Form() {
     genreRating: 0,
     moodRating: 0,
     vocalRating: 0,
-    noGenre: false,
-    noMood: false,
-    noVocal: false,
   });
 
   function handleChange(event) {
@@ -103,6 +100,8 @@ export default function Form() {
             <hr />
             <div class="text">Optional Questions</div>
         </div>
+        <p class="gray">**Leave field(s) as empty if unsure**</p>
+
 
         <div className="rating-group">
             <label>What do you think of the 'Genre' of this song?</label>
@@ -110,15 +109,6 @@ export default function Form() {
                 {renderCustomRadioButtons("genreRating", [-3, -2, -1, 1, 2, 3])}
             </div>
         </div>
-
-        <input 
-          type="checkbox" 
-          id="noGenre"
-          checked={formData.noGenre}
-          onChange={handleChange}
-          name="noGenre"
-        />
-        <label htmlFor="noGenre">Not sure</label>
 
         <div className="rating-group">
             <label>What do you think of the 'Mood' of this song?</label>
@@ -133,7 +123,6 @@ export default function Form() {
                 {renderCustomRadioButtons("vocalRating", [-3, -2, -1, 1, 2, 3])}
             </div>
         </div>
-        
     </form>
   );
 }
