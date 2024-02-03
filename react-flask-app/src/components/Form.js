@@ -3,6 +3,8 @@ import empty_blue_circle from "../images/empty-blue-circle.png";
 import empty_red_circle from "../images/empty-red-circle.png";
 import filled_blue_circle from "../images/filled-blue-circle.png";
 import filled_red_circle from "../images/filled-red-circle.png";
+import prev_button from "../images/prev_button.png"
+import next_button from "../images/next_button.png"
 
 export default function Form() {
   const [selections, setSelections] = useState({
@@ -63,6 +65,14 @@ export default function Form() {
     );
   };
 
+  function handlePrevButton(){
+    //reset page to prev question
+  }
+
+  function handleNextButton(){
+    // submitting to the Flask backend
+  }
+
 
   return (
     <div>
@@ -89,6 +99,17 @@ export default function Form() {
         <h4 className="rating--label">What do you think of the 'Vocals' of this song?</h4>
         {renderOptions('vocalRating', [-3, -2, -1, 1, 2, 3])}
       </div>
+
+      <div className="button--container">
+        <button className="prev--button" onClick={handlePrevButton}>
+          <img src={prev_button} alt="Previous Button" />
+        </button>
+
+        <button className="next--button" onClick={handleNextButton}>
+          <img src={next_button} alt="Next Button" />
+        </button>
+      </div>
+
     </div>
   );
 }

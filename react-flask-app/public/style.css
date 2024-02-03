@@ -181,3 +181,23 @@ input[type="radio"]{
   margin-left: auto;
   margin-right: auto;
 }
+
+.button--container{
+  display: flex;
+  flex-direction: row;
+}
+
+.prev--button {
+  border: none;
+  justify-content: center;
+  background: none;
+  margin-left: 20px;
+}
+
+.next--button {
+  border: none;
+  justify-content: center;
+  background: none;
+  margin-left: auto;
+  margin-right: 20px;
+}
