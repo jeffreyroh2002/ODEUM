@@ -21,7 +21,7 @@ export default function Sidebar({ isOpen, onClose }) {
             <Link to="/help">Help Center</Link>
           </li>
         </ul>
-        <Link to="/get-free-test" className="cta-button">
+        <Link to="/questionnaire" className="cta-button">
           Get Free Test
         </Link>
       </div>
