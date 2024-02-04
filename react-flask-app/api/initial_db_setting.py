@@ -1,20 +1,26 @@
 from WebApp import db, create_app
 import os
-from WebApp.python_scripts.predict_genre import predict_genre
-from WebApp.python_scripts.predict_mood import predict_mood
-from WebApp.python_scripts.predict_timbre import predict_timbre
 import json
+
+#import scripts that use ML model
+from api.pred_scripts.predict_genre import predict_genre
+from api.pred_scripts.predict_mood import predict_mood
+from api.pred_scripts.predict_timbre import predict_timbre
 
 # path for predicting genre, mood, timbre
 
+"""
+genre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', 'full_mix_mfcc.json')
+mood_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', 'instrumental_mfcc.json')
+timbre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', 'vocal_mfcc.json')
+"""
+genre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', '3sample_mfccs.json')
+mood_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', '3sample_mfccs.json')
+timbre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', '3sample_mfccs.json')
 
-genre_saved_mfcc = os.path.join(os.getcwd(), 'WebApp', 'static', 'mfccs', 'full_mix_mfcc.json')
-mood_saved_mfcc = os.path.join(os.getcwd(), 'WebApp', 'static', 'mfccs', 'instrumental_mfcc.json')
-timbre_saved_mfcc = os.path.join(os.getcwd(), 'WebApp', 'static', 'mfccs', 'vocal_mfcc.json')
-
-genre_model_path = os.path.join(os.getcwd(), 'WebApp', 'python_scripts', '0109_PCRNN_Genre7_final_100each_100ep_0.00001lr', 'best_model.h5')
-mood_model_path = os.path.join(os.getcwd(), 'WebApp', 'python_scripts', 'pred_mood', 'saved_model')
-timbre_model_path = os.path.join(os.getcwd(), 'WebApp', 'python_scripts', 'pred_vocal', 'saved_model')
+genre_model_path = os.path.join(os.getcwd(), 'api', 'mlModels', '0109_PCRNN_Genre7_final_100each_100ep_0.00001lr', 'best_model.h5')
+mood_model_path = os.path.join(os.getcwd(), 'api', 'mlModels', 'pred_mood', 'saved_model')
+timbre_model_path = os.path.join(os.getcwd(), 'api', 'mlModels', 'pred_vocal', 'saved_model')
 
 app = create_app()
 
@@ -22,11 +28,11 @@ app = create_app()
 with app.app_context():
     db.drop_all()
     db.create_all()
-    from WebApp.models import AudioFile
+    from api.models import AudioFile
 
-    full_mix_dir = os.path.join(os.getcwd(), 'audio_data', 'audio_full_mix_split')
-    instrumentals_dir = os.path.join(os.getcwd(), 'audio_data', 'audio_instrumental_split')
-    vocals_dir = os.path.join(os.getcwd(), 'audio_data', 'audio_vocals_split')
+    full_mix_dir = os.path.join(os.getcwd(), 'audio_data')
+    instrumentals_dir = os.path.join(os.getcwd(), 'audio_data')
+    vocals_dir = os.path.join(os.getcwd(), 'audio_data')
 
     # Predict and save genre, mood, and timbre data
     genre_data = predict_genre(genre_model_path, genre_saved_mfcc)
