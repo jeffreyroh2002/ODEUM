@@ -25,6 +25,9 @@ export default function Home() {
           <Link to="/questionnaire" className="cta-button">
             Take Free Music Personality Test
           </Link>
+          <Link to="/Signup" className="cta-button">
+            Sign Up Now
+          </Link>
         </div>
       </div>
     </div>
