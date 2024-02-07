@@ -60,10 +60,22 @@
   font-size: 14px;
 }
 
+/* Error message styling */
 .error-messages {
-  color: #ff0000;
-  text-align: left;
-  margin-top: 10px;
+  color: #ff0000; /* Red color for error messages */
+  text-align: left; /* Align error messages to the left */
+  margin-top: 5px; /* Add some margin on top of error messages */
 }
 
-/* You can add more styles and customize further based on your preferences */
+/* Adjust form-group style to accommodate error messages */
+.signup-form .form-group {
+  margin-bottom: 15px;
+  position: relative; /* Position relative for absolute positioning of error messages */
+}
+
+/* Position error messages below the input fields */
+.signup-form .error-messages {
+  position: absolute;
+  bottom: -20px; /* Adjust the position to place error messages below input fields */
+  left: 0;
+}

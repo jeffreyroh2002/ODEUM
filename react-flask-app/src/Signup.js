@@ -1,47 +1,41 @@
+// Signup.js
+
 import React, { useState } from 'react';
-import Header from './components/Header'
-import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
+import Header from './components/Header';
 import './Signup.css';
 
-export default function Signup() {
+const Signup = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    confirm_password: ''
   });
-
-  const [errors, setErrors] = useState({}); // State to store validation errors
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate(); // Use useNavigate hook for redirection
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
+      const response = await axios.post('/register', formData);
+      // Check if the response is successful
       if (response.status === 201) {
-        // Registration was successful
-        console.log('Registration successful!');
-      } else if (response.status === 400) {
-        // Validation errors returned by the backend
-        const errorData = await response.json();
-        setErrors(errorData);
-      } else {
-        // Handle other errors
-        console.error('An error occurred during registration');
+        console.log('Registration successful');
+        navigate('/login'); // Redirect user to login page upon successful registration
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      if (error.response && error.response.data) {
+        // Backend will send back a JSON response with errors, handle them here
+        setErrors(error.response.data.error || error.response.data);
+      } else {
+        console.error('An error occurred:', error.message);
+      }
     }
   };
 
@@ -92,12 +86,11 @@ export default function Signup() {
                 required
               />
             </div>
-            {errors && (
+            {Object.keys(errors).length > 0 && (
               <div className="error-messages">
-                {errors.username && <p>{errors.username}</p>}
-                {errors.email && <p>{errors.email}</p>}
-                {errors.password && <p>{errors.password}</p>}
-                {/* Add error handling for other fields as needed */}
+                {Object.entries(errors).map(([key, value]) => (
+                  <p key={key}>{value}</p>
+                ))}
               </div>
             )}
             <button type="submit">Sign Up</button>
@@ -109,4 +102,6 @@ export default function Signup() {
       </div>
     </div>
   );
-}
+};
+
+export default Signup;
