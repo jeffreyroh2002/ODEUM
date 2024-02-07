@@ -81,11 +81,11 @@ export default function Form() {
         {renderOptions('overallRating', [-3, -2, -1, 1, 2, 3])}
       </div>
 
-      <div class="line-with-text">
+      <div className="line-with-text">
             <hr />
-            <div class="text">Optional Questions</div>
+            <div className="text">Optional Questions</div>
         </div>
-        <p class="gray">**Leave field(s) as empty if unsure**</p>
+        <p className="gray">**Leave field(s) as empty if unsure**</p>
       
       <div className="rating-group">
         <h4 className="rating--label">What do you think of the 'Genre' of this song?</h4>
