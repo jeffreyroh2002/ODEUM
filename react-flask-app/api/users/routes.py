@@ -1,50 +1,53 @@
-from flask import render_template, url_for, flash, redirect, request, Blueprint
-from flask_login import login_user, current_user, logout_user, login_required
-from WebApp import db, bcrypt
-from WebApp.models import User
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from flask import jsonify
+from flask import Blueprint, request, jsonify
+from flask_login import current_user
+from api import db, bcrypt
+from api.models import User
+from wtforms.validators import DataRequired, Length, Email, EqualTo
+from wtforms import ValidationError
 
 users = Blueprint('users', __name__)
 
-class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Sign Up')
+# Assuming csrf is initialized elsewhere in your application
+from api import csrf
 
-    def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first()
-        if user:
-            raise ValidationError('That username is taken. Please choose a different one')
-    
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user:
-            raise ValidationError('That email is taken. Please choose a different one')
+def validate_username(username):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        raise ValidationError('That username is taken. Please choose a different one.')
 
-@users.route("/register", methods=['GET','POST'])
+def validate_email(email):
+    user = User.query.filter_by(email=email).first()
+    if user:
+        raise ValidationError('That email is taken. Please choose a different one.')
+
+@users.route("/register", methods=['POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
-    
-    form = RegistrationForm()
-    
-    if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        return jsonify({'error': 'User is already authenticated'}), 400
+
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+    confirm_password = data.get('confirm_password')
+
+    try:
+        # Manual validations
+        if not username or not email or not password or not confirm_password:
+            raise ValidationError('All fields are required.')
+        validate_username(username)
+        validate_email(email)
+        if password != confirm_password:
+            raise ValidationError('Passwords must match.')
         
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        user = User(username=username, email=email, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        
-        flash('Your account has been created! You are now able to log in', 'success')
-        return redirect(url_for('users.login'))
-    
-    # If validation fails, return a JSON response with error messages
-    errors = form.errors
-    return jsonify(errors), 400  # Use an appropriate HTTP status code, like 400 for bad request
 
+        # Response with CSRF token if needed for subsequent requests
+        csrf_token = csrf.generate_csrf()
+        return jsonify({'message': 'Your account has been created!', 'csrf_token': csrf_token}), 201
+
+    except ValidationError as e:
+        return jsonify({'error': str(e)}), 400
