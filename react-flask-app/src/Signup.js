@@ -23,8 +23,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/register', formData);
-      // Check if the response is successful
+      const response = await axios.post('/users/register', formData);
       if (response.status === 201) {
         console.log('Registration successful');
         navigate('/login'); // Redirect user to login page upon successful registration
