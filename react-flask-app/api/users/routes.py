@@ -1,53 +1,74 @@
-from flask import Blueprint, request, jsonify
-from flask_login import current_user
+
+from flask import jsonify, request, Blueprint
 from api import db, bcrypt
 from api.models import User
-from wtforms.validators import DataRequired, Length, Email, EqualTo
-from wtforms import ValidationError
 
 users = Blueprint('users', __name__)
 
-# Assuming csrf is initialized elsewhere in your application
-from api import csrf
-
-def validate_username(username):
-    user = User.query.filter_by(username=username).first()
-    if user:
-        raise ValidationError('That username is taken. Please choose a different one.')
-
-def validate_email(email):
-    user = User.query.filter_by(email=email).first()
-    if user:
-        raise ValidationError('That email is taken. Please choose a different one.')
-
-@users.route("/register", methods=['POST'])
+@users.route("/users/register", methods=['POST'])
 def register():
-    if current_user.is_authenticated:
-        return jsonify({'error': 'User is already authenticated'}), 400
-
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
     confirm_password = data.get('confirm_password')
 
-    try:
-        # Manual validations
-        if not username or not email or not password or not confirm_password:
-            raise ValidationError('All fields are required.')
-        validate_username(username)
-        validate_email(email)
-        if password != confirm_password:
-            raise ValidationError('Passwords must match.')
-        
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        user = User(username=username, email=email, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
+    # Validate input
+    if not username or not email or not password or not confirm_password:
+        return jsonify({"error": "All fields are required"}), 400
+    if password != confirm_password:
+        return jsonify({"error": "Passwords do not match"}), 400
 
-        # Response with CSRF token if needed for subsequent requests
-        csrf_token = csrf.generate_csrf()
-        return jsonify({'message': 'Your account has been created!', 'csrf_token': csrf_token}), 201
+    # Check if user already exists
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "User already exists"}), 400
 
-    except ValidationError as e:
-        return jsonify({'error': str(e)}), 400
+    # Hash password
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    # Create user
+    new_user = User(username=username, email=email, password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"message": "Registration successful"}), 201
+
+@users.route("/users/login", methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    # Validate input
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+
+    # Check if user exists
+    user = User.query.filter_by(email=email).first()
+    if not user or not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    # Log in user (you need to implement your login mechanism)
+    # login_user(user)
+
+    return jsonify({"message": "Login successful"}), 200
+
+@users.route("/users/logout", methods=['POST'])
+def logout():
+    # Implement your logout mechanism here
+    return jsonify({"message": "Logout successful"}), 200
+
+@users.route("/users/account", methods=['GET', 'PUT'])
+def account():
+    if request.method == 'PUT':
+        data = request.get_json()
+        # Update account details (you need to implement this logic)
+        return jsonify({"message": "Account updated"}), 200
+    elif request.method == 'GET':
+        # Get account details (you need to implement this logic)
+        return jsonify({"message": "Get account details"}), 200
+
+@users.route("/users/mypage", methods=['GET'])
+def mypage():
+    # Return user's page (you need to implement this logic)
+    return jsonify({"message": "My Page"}), 200
