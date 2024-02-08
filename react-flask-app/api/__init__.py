@@ -6,6 +6,7 @@ from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect  # Import CSRFProtect
 from api.config import Config
 import os
+from flask_cors import CORS
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -25,18 +26,19 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    CORS(app)
     
     # Initialize CSRFProtect with the Flask app instance
     csrf.init_app(app)
 
     # section for importing blueprints
     from api.users.routes import users
-    from api.main.routes import main
+    from api.main.routes import users
     #from api.questions.routes import questions
     #from api.results.routes import results
 
     app.register_blueprint(users)
-    app.register_blueprint(main)
+    app.register_blueprint(users)
     #app.register_blueprint(questions)
     #app.register_blueprint(results)
 
