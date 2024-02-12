@@ -1,32 +1,29 @@
-from flask import render_template, request, Blueprint, jsonify
+from flask import Blueprint, jsonify
+from api.models import AudioFile
 
-users = Blueprint('users', __name__)
+main = Blueprint('main', __name__)
 
-@users.route("/users/register", methods=['POST'])
-def register():
-    # Your registration logic here
-    return jsonify(message="User registration endpoint")
+@main.route('/')
+def home():
+    return("Welcome to Flask App!")
 
-@users.route("/users/login", methods=['POST'])
-def login():
-    # Your login logic here
-    return jsonify(message="User login endpoint")
+@main.route('/printdb')
+def get_database():
+    # Query all AudioFile objects from the database
+    audio_files = AudioFile.query.all()
 
-@users.route("/users/logout", methods=['POST'])
-def logout():
-    # Your logout logic here
-    return jsonify(message="User logout endpoint")
+    # Prepare a list to store the serialized data
+    serialized_audio_files = []
 
-@users.route("/users/account", methods=['GET', 'PUT'])
-def account():
-    if request.method == 'PUT':
-        # Your update account logic here
-        return jsonify(message="User account update endpoint")
-    elif request.method == 'GET':
-        # Your get account logic here
-        return jsonify(message="User account details endpoint")
+    # Serialize each AudioFile object
+    for audio_file in audio_files:
+        serialized_audio_files.append({
+            'audio_name': audio_file.audio_name,
+            'file_path': audio_file.file_path,
+            'genre': audio_file.genre,
+            'mood': audio_file.mood,
+            'vocal': audio_file.vocal
+        })
 
-@users.route("/users/mypage", methods=['GET'])
-def mypage():
-    # Your my page logic here
-    return jsonify(message="User mypage endpoint")
+    # Return the serialized data as a JSON response
+    return jsonify(serialized_audio_files)

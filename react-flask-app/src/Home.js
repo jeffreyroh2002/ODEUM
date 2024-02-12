@@ -28,6 +28,9 @@ export default function Home() {
           <Link to="/Signup" className="cta-button">
             Sign Up Now
           </Link>
+          <Link to="/Database" className="cta-button">
+            See Database
+          </Link>
         </div>
       </div>
     </div>
