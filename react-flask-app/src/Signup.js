@@ -1,15 +1,23 @@
 // Signup.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
 import Header from './components/Header';
 import './Signup.css';
 
 export default function Signup(){
+
+  useEffect(() => {
+    axios.get('/csrf-token').then(response => {
+      setCsrfToken(response.data.csrf_token);
+    });
+  }, []);
+
   const [firstName,setFirstName] = useState('');
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
+  const [csrfToken, setCsrfToken] = useState('');
 
   const navigate = useNavigate();
 
@@ -18,6 +26,10 @@ export default function Signup(){
       first_name: firstName,
       email: email,
       password: password
+    }, {
+      headers: {
+        'X-CSRF-Token': csrfToken // Replace `csrfToken` with the actual token
+      }
     })
     .then(function (response) {
       console.log(response);
@@ -25,8 +37,14 @@ export default function Signup(){
     })
     .catch(function (error) {
       console.log(error, 'error');
-      if (error.response.status === 401) {
+      if (error.response) {
+        if (error.response.status === 401) {
           alert("Invalid credentials");
+        } else if (error.response.status === 400) {
+          alert("Bad request. Please check the data you've entered.");
+        } else if (error.response.status === 409) {
+          alert("Email already exists.");
+        }
       }
     });
   }

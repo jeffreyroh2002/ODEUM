@@ -3,12 +3,17 @@ from api import db, bcrypt
 from api.models import User
 from api.models import AudioFile
 #from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flask_wtf.csrf import generate_csrf
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def home():
     return("Welcome to Flask App!")
+
+@main.route('/csrf-token')
+def csrf_token():
+    return jsonify({'csrf_token': generate_csrf()})
 
 @main.route('/printdb')
 def get_database():
@@ -36,7 +41,7 @@ def signup():
     first_name = request.json['first_name']
     email = request.json['email']
     password = request.json['password']
-    confirm_password = request.get['confirmed_password']
+    #confirm_password = request.get['confirmed_password']
 
     user_exists = User.query.filter_by(email=email).first() is not None
 
