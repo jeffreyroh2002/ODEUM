@@ -15,7 +15,7 @@ export default function Signup(){
 
   const registerUser = () => {
     axios.post('/signup', {
-      firstName: first_name,
+      first_name: firstName,
       email: email,
       password: password
     })
@@ -72,7 +72,7 @@ const Signup = () => {
       <div className="signup-container">
         <div className="signup-form">
           <h2>Sign Up</h2>
-          <form onSubmit={handleSubmit}>
+          <form>
             <div className="form-group">
               <input
                 type="text"
@@ -103,6 +103,7 @@ const Signup = () => {
                 required
               />
             </div>
+            {/*   COMMENT OUT PASSWORD CONFIRMATION
             <div className="form-group">
               <input
                 type="password"
@@ -113,6 +114,7 @@ const Signup = () => {
                 required
               />
             </div>
+            */}
             <button type="button" onClick={() => registerUser()} >Sign Up</button>
           </form>
           <p>
