@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, session
 from api import db, bcrypt
 from api.models import User
 from api.models import AudioFile
-from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
+#from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
 
 main = Blueprint('main', __name__)
 
@@ -74,5 +74,5 @@ def login_user():
     return jsonify({
         "id": user.id,
         "first_name": user.first_name,
-        "email:" user.email
+        "email": user.email
     })
