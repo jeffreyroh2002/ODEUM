@@ -6,6 +6,32 @@ import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate inst
 import Header from './components/Header';
 import './Signup.css';
 
+export default function Signup(){
+  const [firstName,setFirstName] = useState('');
+  const [email,setEmail] = useState('');
+  const [password,setPassword] = useState('');
+
+  const navigate = useNavigate();
+
+  const registerUser = () => {
+    axios.post('/signup', {
+      firstName: first_name,
+      email: email,
+      password: password
+    })
+    .then(function (response) {
+      console.log(response);
+      navigate("/");
+    })
+    .catch(function (error) {
+      console.log(error, 'error');
+      if (error.response.status === 401) {
+          alert("Invalid credentials");
+      }
+    });
+  }
+
+/* 
 const Signup = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -38,6 +64,8 @@ const Signup = () => {
     }
   };
 
+*/
+
   return (
     <div>
       <Header />
@@ -48,10 +76,10 @@ const Signup = () => {
             <div className="form-group">
               <input
                 type="text"
-                placeholder="Username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
+                placeholder="First Name"
+                name="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 required
               />
             </div>
@@ -60,8 +88,8 @@ const Signup = () => {
                 type="email"
                 placeholder="Email"
                 name="email"
-                value={formData.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -70,8 +98,8 @@ const Signup = () => {
                 type="password"
                 placeholder="Password"
                 name="password"
-                value={formData.password}
-                onChange={handleChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
@@ -85,14 +113,7 @@ const Signup = () => {
                 required
               />
             </div>
-            {Object.keys(errors).length > 0 && (
-              <div className="error-messages">
-                {Object.entries(errors).map(([key, value]) => (
-                  <p key={key}>{value}</p>
-                ))}
-              </div>
-            )}
-            <button type="submit">Sign Up</button>
+            <button type="button" onClick={() => registerUser()} >Sign Up</button>
           </form>
           <p>
             Already have an account? <Link to="/login">Log In</Link>
@@ -102,5 +123,3 @@ const Signup = () => {
     </div>
   );
 };
-
-export default Signup;
