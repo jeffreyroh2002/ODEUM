@@ -4,6 +4,7 @@ from api.models import User
 from api.models import AudioFile
 #from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flask_wtf.csrf import generate_csrf
+from flask_login import login_user, current_user, logout_user, login_required
 
 main = Blueprint('main', __name__)
 
@@ -62,7 +63,7 @@ def signup():
     })
 
 @main.route('/login', methods=["POST"])
-def login_user():
+def login():
     email = request.json["email"]
     password = request.json["password"]
 
@@ -74,7 +75,8 @@ def login_user():
     if not bcrypt.check_password_hash(user.password, password):
         return jsonify({"error": "Unauthorized"}), 401
     
-    session["user_id"] = user.itsdangerous
+    login_user(user, remember=True)
+    session["user_id"] = user.id
     
     return jsonify({
         "id": user.id,
