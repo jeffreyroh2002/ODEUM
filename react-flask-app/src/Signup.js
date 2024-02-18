@@ -35,7 +35,7 @@ export default function Signup(){
     })
     .then(function (response) {
       console.log(response);
-      navigate("/");
+      navigate("/Login");
     })
     .catch(function (error) {
       console.log(error); // Log the error to see its structure
