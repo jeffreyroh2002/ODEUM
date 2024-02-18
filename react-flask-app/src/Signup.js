@@ -38,15 +38,15 @@ export default function Signup(){
       navigate("/");
     })
     .catch(function (error) {
-      console.log(error, 'error');
-      if (error.response) {
-        if (error.response.status === 401) {
-          alert("Invalid credentials");
-        } else if (error.response.status === 400) {
-          alert("Bad request. Please check the data you've entered.");
-        } else if (error.response.status === 409) {
-          alert("Email already exists.");
-        }
+      console.log(error); // Log the error to see its structure
+      if (error.response && error.response.status === 400) {
+        alert(error.response.data.error); // Alert the error message from the response
+      } else if (error.response && error.response.status === 401) {
+        alert("Invalid credentials");
+      } else if (error.response && error.response.status === 409) {
+        alert("Email already exists.");
+      } else {
+        alert("An unexpected error occurred. Please try again later."); // Handle other errors
       }
     });
   }
