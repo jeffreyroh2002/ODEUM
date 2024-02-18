@@ -1,7 +1,7 @@
-import React from "react"
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
-
+import axios from 'axios';
 import logo from '../images/logo.png'
 import account_icon from '../images/account_circle_filled_white_24px.png'
 import menu_icon from '../images/menu_white_24px.png'
@@ -9,6 +9,20 @@ import menu_icon from '../images/menu_white_24px.png'
 import Sidebar from './Sidebar';
 
 export default function Header() {
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        // Fetch isLoggedIn status from backend when component mounts
+        axios.get('/isLoggedIn')
+        .then(response => {
+            setIsLoggedIn(response.data.isLoggedIn);
+        })
+        .catch(error => {
+            console.error('Error fetching isLoggedIn status:', error);
+        });
+    }, []);
+
     const [isSidebarOpen, setSidebarOpen] = React.useState(false);
 
     const toggleSidebar = () => {
@@ -35,7 +49,7 @@ export default function Header() {
                 alt="menu"
                 className="header--menu--image"
             />
-            <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} />
+            <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} isLoggedIn={isLoggedIn}/>
         </header>
     );
 }
