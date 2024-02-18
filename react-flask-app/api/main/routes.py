@@ -39,13 +39,27 @@ def get_database():
 
 @main.route('/signup', methods=["POST"])
 def signup():
-    first_name = request.json['first_name']
-    email = request.json['email']
-    password = request.json['password']
-    #confirm_password = request.get['confirmed_password']
+
+    # Validate input fields (instead of form.validate_on_submit())
+    if 'first_name' not in data or 'email' not in data or 'password' not in data or 'confirm_password' not in data:
+        return jsonify({"error": "Missing required field(s)"}), 400
+
+    first_name = data['first_name']
+    email = data['email']
+    password = data['password']
+    confirm_password = data['confirm_password']
+
+     # Additional validation
+    if not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email):
+        return jsonify({"error": "Invalid email format"}), 400
+
+    if len(password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters long"}), 400
+    
+    if password != confirm_password:
+        return jsonify({"error": "Password and Confirm Password do not match"}), 400
 
     user_exists = User.query.filter_by(email=email).first() is not None
-
     if user_exists:
         return jsonify({"error": "Email already exists"}), 409
     
@@ -64,18 +78,22 @@ def signup():
 
 @main.route('/login', methods=["POST"])
 def login():
+
+    # Validate input fields (instead of form.validate_on_submit())
+    if 'email' not in data or 'password' not in data:
+        return jsonify({"error": "Missing required field(s)"}), 400
+
     email = request.json["email"]
     password = request.json["password"]
+    remember_me = request.json["remember_me"]
+    # ADD A REMEMBER ME BOOLEAN FIELD IN THE FUTURE
 
     user = User.query.filter_by(email=email).first()
 
-    if user is None:
-        return jsonify({"error": "Unauthorized Access"}), 401
+    if user is None or not bcrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Check email or password"}), 401
     
-    if not bcrypt.check_password_hash(user.password, password):
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    login_user(user, remember=True)
+    login_user(user, remember=remember_me)
     session["user_id"] = user.id
     
     return jsonify({
