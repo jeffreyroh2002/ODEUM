@@ -103,3 +103,10 @@ def login():
         "first_name": user.first_name,
         "email": user.email
     })
+
+@main.route('/isLoggedIn')
+def is_logged_in():
+    if current_user.is_authenticated:
+        return jsonify({"isLoggedIn": True})
+    else:
+        return jsonify({"isLoggedIn": False})
