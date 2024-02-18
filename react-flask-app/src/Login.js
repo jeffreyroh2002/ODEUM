@@ -16,6 +16,7 @@ export default function Signup(){
 
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [csrfToken, setCsrfToken] = useState('');
 
   const navigate = useNavigate();
@@ -23,7 +24,8 @@ export default function Signup(){
   const logInUser = () => {
     axios.post('/login', {
       email: email,
-      password: password
+      password: password,
+      remember_me: rememberMe
     }, {
       headers: {
         'X-CSRF-Token': csrfToken // Replace `csrfToken` with the actual token
@@ -75,6 +77,16 @@ export default function Signup(){
               />
             </div>
             <button type="button" onClick={() => logInUser()} >Log in</button>
+            <div className="form-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                Remember Me
+              </label>
+            </div>
           </form>
         </div>
       </div>
