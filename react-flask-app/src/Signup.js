@@ -17,6 +17,7 @@ export default function Signup(){
   const [firstName,setFirstName] = useState('');
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
+  const [confirmPassword,setConfirmPassword] = useState('');
   const [csrfToken, setCsrfToken] = useState('');
 
   const navigate = useNavigate();
@@ -25,7 +26,8 @@ export default function Signup(){
     axios.post('/signup', {
       first_name: firstName,
       email: email,
-      password: password
+      password: password,
+      confirm_password: confirmPassword
     }, {
       headers: {
         'X-CSRF-Token': csrfToken // Replace `csrfToken` with the actual token
@@ -48,41 +50,6 @@ export default function Signup(){
       }
     });
   }
-
-/* 
-const Signup = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirm_password: ''
-  });
-  const [errors, setErrors] = useState({});
-  const navigate = useNavigate(); // Use useNavigate hook for redirection
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('/users/register', formData);
-      if (response.status === 201) {
-        console.log('Registration successful');
-        navigate('/login'); // Redirect user to login page upon successful registration
-      }
-    } catch (error) {
-      if (error.response && error.response.data) {
-        // Backend will send back a JSON response with errors, handle them here
-        setErrors(error.response.data.error || error.response.data);
-      } else {
-        console.error('An error occurred:', error.message);
-      }
-    }
-  };
-
-*/
 
   return (
     <div>
@@ -121,18 +88,16 @@ const Signup = () => {
                 required
               />
             </div>
-            {/*   COMMENT OUT PASSWORD CONFIRMATION
             <div className="form-group">
               <input
                 type="password"
                 placeholder="Confirm Password"
-                name="confirm_password"
-                value={formData.confirm_password}
-                onChange={handleChange}
+                name="confirm password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
-            */}
             <button type="button" onClick={() => registerUser()} >Sign Up</button>
           </form>
           <p>
