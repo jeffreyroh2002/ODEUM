@@ -5,6 +5,7 @@ from api.models import AudioFile
 #from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flask_wtf.csrf import generate_csrf
 from flask_login import login_user, current_user, logout_user, login_required
+import re  # for email confirmation
 
 main = Blueprint('main', __name__)
 
@@ -39,6 +40,7 @@ def get_database():
 
 @main.route('/signup', methods=["POST"])
 def signup():
+    data = request.json
 
     # Validate input fields (instead of form.validate_on_submit())
     if 'first_name' not in data or 'email' not in data or 'password' not in data or 'confirm_password' not in data:
@@ -78,6 +80,7 @@ def signup():
 
 @main.route('/login', methods=["POST"])
 def login():
+    data = request.json
 
     # Validate input fields (instead of form.validate_on_submit())
     if 'email' not in data or 'password' not in data:
@@ -86,7 +89,6 @@ def login():
     email = request.json["email"]
     password = request.json["password"]
     remember_me = request.json["remember_me"]
-    # ADD A REMEMBER ME BOOLEAN FIELD IN THE FUTURE
 
     user = User.query.filter_by(email=email).first()
 
