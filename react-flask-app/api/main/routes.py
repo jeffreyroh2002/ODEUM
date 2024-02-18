@@ -104,9 +104,16 @@ def login():
         "email": user.email
     })
 
+@main.route('/logout', methods=["POST"])
+@login_required  # Require the user to be logged in to access this route
+def logout():
+    logout_user()
+    return jsonify({"message": "Logout successful"})
+
 @main.route('/isLoggedIn')
 def is_logged_in():
     if current_user.is_authenticated:
         return jsonify({"isLoggedIn": True})
     else:
         return jsonify({"isLoggedIn": False})
+
