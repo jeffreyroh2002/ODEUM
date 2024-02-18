@@ -19,6 +19,7 @@ export default function Signup(){
   const [rememberMe, setRememberMe] = useState(false);
   const [csrfToken, setCsrfToken] = useState('');
 
+  // For Routing back to prev page
   const navigate = useNavigate();
 
   const logInUser = () => {
@@ -28,12 +29,12 @@ export default function Signup(){
       remember_me: rememberMe
     }, {
       headers: {
-        'X-CSRF-Token': csrfToken
+        'X-CSRF-Token': csrfToken // Replace `csrfToken` with the actual token
       }
     })
     .then(function (response) {
       console.log(response);
-      navigate("/");
+      navigate(-1);
     })
     .catch(function (error) {
       console.log(error);
@@ -44,7 +45,6 @@ export default function Signup(){
       }
     });
   }
-
 
   return (
     <div>
