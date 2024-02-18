@@ -28,7 +28,7 @@ export default function Signup(){
       remember_me: rememberMe
     }, {
       headers: {
-        'X-CSRF-Token': csrfToken // Replace `csrfToken` with the actual token
+        'X-CSRF-Token': csrfToken
       }
     })
     .then(function (response) {
@@ -36,18 +36,15 @@ export default function Signup(){
       navigate("/");
     })
     .catch(function (error) {
-      console.log(error, 'error');
-      if (error.response) {
-        if (error.response.status === 401) {
-          alert("Invalid credentials");
-        } else if (error.response.status === 400) {
-          alert("Bad request. Please check the data you've entered.");
-        } else if (error.response.status === 409) {
-          alert("Email already exists.");
-        }
+      console.log(error);
+      if (error.response && error.response.status === 400 || error.response.status === 401) {
+        alert(error.response.data.error);
+      } else {
+        alert("An unexpected error occurred. Please try again later."); // Handle other errors
       }
     });
   }
+
 
   return (
     <div>
