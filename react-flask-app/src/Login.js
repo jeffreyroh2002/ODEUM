@@ -51,7 +51,7 @@ export default function Signup(){
       <Header />
       <div className="signup-container">
         <div className="signup-form">
-          <h2>Sign Up</h2>
+          <h2>Log in</h2>
           <form>
             <div className="form-group">
               <input
