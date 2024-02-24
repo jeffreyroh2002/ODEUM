@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import empty_blue_circle from "../images/empty-blue-circle.png";
 import empty_red_circle from "../images/empty-red-circle.png";
@@ -15,6 +15,17 @@ export default function Form({ audioFileId, testType }) {
     moodRating: 0,
     vocalRating: 0,
   });
+
+  const [csrfToken, setCsrfToken] = useState('');
+
+  // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
+  useEffect(() => {
+    fetch('/csrf-token').then(response => {
+      return response.json();
+    }).then(data => {
+      setCsrfToken(data.csrf_token);
+    });
+  }, []);
 
   const handleSelection = (category, value) => {
     setSelections(prev => ({
@@ -72,43 +83,40 @@ export default function Form({ audioFileId, testType }) {
   }
 
   // submitting to the Flask backend
-  function handleNextButton(){
-    
-    // Example URL - replace with the correct route
+  function handleNextButton() {
     const submitUrl = '/submit_answer';
-
-    // Example data structure - adjust according to your requirements
-    const formData = {
-      overall_rating: selections.overallRating,
-      genre_rating: selections.genreRating,
-      mood_rating: selections.moodRating,
-      vocal_timbre_rating: selections.vocalRating,
-      audio_id: audioFileId, // passed down from Questionnaire.js
-      test_id: testType,       // passed down from Questionnaire.js
-    };
 
     fetch(submitUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Include CSRF token as needed, especially if CSRF protection is enabled in Flask
+        'X-CSRFToken': csrfToken, // Assuming CSRF protection is enabled
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({
+        overall_rating: selections.overallRating,
+        genre_rating: selections.genreRating,
+        mood_rating: selections.moodRating,
+        vocal_timbre_rating: selections.vocalRating,
+        audio_id: audioFileId, 
+        test_id: testType,
+      }),
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
     .then(data => {
-        console.log('Success:', data);
-        if(data.next_audio_file_id) {
-            // Navigate to the next question with the new audio file ID
-            navigate(`/Questionnaire?audio_file_id=${data.next_audio_file_id}&test_type=${testType}`);
-        } else {
-            // Handle completion of the test
-            navigate('/TestCompleted'); // Need to add TestCompleted Route
-        }
+      if(data.next_audio_file_id) {
+        navigate(`/Questionnaire?audio_file_id=${data.next_audio_file_id}&test_type=${testType}`);
+      } else {
+        navigate('/TestCompleted'); // Assuming there's a route/component for test completion
+      }
     })
-    .catch((error) => {
-        console.error('Error:', error);
-        // Handle error
+    .catch(error => {
+      console.error('Error submitting answers:', error);
+      alert('There was an error submitting your answers. Please try again.');
     });
 
   }
