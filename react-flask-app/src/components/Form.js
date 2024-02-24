@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import empty_blue_circle from "../images/empty-blue-circle.png";
 import empty_red_circle from "../images/empty-red-circle.png";
 import filled_blue_circle from "../images/filled-blue-circle.png";
@@ -6,12 +7,13 @@ import filled_red_circle from "../images/filled-red-circle.png";
 import prev_button from "../images/prev_button.png"
 import next_button from "../images/next_button.png"
 
-export default function Form() {
+export default function Form({ audioFileId, testType }) {
+  const navigate = useNavigate();
   const [selections, setSelections] = useState({
     overallRating: null,
-    genreRating: null,
-    moodRating: null,
-    vocalRating: null,
+    genreRating: 0,
+    moodRating: 0,
+    vocalRating: 0,
   });
 
   const handleSelection = (category, value) => {
@@ -69,8 +71,46 @@ export default function Form() {
     //reset page to prev question
   }
 
+  // submitting to the Flask backend
   function handleNextButton(){
-    // submitting to the Flask backend
+    
+    // Example URL - replace with the correct route
+    const submitUrl = '/submit_answer';
+
+    // Example data structure - adjust according to your requirements
+    const formData = {
+      overall_rating: selections.overallRating,
+      genre_rating: selections.genreRating,
+      mood_rating: selections.moodRating,
+      vocal_timbre_rating: selections.vocalRating,
+      audio_id: audioFileId, // passed down from Questionnaire.js
+      test_id: testType,       // passed down from Questionnaire.js
+    };
+
+    fetch(submitUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Include CSRF token as needed, especially if CSRF protection is enabled in Flask
+      },
+      body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        if(data.next_audio_file_id) {
+            // Navigate to the next question with the new audio file ID
+            navigate(`/Questionnaire?audio_file_id=${data.next_audio_file_id}&test_type=${testId}`);
+        } else {
+            // Handle completion of the test
+            navigate('/TestCompleted'); // Need to add TestCompleted Route
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        // Handle error
+    });
+
   }
 
 
