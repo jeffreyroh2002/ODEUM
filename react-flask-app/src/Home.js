@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
 import Header from "./components/Header"
 import { Link } from 'react-router-dom';
 import './Home.css';
@@ -29,7 +28,7 @@ export default function Home() {
           <h1 className="main-title">ODEUM</h1>
           <p className="sub-title">Unraveling the Personalized Tapestry of Musical Taste</p>
           <Link 
-            to={isLoggedIn ? "/questionnaire" : "/login"} // Conditional routing based on isLoggedIn
+            to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
             className="cta-button"
           >
             Take Free Music Personality Test
