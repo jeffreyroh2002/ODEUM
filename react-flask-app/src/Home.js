@@ -1,22 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { withRouter } from 'react-router-dom';
 import Header from "./components/Header"
 import { Link } from 'react-router-dom';
 import './Home.css';
 import axios from 'axios';
 
-import Typist from 'react-typist';
-
 
 export default function Home() {
-
-  /* For Typing Animation on main-content
-  const [isTypingComplete, setIsTypingComplete] = React.useState(false);
-
-  const handleTypingComplete = () => {
-    setIsTypingComplete(true);
-  };
-
-  */
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -38,9 +28,12 @@ export default function Home() {
         <div className="main-content">
           <h1 className="main-title">ODEUM</h1>
           <p className="sub-title">Unraveling the Personalized Tapestry of Musical Taste</p>
-          <Link to="/questionnaire" className="cta-button">
+          <Link 
+            to={isLoggedIn ? "/questionnaire" : "/login"} // Conditional routing based on isLoggedIn
+            className="cta-button"
+          >
             Take Free Music Personality Test
-            </Link>
+          </Link>
           {!isLoggedIn && (
             <Link to="/Signup" className="cta-button">
               Sign Up Now
