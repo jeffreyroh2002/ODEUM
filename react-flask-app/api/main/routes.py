@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, request, session
 from api import db, bcrypt
-from api.models import User
-from api.models import AudioFile
+from api.models import User, AudioFile, UserAnswer, Test
 #from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flask_wtf.csrf import generate_csrf
 from flask_login import login_user, current_user, logout_user, login_required
 import re  # for email confirmation
+from datetime import datetime
 
 main = Blueprint('main', __name__)
 
@@ -117,3 +117,118 @@ def is_logged_in():
     else:
         return jsonify({"isLoggedIn": False})
 
+def get_next_audio_file_id(current_audio_file_id):
+    current_audio_file = AudioFile.query.get_or_404(current_audio_file_id)
+    next_audio_file = AudioFile.query.filter(AudioFile.id > current_audio_file.id).order_by(AudioFile.id.asc()).first()
+
+    if next_audio_file:
+        return next_audio_file.id
+    else:
+        return None
+
+@main.route('/submit_answer', methods=['POST'])
+@login_required
+def submit_answer():
+    data = request.json
+    new_answer = UserAnswer(
+        overall_rating=data['overall_rating'],
+        genre_rating=data['genre_rating'],
+        mood_rating=data['mood_rating'],
+        vocal_timbre_rating=data['vocal_timbre_rating'],
+        user_id=current_user.id,  # Assuming you're using Flask-Login for user management
+        audio_id=data['audio_id'],
+        test_id=data['test_id'],
+    )
+    db.session.add(new_answer)
+    db.session.commit()
+
+    next_audio_file_id = get_next_audio_file_id(data['audio_id'])
+
+    if next_audio_file_id is not None:
+        return jsonify({'message': 'Answer submitted successfully', 'next_audio_file_id': next_audio_file_id})
+    else:
+        # Handle the case where there are no more audio files
+        user = current_user
+        test = Test.query.filter((Test.user_id==user.id) & (Test.test_type==test_type)).order_by(Test.test_start_time.desc()).first()
+        test.test_end_time = datetime.now()
+        db.session.commit()
+        return jsonify({'message': 'Test completed', 'next_audio_file_id': None})
+
+@login_required
+@main.route('/get_next_questions', methods=["GET","POST"])
+def get_next_questions():
+    test_type = request.args.get('test_type')
+    audio_file_id = request.args.get('audio_file_id')
+
+    user = current_user
+
+    # consider case where user already took test: new test
+    test = Test.query.filter((Test.user_id==user.id) & (Test.test_type==test_type)).order_by(Test.test_start_time.desc()).first()
+
+    if audio_file == 0:
+        # haven't taken this test before (new user)
+        if not test:
+            # add new test data to Test model
+            test_val = Test(
+                test_type = test_type,
+                test_start_time = datetime.now(),
+                subject = user
+            )
+            db.session.add(test_val)
+            db.session.commit()
+
+            return redirect(url_for('main.get_next_questions', test_type=test_type, audio_file_id=1))
+
+        # already have taken this test before (start new test)
+        if test.test_end_time:
+            # add new test data to Test model
+            test_val = Test(
+                test_type = test_type,
+                test_start_time = datetime.now(),
+                subject = user
+            )
+            db.session.add(test_val)
+            db.session.commit()
+
+            ### change below flash to display on react frontend ###
+            # flash('You have already taken this type of test before. Start test again.', 'info')
+            
+            return redirect(url_for('main.get_next_questions', test_type=test_type, audio_file_id=1))
+
+        latest_answer = UserAnswer.query.filter((UserAnswer.user==current_user) & (UserAnswer.test==test)).order_by(UserAnswer.audio_id.desc()).first()
+        if not latest_answer :
+            return redirect(url_for('main.get_next_questions', test_type=test_type, audio_file_id=1))
+        latest_audio_num = latest_answer.audio_id
+
+        # when you have already finished this type of test
+        if len(AudioFile.query.all()) == latest_audio_num:
+            ### change below flash message and redirect to results page in react frontend ###
+            # flash('You have already taken this test!', 'info')
+            # return redirect(url_for('results.single_test_result', test_id=test.id))
+        else:
+            ### change below flash message ###
+            # flash('It seems you have already answers some questions in the past. Starting where you left off.', 'info')
+            return redirect(url_for('main.get_next_questions', test_type=test_type, audio_file_id=latest_audio_num+1))
+
+    audio_file = AudioFile.query.get_or_404(audio_file_id)
+    return jsonify(audio_file) # sending to react frontend
+
+
+
+@login_required
+@main.route('/get_prev_questions', methods=["GET"])
+def get_prev_questions(test_type, audio_file_id):
+    """ NEED TO RECREATE THIS ENTIRELY
+    db_answer = UserAnswer.query.filter((UserAnswer.test == test) & (UserAnswer.audio == audio_file) & (UserAnswer.user == current_user)).first()
+    form.overall_rating.default = db_answer.overall_rating
+        form.genre_rating.default = db_answer.genre_rating
+        form.mood_rating.default = db_answer.mood_rating
+        form.vocal_timbre_rating.default = db_answer.vocal_timbre_rating
+        if db_answer.genre_not_sure:
+            form.genre_not_sure.default = True
+        if db_answer.mood_not_sure:
+            form.mood_not_sure.default = True
+        if db_answer.vocal_not_sure:
+            form.vocal_not_sure.default = True
+        form.process()
+    """
