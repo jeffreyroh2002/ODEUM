@@ -100,7 +100,7 @@ export default function Form({ audioFileId, testType }) {
         console.log('Success:', data);
         if(data.next_audio_file_id) {
             // Navigate to the next question with the new audio file ID
-            navigate(`/Questionnaire?audio_file_id=${data.next_audio_file_id}&test_type=${testId}`);
+            navigate(`/Questionnaire?audio_file_id=${data.next_audio_file_id}&test_type=${testType}`);
         } else {
             // Handle completion of the test
             navigate('/TestCompleted'); // Need to add TestCompleted Route
