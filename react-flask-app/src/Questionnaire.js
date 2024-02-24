@@ -17,7 +17,7 @@ export default function App() {
                 playIconPath = {playIcon}
                 pauseIconPath = {pauseIcon}
             />
-            <Form/>
+            <Form />
         </div>
     )
 }
