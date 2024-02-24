@@ -12,6 +12,14 @@ const AudioPlayer = ({ src, playIconPath, pauseIconPath }) => {
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(new Audio(src));
 
+  useEffect(() => {
+    audioRef.current.src = src;
+    audioRef.current.pause();
+    setIsPlaying(false);
+    setCurrentTime(0);
+    audioRef.current.load();
+  }, [src]);
+  
   const togglePlayPause = () => {
     const prevValue = isPlaying;
     setIsPlaying(!prevValue);
