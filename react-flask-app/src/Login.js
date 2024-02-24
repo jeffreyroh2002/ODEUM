@@ -34,7 +34,7 @@ export default function Signup(){
     })
     .then(function (response) {
       console.log(response);
-      navigate(-1);
+      navigate('/');
     })
     .catch(function (error) {
       console.log(error);
@@ -54,9 +54,9 @@ export default function Signup(){
           <h2>Log in</h2>
           <form>
             <div className="form-group">
+            <label htmlFor="email">Email</label>
               <input
                 type="email"
-                placeholder="Email"
                 name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -64,16 +64,15 @@ export default function Signup(){
               />
             </div>
             <div className="form-group">
+              <label htmlFor="password">Password</label>
               <input
                 type="password"
-                placeholder="Password"
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
-            <button type="button" onClick={() => logInUser()} >Log in</button>
             <div className="form-group">
               <label>
                 <input
@@ -83,6 +82,11 @@ export default function Signup(){
                 />
                 Remember Me
               </label>
+            </div>
+            <button type="button" onClick={() => logInUser()} >Log in</button>
+            <div className="signup-link">
+              <p>Don't have an account?</p>
+              <Link to="/signup">Sign Up Now</Link>
             </div>
           </form>
         </div>
