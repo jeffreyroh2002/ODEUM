@@ -7,7 +7,7 @@ import filled_red_circle from "../images/filled-red-circle.png";
 import prev_button from "../images/prev_button.png"
 import next_button from "../images/next_button.png"
 
-export default function Form({ audioFileId, testType }) {
+export default function Form({ audioFileId, testType, onNextAudioFile }) {
   const navigate = useNavigate();
   const [selections, setSelections] = useState({
     overallRating: null,
@@ -30,7 +30,7 @@ export default function Form({ audioFileId, testType }) {
   const handleSelection = (category, value) => {
     setSelections(prev => ({
       ...prev,
-      [category]: prev[category] === value ? null : value, // Toggle selection
+      [category]: prev[category] === value ? 0 : value, // Toggle selection
     }));
   };
 
@@ -108,11 +108,13 @@ export default function Form({ audioFileId, testType }) {
       return response.json();
     })
     .then(data => {
-      if(data.next_audio_file_id) {
-        navigate(`/Questionnaire?audio_file_id=${data.next_audio_file_id}&test_type=${testType}`);
-      } else {
-        navigate('/TestCompleted'); // Assuming there's a route/component for test completion
-      }
+        console.log(data); // Add this line to check the structure of the response data
+        const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
+        if (nextAudioFileId) {
+            onNextAudioFile(nextAudioFileId); // Call the callback function with the next audio file id
+        } else {
+            navigate('/TestCompleted');
+        }
     })
     .catch(error => {
       console.error('Error submitting answers:', error);

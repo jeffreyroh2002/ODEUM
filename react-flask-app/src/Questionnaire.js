@@ -11,12 +11,13 @@ import pauseIcon from './images/icons8-pause-64.png'
 export default function Questionnaire() {
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
-    const audioFileId = searchParams.get('audio_file_id');
+    const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
     const testType = searchParams.get('test_type');
 
     const [audioFilePath, setAudioFilePath] = useState('');
 
     useEffect(() => {
+        console.log("Fetching audio file for:", audioFileId); // Add this line to check if useEffect is triggered
         const queryParams = new URLSearchParams({ audio_file_id: audioFileId, test_type: testType }).toString();
         fetch(`/get_next_questions?${queryParams}`)
         .then(res => res.json())
@@ -29,6 +30,10 @@ export default function Questionnaire() {
         .catch(error => console.error('Error fetching audio file info:', error));
     }, [audioFileId, testType]);
 
+    const handleNextAudioFile = (nextAudioFileId) => {
+        setAudioFileId(nextAudioFileId);
+    };
+
     return (
         <div>
             <Header />
@@ -38,7 +43,7 @@ export default function Questionnaire() {
                 playIconPath = {playIcon}
                 pauseIconPath = {pauseIcon}
             />
-            <Form audioFileId={audioFileId} testType={testType} />
+            <Form audioFileId={audioFileId} testType={testType} onNextAudioFile={handleNextAudioFile} />
         </div>
     )
 }
