@@ -19,7 +19,7 @@ mail = Mail()
 csrf = CSRFProtect()
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static')
     app.config.from_object(Config)
 
     db.init_app(app)
