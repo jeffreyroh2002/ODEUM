@@ -1,0 +1,18 @@
+.before-test-span {
+    color: #212121;
+    font-feature-settings: 'clig' off, 'liga' off;
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 22px; /* 110% */
+    letter-spacing: -0.4px;
+}
+
+.next--button {
+    border: none;
+    justify-content: center;
+    background: none;
+    margin-left: auto;
+    margin-right: 20px;
+  }
