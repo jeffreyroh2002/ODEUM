@@ -59,9 +59,9 @@ export default function Signup(){
           <h2>Sign Up</h2>
           <form>
             <div className="form-group">
+              <label htmlFor="firstname">First Name</label>
               <input
                 type="text"
-                placeholder="First Name"
                 name="firstName"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -69,9 +69,9 @@ export default function Signup(){
               />
             </div>
             <div className="form-group">
+              <label htmlFor="email">Email</label>
               <input
                 type="email"
-                placeholder="Email"
                 name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -79,9 +79,9 @@ export default function Signup(){
               />
             </div>
             <div className="form-group">
+              <label htmlFor="password">Password</label>
               <input
                 type="password"
-                placeholder="Password"
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -89,9 +89,9 @@ export default function Signup(){
               />
             </div>
             <div className="form-group">
+              <label htmlFor="confirm password">Confirm Password</label>
               <input
                 type="password"
-                placeholder="Confirm Password"
                 name="confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

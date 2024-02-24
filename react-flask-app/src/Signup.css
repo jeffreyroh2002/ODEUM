@@ -28,7 +28,15 @@
 }
 
 .signup-form .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 15px; /* Keep space between form groups */
+  display: flex; /* Use flexbox for layout */
+  flex-direction: column; /* Stack elements vertically */
+  align-items: flex-start; /* Align items to the start of the flex container */
+}
+
+.signup-form .form-group label {
+  margin-bottom: 5px; /* Add space below the label */
+  font-weight: bold; /* Optional: Makes label text bold */
 }
 
 .signup-form input[type="text"],
