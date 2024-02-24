@@ -9,7 +9,7 @@ export default function App() {
     const navigate = useNavigate();
 
     function handleNextButton(){
-        navigate('/Questionnaire'); // Navigate to /Questionnaire route
+        navigate('/Questionnair?audio_file_id=0'); // Navigate to /Questionnaire with audio_file_id=0
     }
 
     return (
