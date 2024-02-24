@@ -26,7 +26,7 @@ export default function Questionnaire() {
         fetch(`/get_next_questions?${queryParams}`)
         .then(res => res.json())
         .then(data => {
-            setAudioFilePath(`./Audio/${data.audio_file}`);
+            setAudioFilePath(`/static/audio_files/${data.audio_file}`);
         })
         .catch(error => console.error('Error fetching song:', error));
 
