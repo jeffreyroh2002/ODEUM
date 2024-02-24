@@ -8,9 +8,13 @@ export default function App() {
 
     const navigate = useNavigate();
 
-    function handleNextButton(){
-        navigate('/Questionnair?audio_file_id=0'); // Navigate to /Questionnaire with audio_file_id=0
-    }
+    const navigateToQuestionnaire = () => {
+        // Hardcoded values
+        const audioFileId = 0;
+        const testType = 1;
+    
+        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`);
+    };
 
     return (
         <div>
@@ -39,7 +43,7 @@ export default function App() {
                     가능한 추가질문에 답해주는 것이 도움이 됩니다.
                 </li>
             </ul>
-            <button className="next--button" onClick={handleNextButton}>
+            <button className="next--button" onClick={navigateToQuestionnaire}>
                 <img src={next_button} alt="Next Button" />
             </button>
         </div>
