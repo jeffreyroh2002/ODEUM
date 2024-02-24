@@ -146,7 +146,7 @@ def submit_answer():
     else:
         # Handle the case where there are no more audio files
         user = current_user
-        test = Test.query.filter((Test.user_id==user.id) & (Test.test_type==test_type)).order_by(Test.test_start_time.desc()).first()
+        test = Test.query.filter((Test.user_id==user.id) & (Test.test_type==data['test_id'])).order_by(Test.test_start_time.desc()).first()
         test.test_end_time = datetime.now()
         db.session.commit()
         return jsonify({'message': 'Test completed', 'next_audio_file_id': None})
