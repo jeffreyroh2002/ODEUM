@@ -1,5 +1,7 @@
 /* Login.css or a separate CSS file for your form */
 
+
+
 .signup-container {
     display: flex;
     justify-content: center;
@@ -28,16 +30,25 @@
   }
   
   .signup-form .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Keep space between form groups */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack elements vertically */
+    align-items: flex-start; /* Align items to the start of the flex container */
+  }
+  
+  .signup-form .form-group label {
+    margin-bottom: 5px; /* Add space below the label */
+    font-weight: bold; /* Optional: Makes label text bold */
   }
   
   .signup-form input[type="text"],
   .signup-form input[type="email"],
   .signup-form input[type="password"] {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
+    width: 100%; /* Ensure input fields take up the full container width */
+    padding: 10px; /* Padding inside input fields for better text visibility */
+    border: 1px solid #ccc; /* Border color */
+    border-radius: 4px; /* Rounded corners for input fields */
+    font-size: 16px; /* Text size within input fields */
   }
   
   .signup-form button {
@@ -79,3 +90,31 @@
     bottom: -20px; /* Adjust the position to place error messages below input fields */
     left: 0;
   }
+
+  .signup-link {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .signup-link p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .signup-link a {
+    display: inline-block;
+    margin-top: 5px;
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+  }
+  
+  .signup-link a:hover,
+  .signup-link a:focus {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+  
