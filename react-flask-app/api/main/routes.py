@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, redirect, url_for
 from api import db, bcrypt
 from api.models import User, AudioFile, UserAnswer, Test
 #from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
@@ -165,7 +165,7 @@ def get_next_questions():
     # consider case where user already took test: new test
     test = Test.query.filter((Test.user_id==user.id) & (Test.test_type==test_type)).order_by(Test.test_start_time.desc()).first()
 
-    if audio_file == 0:
+    if audio_file_id == 0:
         # haven't taken this test before (new user)
         if not test:
             # add new test data to Test model
@@ -205,6 +205,7 @@ def get_next_questions():
             ### change below flash message and redirect to results page in react frontend ###
             # flash('You have already taken this test!', 'info')
             # return redirect(url_for('results.single_test_result', test_id=test.id))
+            print('You have already taken this test! Taking you to test results...')
         else:
             ### change below flash message ###
             # flash('It seems you have already answers some questions in the past. Starting where you left off.', 'info')
