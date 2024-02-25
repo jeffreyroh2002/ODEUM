@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from "./components/Header"
 import AudioPlayer from './components/AudioPlayer';
 import Form from './components/Form';
@@ -10,6 +10,7 @@ import pauseIcon from './images/icons8-pause-64.png'
 
 export default function Questionnaire() {
     const location = useLocation();
+    const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
     const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
     const testType = searchParams.get('test_type');
@@ -29,6 +30,12 @@ export default function Questionnaire() {
         })
         .catch(error => console.error('Error fetching audio file info:', error));
     }, [audioFileId, testType]);
+
+    useEffect(() => {
+        // This useEffect is for demonstration purposes. Adjust or remove according to your needs.
+        // Make sure to include all dependencies in the dependency array.
+        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`, { replace: true });
+    }, [audioFileId, testType, navigate]);
 
     const handleNextAudioFile = (nextAudioFileId) => {
         setAudioFileId(nextAudioFileId);
