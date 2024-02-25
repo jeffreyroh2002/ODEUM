@@ -42,6 +42,7 @@ export default function Questionnaire() {
             <Header />
             <div>{audioFilePath}</div>
             <AudioPlayer 
+                key={audioFileId}
                 src={audioFilePath}
                 playIconPath = {playIcon}
                 pauseIconPath = {pauseIcon}
