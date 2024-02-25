@@ -132,7 +132,7 @@ def submit_answer():
         genre_rating=data['genre_rating'],
         mood_rating=data['mood_rating'],
         vocal_timbre_rating=data['vocal_timbre_rating'],
-        user_id=current_user.id,  # Assuming you're using Flask-Login for user management
+        user_id=current_user.id,
         audio_id=data['audio_id'],
         test_id=data['test_id'],
     )
