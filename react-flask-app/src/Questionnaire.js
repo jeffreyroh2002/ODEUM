@@ -23,8 +23,6 @@ export default function Questionnaire() {
         fetch(`/get_next_questions?${queryParams}`)
         .then(res => res.json())
         .then(data => {
-            // Assuming your server's static directory is structured as '/static/audio_files/'
-            // and data.audio_file_name is the filename of the next audio file
             const path = `/static/audio_files/${data.audio_file_name}`;
             setAudioFilePath(path);
         })
@@ -32,8 +30,6 @@ export default function Questionnaire() {
     }, [audioFileId, testType]);
 
     useEffect(() => {
-        // This useEffect is for demonstration purposes. Adjust or remove according to your needs.
-        // Make sure to include all dependencies in the dependency array.
         navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`, { replace: true });
     }, [audioFileId, testType, navigate]);
 
