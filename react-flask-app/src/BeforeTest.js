@@ -10,7 +10,7 @@ export default function App() {
 
     const navigateToQuestionnaire = () => {
         // Hardcoded values
-        const audioFileId = 0;
+        const audioFileId = 1;
         const testType = 1;
     
         navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`);
