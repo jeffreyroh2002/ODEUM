@@ -122,9 +122,10 @@ def get_next_audio_file_id(current_audio_file_id):
     # Query for the next AudioFile ID greater than the current one
     #next_audio_file = AudioFile.query.filter(AudioFile.id > current_audio_file_id).order_by(AudioFile.id).first()
     #return next_audio_file.id if next_audio_file else None
-    print("current_audio_file_id:", current_audio_file_id)
+    
+    #print("current_audio_file_id:", current_audio_file_id)
     next_audio_file_id = str(int(current_audio_file_id) + 1)
-    print("next_audio_file_id:", next_audio_file_id)
+    #print("next_audio_file_id:", next_audio_file_id)
     next_audio_file = AudioFile.query.filter(AudioFile.id == next_audio_file_id).first()
     if (next_audio_file):
         return next_audio_file_id
@@ -165,7 +166,7 @@ def submit_answer():
 def get_next_questions():
     test_type = request.args.get('test_type', type=int)
     audio_file_id = request.args.get('audio_file_id', type=int)
-    print("Audio File Id:", audio_file_id)
+    #print("Audio File Id:", audio_file_id)
 
     if not test_type or audio_file_id is None:
         return jsonify({'error': 'Missing required parameters'}), 400
@@ -184,12 +185,12 @@ def get_next_questions():
         new_test = True
     else:
          # Continue with the ongoing test
-        print(test)
+        # print(test)
         last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
-        print("last answer:", last_answer)
+        # print("last answer:", last_answer)
         audio_file_id = get_next_audio_file_id(last_answer.audio_id if last_answer else 0)
         new_test = False
-        print("new audio file id: ",audio_file_id)
+        # print("new audio file id: ",audio_file_id)
 
     if audio_file_id is None:
         # No more audio files to proceed with, mark the test as completed
@@ -199,7 +200,7 @@ def get_next_questions():
 
     # Proceed with fetching and returning details for the next audio file
     audio_file = AudioFile.query.get(audio_file_id)
-    print(audio_file.audio_name)
+    # print(audio_file.audio_name)
     if audio_file:
         return jsonify({
             'status': 'in_progress',
