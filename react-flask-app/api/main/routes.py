@@ -120,17 +120,17 @@ def is_logged_in():
 
 def get_next_audio_file_id(current_audio_file_id):
     # Query for the next AudioFile ID greater than the current one
-    #next_audio_file = AudioFile.query.filter(AudioFile.id > current_audio_file_id).order_by(AudioFile.id).first()
-    #return next_audio_file.id if next_audio_file else None
+    next_audio_file = AudioFile.query.filter(AudioFile.id > current_audio_file_id).order_by(AudioFile.id).first()
+    return next_audio_file.id if next_audio_file else None
     
     #print("current_audio_file_id:", current_audio_file_id)
-    next_audio_file_id = str(int(current_audio_file_id) + 1)
+    #next_audio_file_id = str(int(current_audio_file_id) + 1)
     #print("next_audio_file_id:", next_audio_file_id)
-    next_audio_file = AudioFile.query.filter(AudioFile.id == next_audio_file_id).first()
-    if (next_audio_file):
-        return next_audio_file_id
-    else:
-        return None
+    #next_audio_file = AudioFile.query.filter(AudioFile.id == next_audio_file_id).first()
+    #if (next_audio_file):
+    #    return next_audio_file_id
+    #else:
+    #    return None
     
 
 @main.route('/submit_answer', methods=['POST'])
