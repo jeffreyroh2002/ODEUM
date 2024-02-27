@@ -34,6 +34,7 @@ export default function Questionnaire() {
     }, [audioFileId, testType, navigate]);
 
     const handleNextAudioFile = (nextAudioFileId) => {
+        console.log('Next audio file id:', nextAudioFileId);
         setAudioFileId(nextAudioFileId);
     };
 

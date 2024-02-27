@@ -13,6 +13,11 @@ const AudioPlayer = ({ src, playIconPath, pauseIconPath }) => {
   const audioRef = useRef(new Audio(src));
 
   useEffect(() => {
+    console.log('Audio file path:', src);
+  }, [src]);
+
+
+  useEffect(() => {
     audioRef.current.src = src;
     audioRef.current.pause();
     setIsPlaying(false);
@@ -62,6 +67,7 @@ const AudioPlayer = ({ src, playIconPath, pauseIconPath }) => {
 
   return (
     <div className="audio--player--container">
+      <p>{src}</p>
       <div className="audio--timeline--container">
         <span>{formatTime(currentTime)}</span>
         <input

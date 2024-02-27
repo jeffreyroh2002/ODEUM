@@ -18,6 +18,12 @@ export default function Form({ audioFileId, testType, onNextAudioFile }) {
 
   const [csrfToken, setCsrfToken] = useState('');
 
+
+  useEffect(() => {
+    console.log('Audio file id in Form:', audioFileId);
+  }, [audioFileId]);
+
+
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
   useEffect(() => {
     fetch('/csrf-token').then(response => {
@@ -111,7 +117,8 @@ export default function Form({ audioFileId, testType, onNextAudioFile }) {
         console.log(data); // Add this line to check the structure of the response data
         const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
         if (nextAudioFileId) {
-            onNextAudioFile(nextAudioFileId); // Call the callback function with the next audio file id
+          onNextAudioFile(nextAudioFileId); 
+          
         } else {
             navigate('/TestCompleted');
         }
