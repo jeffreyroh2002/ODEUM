@@ -122,9 +122,9 @@ def get_next_audio_file_id(current_audio_file_id):
     # Query for the next AudioFile ID greater than the current one
     #next_audio_file = AudioFile.query.filter(AudioFile.id > current_audio_file_id).order_by(AudioFile.id).first()
     #return next_audio_file.id if next_audio_file else None
-    
+    print("current_audio_file_id:", current_audio_file_id)
     next_audio_file_id = str(int(current_audio_file_id) + 1)
-    print(next_audio_file_id)
+    print("next_audio_file_id:", next_audio_file_id)
     next_audio_file = AudioFile.query.filter(AudioFile.id == next_audio_file_id).first()
     if (next_audio_file):
         return next_audio_file_id
@@ -184,7 +184,9 @@ def get_next_questions():
         new_test = True
     else:
          # Continue with the ongoing test
-        last_answer = UserAnswer.query.filter_by(test_id=test.id).order_by(UserAnswer.id.desc()).first()
+        print(test)
+        last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
+        print("last answer:", last_answer)
         audio_file_id = get_next_audio_file_id(last_answer.audio_id if last_answer else 0)
         new_test = False
         print("new audio file id: ",audio_file_id)
