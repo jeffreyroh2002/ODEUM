@@ -176,6 +176,77 @@ def get_next_questions():
     # Find the latest test of the specified type for the user
     test = Test.query.filter_by(user_id=user.id, test_type=test_type).order_by(Test.test_start_time.desc()).first()
 
+    if audio_file_id == 0 or test.test_end_time:
+        # haven't taken this test before (new user)
+        if not test:
+            # add new test data to Test model
+            test_val = Test(
+                test_type = test_type,
+                test_start_time = datetime.now(),
+                subject = user
+            )
+
+            db.session.add(test_val)
+            db.session.commit()
+            audio_file_id = 1  # Assuming the first audio file's ID is 1 for a new test
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+            newTest = True
+            return jsonify({
+                        'status': 'in_progress',
+                        'new_test': newTest,
+                        'audio_file_id': audio_file_id,
+                        'audio_file_name': audio_file.audio_name,
+                        'test_id': test.id
+            })
+
+        else:
+            # Continue with the ongoing test
+            # print(test)
+            last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
+            # print("last answer:", last_answer)
+            audio_file_id = get_next_audio_file_id(last_answer.audio_id if last_answer else 0)
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+            newTest = False
+            # print("new audio file id: ",audio_file_id)
+            return jsonify({
+                        'status': 'in_progress',
+                        'new_test': newTest,
+                        'audio_file_id': audio_file_id,
+                        'audio_file_name': audio_file.audio_name,
+                        'test_id': test.id
+            })
+
+
+        latest_answer = UserAnswer.query.filter((UserAnswer.user==current_user) & (UserAnswer.test==test)).order_by(UserAnswer.audio_id.desc()).first()
+        if not latest_answer:
+            audio_file_id = 1  # Assuming the first audio file's ID is 1 for a new test
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+            newTest = False
+            return jsonify({
+                        'status': 'in_progress',
+                        'new_test': newTest,
+                        'audio_file_id': audio_file.id,
+                        'audio_file_name': audio_file.audio_name,
+                        'test_id': test.id
+            })
+        latest_audio_num = latest_answer.audio_id
+        if len(AudioFile.query.all()) == latest_audio_num:
+            test.test_end_time = datetime.utcnow()
+            db.session.commit()
+            return jsonify({'status': 'completed', 'message': 'Test completed', 'test_id': test.id})
+        else:
+            audio_file_id = latest_audio_num+1
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+            newTest= False
+            return jsonify({
+                        'status': 'in_progress',
+                        'new_test': newTest,
+                        'audio_file_id': audio_file.id,
+                        'audio_file_name': audio_file.audio_name,
+                        'test_id': test.id
+            })
+
+"""
     # If no test is found or the last test has finished, start a new test
     if test is None or test.test_end_time is not None:
         test = Test(user_id=user.id, test_type=test_type, test_start_time=datetime.utcnow())
@@ -212,7 +283,7 @@ def get_next_questions():
     else:
         # Fallback case if the next audio file couldn't be fetched
         return jsonify({'error': 'Audio file not found'}), 404
-
+"""
 
 
 @login_required
