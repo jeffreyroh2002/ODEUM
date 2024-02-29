@@ -18,7 +18,6 @@ export default function Questionnaire() {
     const [audioFilePath, setAudioFilePath] = useState('');
 
     useEffect(() => {
-        console.log("Fetching audio file for:", audioFileId); // Add this line to check if useEffect is triggered
         const queryParams = new URLSearchParams({ audio_file_id: audioFileId, test_type: testType }).toString();
         fetch(`/get_next_questions?${queryParams}`)
         .then(res => res.json())
