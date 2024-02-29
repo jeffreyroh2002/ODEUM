@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useState, useEffect} from "react"
 import Header from "./components/Header"
 import './BeforeTest.css';
 import next_button from "./images/next_button.png"
@@ -6,13 +6,24 @@ import { useNavigate } from 'react-router-dom';
 
 export default function App() {
 
+    const [audioFileId, setAudioFileId] = useState('');
+
+    useEffect(() => {
+        fetch(`/before_test_info`)
+        .then(res => res.json())
+        .then(data => {
+            setAudioFileId(data.audio_file_id)
+            console.log(audioFileId)
+        })
+        .catch(error => console.error('Error fetching audio file info:', error));
+    }, []);
+
     const navigate = useNavigate();
 
     const navigateToQuestionnaire = () => {
-        // Hardcoded values
-        const audioFileId = 0; // CHANGE HERE
+        // Hardcoded testType
         const testType = 1;
-    
+        console.log("audioFileId:",audioFileId)
         navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`);
     };
 
