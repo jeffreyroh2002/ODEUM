@@ -151,10 +151,13 @@ def submit_answer():
     else:
         # Handle the case where there are no more audio files
         user = current_user
-        test = Test.query.filter((Test.user_id==user.id) & (Test.test_type==data['test_id'])).order_by(Test.test_start_time.desc()).first()
+        test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+        print("TEST TEST TEST!:", test )
         test.test_end_time = datetime.now()
         db.session.commit()
+        print("TEST TEST TEST!:", test )
         return jsonify({'message': 'Test completed', 'next_audio_file_id': None})
+    
 
 
 @main.route('/before_test_info', methods=['GET'])
@@ -162,10 +165,13 @@ def submit_answer():
 def before_test_info():
 
     user = current_user
+    #test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
     print(test)
+    print("test_end_time:",test.test_end_time)
     # haven't taken this test before or need to start a new one
     if not test or test.test_end_time:
+        print("CREATING NEW TEST NOW!")
         test_val = Test(
             test_type = 1,
             test_start_time = datetime.now(),
@@ -175,8 +181,11 @@ def before_test_info():
         db.session.commit()
         audio_file_id = 1
         audio_file = AudioFile.query.get_or_404(audio_file_id)
+        print
         newTest = True
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+        print("IM ABOUT TO GO BACK TO FRONTEND")
+        print("audio_file", audio_file)
         return jsonify({
                     'status': 'in_progress',
                     'new_test': newTest,

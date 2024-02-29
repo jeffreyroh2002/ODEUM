@@ -12,19 +12,22 @@ export default function App() {
         fetch(`/before_test_info`)
         .then(res => res.json())
         .then(data => {
-            setAudioFileId(data.audio_file_id)
-            console.log(audioFileId)
+            setAudioFileId(data.audio_file_id);
+            console.log("Initial audioFileId:",audioFileId)
         })
         .catch(error => console.error('Error fetching audio file info:', error));
-    }, []);
+    }, [audioFileId]); 
 
     const navigate = useNavigate();
 
     const navigateToQuestionnaire = () => {
         // Hardcoded testType
         const testType = 1;
-        console.log("audioFileId:",audioFileId)
-        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`);
+        console.log("Next audioFileId:",audioFileId)
+        navigate(`/Questionnaire?audio_file_id=${1}&test_type=${testType}`);
+        // This works for now, but it fails to dynamically update based on
+        // how many questions user already answered. ideally use audioFileId
+        // instead of 1 but it doesn't seem to work
     };
 
     return (
