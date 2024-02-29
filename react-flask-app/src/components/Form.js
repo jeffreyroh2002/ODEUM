@@ -7,7 +7,7 @@ import filled_red_circle from "../images/filled-red-circle.png";
 import prev_button from "../images/prev_button.png"
 import next_button from "../images/next_button.png"
 
-export default function Form({ audioFileId, testType, onNextAudioFile }) {
+export default function Form({ audioFileId, testType, onAudioFile }) {
   const navigate = useNavigate();
   const [selections, setSelections] = useState({
     overallRating: null,
@@ -85,7 +85,39 @@ export default function Form({ audioFileId, testType, onNextAudioFile }) {
   };
 
   function handlePrevButton(){
-    //reset page to prev question
+    const prevForm = '/get_prev_questions';
+    fetch(prevForm, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken, // Assuming CSRF protection is enabled
+      },
+      body: JSON.stringify({
+        audio_id: audioFileId, 
+        test_id: testType,
+      }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log(data); // Add this line to check the structure of the response data
+      if (data.status === 'in_progress') {
+          onAudioFile(data.prev_audio_file_id);
+          // You can handle other data from the response here if needed
+      } else if (data.status === 'send_to_before_test') {
+          navigate('/BeforeTest');
+      } else {
+          throw new Error('Unexpected server response');
+      }
+    })
+    .catch(error => {
+      console.error('Error submitting answers:', error);
+      alert('There was an error submitting your answers. Please try again.');
+    });
   }
 
   // submitting to the Flask backend
@@ -117,8 +149,7 @@ export default function Form({ audioFileId, testType, onNextAudioFile }) {
         console.log(data); // Add this line to check the structure of the response data
         const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
         if (nextAudioFileId) {
-          onNextAudioFile(nextAudioFileId); 
-          
+          onAudioFile(nextAudioFileId); 
         } else {
             navigate('/TestCompleted');
         }
