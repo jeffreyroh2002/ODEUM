@@ -32,9 +32,9 @@ export default function Questionnaire() {
         navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`, { replace: true });
     }, [audioFileId, testType, navigate]);
 
-    const handleNextAudioFile = (nextAudioFileId) => {
-        console.log('Next audio file id:', nextAudioFileId);
-        setAudioFileId(nextAudioFileId);
+    const handleAudioFile = (AudioFileId) => {
+        console.log('Next audio file id:', AudioFileId);
+        setAudioFileId(AudioFileId);
     };
 
     return (
@@ -47,7 +47,7 @@ export default function Questionnaire() {
                 playIconPath = {playIcon}
                 pauseIconPath = {pauseIcon}
             />
-            <Form audioFileId={audioFileId} testType={testType} onNextAudioFile={handleNextAudioFile} />
+            <Form audioFileId={audioFileId} testType={testType} onAudioFile={handleAudioFile}/>
         </div>
     )
 }
