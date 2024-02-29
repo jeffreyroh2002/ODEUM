@@ -16,7 +16,7 @@ export default function App() {
             console.log("Initial audioFileId:",audioFileId)
         })
         .catch(error => console.error('Error fetching audio file info:', error));
-    }, [audioFileId]); 
+    }, []); 
 
     const navigate = useNavigate();
 

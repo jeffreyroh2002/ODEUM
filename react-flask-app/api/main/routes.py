@@ -168,7 +168,6 @@ def before_test_info():
     #test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
     print(test)
-    print("test_end_time:",test.test_end_time)
     # haven't taken this test before or need to start a new one
     if not test or test.test_end_time:
         print("CREATING NEW TEST NOW!")
@@ -181,7 +180,7 @@ def before_test_info():
         db.session.commit()
         audio_file_id = 1
         audio_file = AudioFile.query.get_or_404(audio_file_id)
-        print
+
         newTest = True
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
         print("IM ABOUT TO GO BACK TO FRONTEND")
