@@ -161,12 +161,61 @@ def submit_answer():
         db.session.commit()
         return jsonify({'message': 'Test completed', 'next_audio_file_id': None})
 
+
+@main.route('/before_test_info', methods=['GET'])
+@login_required
+def before_test_info():
+
+    user = current_user
+    test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+    print(test)
+    # haven't taken this test before or need to start a new one
+    if not test or test.test_end_time:
+        test_val = Test(
+            test_type = 1,
+            test_start_time = datetime.now(),
+            subject = user
+        )
+        db.session.add(test_val)
+        db.session.commit()
+        audio_file_id = 1
+        audio_file = AudioFile.query.get_or_404(audio_file_id)
+        newTest = True
+        return jsonify({
+                    'status': 'in_progress',
+                    'new_test': newTest,
+                    'audio_file_id': audio_file_id,
+                    'audio_file_name': audio_file.audio_name,
+                    'test_id': test.id
+        })
+    
+
+    #need to continue ongoing test
+    else:
+        print("BEFORE LAST answer:")
+        last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
+        print("last answer:", last_answer)
+        audio_file_id = last_answer.audio_id
+        print("audio_file_id:", audio_file_id)
+        audio_file = AudioFile.query.get_or_404(audio_file_id)
+        print("audio_file:", audio_file)
+        newTest = False
+        # print("new audio file id: ",audio_file_id)
+        return jsonify({
+                    'status': 'in_progress',
+                    'new_test': newTest,
+                    'audio_file_id': audio_file_id,
+                    'audio_file_name': audio_file.audio_name,
+                    'test_id': test.id
+        })
+
+
 @login_required
 @main.route('/get_next_questions', methods=["GET"])
 def get_next_questions():
+
     test_type = request.args.get('test_type', type=int)
     audio_file_id = request.args.get('audio_file_id', type=int)
-    #print("Audio File Id:", audio_file_id)
 
     if not test_type or audio_file_id is None:
         return jsonify({'error': 'Missing required parameters'}), 400
@@ -176,75 +225,22 @@ def get_next_questions():
     # Find the latest test of the specified type for the user
     test = Test.query.filter_by(user_id=user.id, test_type=test_type).order_by(Test.test_start_time.desc()).first()
 
-    if audio_file_id == 0 or test.test_end_time:
-        # haven't taken this test before (new user)
-        if not test:
-            # add new test data to Test model
-            test_val = Test(
-                test_type = test_type,
-                test_start_time = datetime.now(),
-                subject = user
-            )
-
-            db.session.add(test_val)
-            db.session.commit()
-            audio_file_id = 1  # Assuming the first audio file's ID is 1 for a new test
-            audio_file = AudioFile.query.get_or_404(audio_file_id)
-            newTest = True
-            return jsonify({
-                        'status': 'in_progress',
-                        'new_test': newTest,
-                        'audio_file_id': audio_file_id,
-                        'audio_file_name': audio_file.audio_name,
-                        'test_id': test.id
-            })
-
-        else:
-            # Continue with the ongoing test
-            # print(test)
-            last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
-            # print("last answer:", last_answer)
-            audio_file_id = get_next_audio_file_id(last_answer.audio_id if last_answer else 0)
-            audio_file = AudioFile.query.get_or_404(audio_file_id)
-            newTest = False
-            # print("new audio file id: ",audio_file_id)
-            return jsonify({
-                        'status': 'in_progress',
-                        'new_test': newTest,
-                        'audio_file_id': audio_file_id,
-                        'audio_file_name': audio_file.audio_name,
-                        'test_id': test.id
-            })
-
-
-        latest_answer = UserAnswer.query.filter((UserAnswer.user==current_user) & (UserAnswer.test==test)).order_by(UserAnswer.audio_id.desc()).first()
-        if not latest_answer:
-            audio_file_id = 1  # Assuming the first audio file's ID is 1 for a new test
-            audio_file = AudioFile.query.get_or_404(audio_file_id)
-            newTest = False
-            return jsonify({
-                        'status': 'in_progress',
-                        'new_test': newTest,
-                        'audio_file_id': audio_file.id,
-                        'audio_file_name': audio_file.audio_name,
-                        'test_id': test.id
-            })
-        latest_audio_num = latest_answer.audio_id
-        if len(AudioFile.query.all()) == latest_audio_num:
-            test.test_end_time = datetime.utcnow()
-            db.session.commit()
-            return jsonify({'status': 'completed', 'message': 'Test completed', 'test_id': test.id})
-        else:
-            audio_file_id = latest_audio_num+1
-            audio_file = AudioFile.query.get_or_404(audio_file_id)
-            newTest= False
-            return jsonify({
-                        'status': 'in_progress',
-                        'new_test': newTest,
-                        'audio_file_id': audio_file.id,
-                        'audio_file_name': audio_file.audio_name,
-                        'test_id': test.id
-            })
+    # Continue with the ongoing test
+    last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
+    audio_file = AudioFile.query.get(audio_file_id)
+    if audio_file:
+        newTest = False
+        return jsonify({
+                    'status': 'in_progress',
+                    'new_test': newTest,
+                    'audio_file_id': audio_file_id,
+                    'audio_file_name': audio_file.audio_name,
+                    'test_id': test.id,
+        })
+    else:
+        test.test_end_time = datetime.utcnow()
+        db.session.commit()
+        return jsonify({'status': 'completed', 'message': 'Test completed', 'test_id': test.id})
 
 """
     # If no test is found or the last test has finished, start a new test
