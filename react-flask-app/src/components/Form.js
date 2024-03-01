@@ -148,10 +148,11 @@ export default function Form({ audioFileId, testType, onAudioFile }) {
     .then(data => {
         console.log(data); // Add this line to check the structure of the response data
         const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
+        const testId = data.test_id;
         if (nextAudioFileId) {
           onAudioFile(nextAudioFileId); 
         } else {
-            navigate('/TestCompleted');
+          navigate(`/TestCompleted/${testId}`);
         }
     })
     .catch(error => {
