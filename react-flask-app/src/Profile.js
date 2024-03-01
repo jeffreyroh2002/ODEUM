@@ -31,7 +31,7 @@ export default function Profile() {
                 <div>
                     {testsData.length > 0 ? (
                         testsData.map(test => (
-                            <Link key={test.id} to={`/test/${test.id}`} className="test-link">
+                            <Link key={test.id} to={`/TestCompleted/${test.id}`} className="test-link">
                                 <div className="test-card">
                                     <p>ID: {test.id}</p>
                                     <p>Type: {test.test_type}</p>
