@@ -37,7 +37,7 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn }) {
           )}
           {isLoggedIn && (
             <li>
-              <Link to="/profile">My Profile</Link>
+              <Link to="/Profile">My Profile</Link>
             </li>
           )}
           <li>
