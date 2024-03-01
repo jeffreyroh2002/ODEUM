@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Home from './Home';
 import Signup from './Signup';
 import Login from './Login'
+import Profile from './Profile';
 import Questionnaire from './Questionnaire';
 import BeforeTest from './BeforeTest';
 
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Home />} exact />
         <Route path="/Signup" element={<Signup />} />
         <Route path="/Login" element={<Login />} />
+        <Route path="/Profile" element={<Profile />} />
         <Route path="/BeforeTest" element={<BeforeTest />} />
         <Route path="/questionnaire" element={<Questionnaire />} />
         <Route path="/Database" element={<Database />} />
