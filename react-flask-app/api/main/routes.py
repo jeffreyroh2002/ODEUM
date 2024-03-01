@@ -250,33 +250,6 @@ def get_next_questions():
                 'test_id': test.id,
     })
 
-    """
-def submit_answer():
-    data = request.json
-    new_answer = UserAnswer(
-        overall_rating=data['overall_rating'],
-        genre_rating=data['genre_rating'],
-        mood_rating=data['mood_rating'],
-        vocal_timbre_rating=data['vocal_timbre_rating'],
-        user_id=current_user.id,
-        audio_id=data['audio_id'],
-        test_id=data['test_id'],
-    )
-    db.session.add(new_answer)
-    db.session.commit()
-
-    next_audio_file_id = get_next_audio_file_id(data['audio_id'])
-
-    if next_audio_file_id is not None:
-        return jsonify({'message': 'Answer submitted successfully', 'next_audio_file_id': next_audio_file_id})
-    else:
-        # Handle the case where there are no more audio files
-        user = current_user
-        test = Test.query.filter((Test.user_id==user.id) & (Test.test_type==data['test_id'])).order_by(Test.test_start_time.desc()).first()
-        test.test_end_time = datetime.now()
-        db.session.commit()
-        return jsonify({'message': 'Test completed', 'next_audio_file_id': None})
-    """
 
 @login_required
 @main.route('/get_prev_questions', methods=["POST"])
@@ -322,4 +295,26 @@ def get_prev_questions():
         return jsonify({
             'status': 'send_to_before_test'
         })
+
+@login_required
+@main.route('/get_user_info', methods=["GET"])
+def get_user_info():
+    user = current_user
+    user_name = user.first_name
+    tests = Test.query.filter_by(subject=current_user).order_by(Test.id.asc()).all()
+    tests_data = []
+    
+    for test in tests:
+        test_data = {
+            'id': test.id,
+            'test_type': test.test_type,
+            'test_start_time': test.test_start_time.strftime('%Y-%m-%d %H:%M:%S'),  # Convert datetime to string
+        }
+        tests_data.append(test_data)
+
+    return jsonify({
+        'user_name': user_name,
+        'tests_data': tests_data
+    })
+
 
