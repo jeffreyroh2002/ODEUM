@@ -147,7 +147,7 @@ def submit_answer():
     next_audio_file_id = get_next_audio_file_id(data['audio_id'])
 
     if next_audio_file_id is not None:
-        return jsonify({'message': 'Answer submitted successfully', 'next_audio_file_id': next_audio_file_id})
+        return jsonify({'message': 'Answer submitted successfully', 'next_audio_file_id': next_audio_file_id, 'test_id': None})
     else:
         # Handle the case where there are no more audio files
         user = current_user
@@ -156,7 +156,7 @@ def submit_answer():
         test.test_end_time = datetime.now()
         db.session.commit()
         print("TEST TEST TEST!:", test )
-        return jsonify({'message': 'Test completed', 'next_audio_file_id': None})
+        return jsonify({'message': 'Test completed', 'next_audio_file_id': None, 'test_id': test.id})
     
 
 
