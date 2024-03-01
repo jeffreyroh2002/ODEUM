@@ -44,8 +44,11 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn }) {
             <Link to="/help">Help Center</Link>
           </li>
         </ul>
-        <Link to="/questionnaire" className="cta-button">
-          Get Free Test
+        <Link 
+            to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
+            className="cta-button"
+          >
+            Get Free Test
         </Link>
       </div>
     </div>
