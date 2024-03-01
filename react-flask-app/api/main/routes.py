@@ -310,7 +310,8 @@ def get_user_info():
             'test_type': test.test_type,
             'test_start_time': test.test_start_time.strftime('%Y-%m-%d %H:%M:%S'),  # Convert datetime to string
         }
-        tests_data.append(test_data)
+        if (test.test_end_time):
+            tests_data.append(test_data)
 
     return jsonify({
         'user_name': user_name,
