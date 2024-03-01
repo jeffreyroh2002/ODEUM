@@ -10,7 +10,7 @@ export default function TestCompleted() {
     const testId = new URLSearchParams(location.search).get('testId');
     const [testResults, setTestResults] = useState(null);
 
-    // Refs for the charts to manage instances
+    // Refs for the radar chart canvases
     const genreChartRef = useRef(null);
     const moodChartRef = useRef(null);
     const vocalChartRef = useRef(null);
@@ -21,7 +21,7 @@ export default function TestCompleted() {
             return;
         }
 
-        fetch(`/test_results?testId=${testId}`)
+        fetch(`/test_results?testId=${testId}`) // Adjust this URL for your backend
             .then(res => {
                 if (!res.ok) {
                     throw new Error('Network response was not ok');
@@ -30,210 +30,143 @@ export default function TestCompleted() {
             })
             .then(data => {
                 setTestResults(data);
+                // Initialize charts here after ensuring the component has mounted
+                // and the divs for the charts are available in the DOM
+                if (data) {
+                    initializeCharts(data);
+                }
             })
             .catch(error => console.error('Error fetching test results:', error));
     }, [testId]);
 
-    useEffect(() => {
-        if (testResults) {
-            initializeCharts();
+    // Function to initialize radar charts
+    const initializeCharts = (data) => {
+        if (genreChartRef.current && data.genre_score) {
+            new Chart(genreChartRef.current, createChartConfig('Genre Preferences', data.genre_score));
         }
-
-        // Cleanup function to destroy charts on component unmount or before reinitializing
-        return () => {
-            if (genreChartRef.current) {
-                genreChartRef.current.destroy();
-            }
-            if (moodChartRef.current) {
-                moodChartRef.current.destroy();
-            }
-            if (vocalChartRef.current) {
-                vocalChartRef.current.destroy();
-            }
-        };
-    }, [testResults]); // This useEffect depends on testResults
-
-    const initializeCharts = () => {
-        const genreCtx = document.getElementById('genreRadarChart').getContext('2d');
-        const moodCtx = document.getElementById('moodRadarChart').getContext('2d');
-        const vocalCtx = document.getElementById('vocalRadarChart').getContext('2d');
-
-        // Destroy existing charts if they exist
-        if (genreChartRef.current) genreChartRef.current.destroy();
-        if (moodChartRef.current) moodChartRef.current.destroy();
-        if (vocalChartRef.current) vocalChartRef.current.destroy();
-
-        // Initialize new chart instances with example data and options
-        genreChartRef.current = new Chart(genreCtx, {
-            type: 'radar',
-            data: {
-                labels: Object.keys(testResults.genre_score),
-                datasets: [{
-                    label: 'Genre Preferences',
-                    data: Object.values(testResults.genre_score),
-                    fill: true,
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    pointBackgroundColor: 'rgb(255, 99, 132)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(255, 99, 132)'
-                }]
-            },
-            options: {
-                elements: {
-                    line: {
-                        borderWidth: 3
-                    }
-                },
-                scales: {
-                    r: {
-                        angleLines: {
-                            display: false
-                        },
-                        suggestedMin: 0,
-                        suggestedMax: 10
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Genre Preferences'
-                    }
-                }
-            },
-        });
-
-        moodChartRef.current = new Chart(moodCtx, {
-            type: 'radar',
-            data: {
-                labels: Object.keys(testResults.mood_score),
-                datasets: [{
-                    label: 'Mood Preferences',
-                    data: Object.values(testResults.mood_score),
-                    fill: true,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgb(54, 162, 235)',
-                    pointBackgroundColor: 'rgb(54, 162, 235)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(54, 162, 235)'
-                }]
-            },
-            options: {
-                elements: {
-                    line: {
-                        borderWidth: 3
-                    }
-                },
-                scales: {
-                    r: {
-                        angleLines: {
-                            display: false
-                        },
-                        suggestedMin: 0,
-                        suggestedMax: 10
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Mood Preferences'
-                    }
-                }
-            },
-        });
-
-        vocalChartRef.current = new Chart(vocalCtx, {
-            type: 'radar',
-            data: {
-                labels: Object.keys(testResults.vocal_score),
-                datasets: [{
-                    label: 'Vocal Timbre Preferences',
-                    data: Object.values(testResults.vocal_score),
-                    fill: true,
-                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                    borderColor: 'rgb(255, 206, 86)',
-                    pointBackgroundColor: 'rgb(255, 206, 86)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(255, 206, 86)'
-                }]
-            },
-            options: {
-                elements: {
-                    line: {
-                        borderWidth: 3
-                    }
-                },
-                scales: {
-                    r: {
-                        angleLines: {
-                            display: false
-                        },
-                        suggestedMin: 0,
-                        suggestedMax: 10
-                    }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Vocal Timbre Preferences'
-                    }
-                }
-            },
-        });
+        if (moodChartRef.current && data.mood_score) {
+            new Chart(moodChartRef.current, createChartConfig('Mood Preferences', data.mood_score));
+        }
+        if (vocalChartRef.current && data.vocal_score) {
+            new Chart(vocalChartRef.current, createChartConfig('Vocal Preferences', data.vocal_score));
+        }
     };
 
-    // Function to render preference scales (if applicable)
-    const renderPreferenceScales = (scores, title) => {
-        return (
-            <div>
-                <h3>{title} Preferences:</h3>
-                <ul>
-                    {Object.entries(scores).map(([key, value]) => (
-                        <li key={key}>{key}: {value}</li>
-                    ))}
-                </ul>
-            </div>
-        );
-    };
+    // Helper function to create chart configuration
+    const createChartConfig = (title, score) => ({
+        type: 'radar',
+        data: {
+            labels: Object.keys(score),
+            datasets: [{
+                label: title,
+                data: Object.values(score),
+                fill: true,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+                pointBackgroundColor: 'rgb(255, 99, 132)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(255, 99, 132)'
+            }]
+        },
+        options: {
+            elements: {
+                line: {
+                    borderWidth: 3
+                }
+            },
+            scales: {
+                r: {
+                    angleLines: {
+                        display: false
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: title
+                }
+            }
+        }
+    });
 
     return (
         <div>
             <Header />
             <h1>Test Completed</h1>
             <p>Test ID: {testId}</p>
-            {testResults && (
+            {testResults ? (
                 <div>
-                    {/* Radar charts for genre, mood, and vocal preferences */}
-                    <canvas id="genreRadarChart"></canvas>
-                    <canvas id="moodRadarChart"></canvas>
-                    <canvas id="vocalRadarChart"></canvas>
-                    {/* Displaying preference scales */}
-                    {renderPreferenceScales(testResults.genre_score, "Genre")}
-                    {renderPreferenceScales(testResults.mood_score, "Mood")}
-                    {renderPreferenceScales(testResults.vocal_score, "Vocal")}
-                    {/* Displaying messages */}
-                    <div className="display-messages">
-                        {testResults.display_messages && testResults.display_messages.length > 0 ? (
-                            testResults.display_messages.map((message, index) => (
-                                <p key={index}>{message}</p>
-                            ))
-                        ) : (
-                            <p>There are no specific messages to display.</p>
-                        )}
+                    {/* Radar charts for preferences */}
+                    <div>
+                        <canvas ref={genreChartRef}></canvas>
                     </div>
+                    <div>
+                        <canvas ref={moodChartRef}></canvas>
+                    </div>
+                    <div>
+                        <canvas ref={vocalChartRef}></canvas>
+                    </div>
+                    {/* Display the images generated by Flask */}
+                <div>
+                    <h2>Genre Preferences Image</h2>
+                    <img src={`data:image/png;base64,${testResults.genre_image}`} alt="Genre Preferences" style={{ maxWidth: '100%', height: 'auto' }} />
                 </div>
+                <div>
+                    <h2>Mood Preferences Image</h2>
+                    <img src={`data:image/png;base64,${testResults.mood_image}`} alt="Mood Preferences" style={{ maxWidth: '100%', height: 'auto' }} />
+                </div>
+                <div>
+                    <h2>Vocal Preferences Image</h2>
+                    <img src={`data:image/png;base64,${testResults.vocal_image}`} alt="Vocal Preferences" style={{ maxWidth: '100%', height: 'auto' }} />
+                </div>
+
+                {/* Display preference scales */}
+                <div className="preference-scales">
+                    <h3>Genre Scores</h3>
+                    <ul>
+                        {Object.entries(testResults.genre_score).map(([genre, score]) => (
+                            <li key={genre}>{genre}: {score.toFixed(2)}</li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="preference-scales">
+                    <h3>Mood Scores</h3>
+                    <ul>
+                        {Object.entries(testResults.mood_score).map(([mood, score]) => (
+                            <li key={mood}>{mood}: {score.toFixed(2)}</li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="preference-scales">
+                    <h3>Vocal Scores</h3>
+                    <ul>
+                        {Object.entries(testResults.vocal_score).map(([vocal, score]) => (
+                            <li key={vocal}>{vocal}: {score.toFixed(2)}</li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Displaying messages */}
+                <div className="display-messages">
+                    <h3>Messages</h3>
+                    {testResults.display_messages && testResults.display_messages.length > 0 ? (
+                        testResults.display_messages.map((message, index) => (
+                            <p key={index}>{message}</p>
+                        ))
+                    ) : (
+                        <p>No specific messages to display.</p>
+                    )}
+                </div>
+                </div>
+            ) : (
+                <p>Loading test results...</p>
             )}
         </div>
     );
