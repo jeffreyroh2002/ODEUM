@@ -47,7 +47,10 @@ export default function Questionnaire() {
                 playIconPath = {playIcon}
                 pauseIconPath = {pauseIcon}
             />
-            <Form audioFileId={audioFileId} testType={testType} onAudioFile={handleAudioFile}/>
+            <Form 
+                audioFileId={audioFileId} 
+                testType={testType} 
+                onAudioFile={handleAudioFile}/>
         </div>
     )
 }

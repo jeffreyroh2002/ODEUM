@@ -152,7 +152,7 @@ export default function Form({ audioFileId, testType, onAudioFile }) {
         if (nextAudioFileId) {
           onAudioFile(nextAudioFileId); 
         } else {
-          navigate(`/TestCompleted/${testId}`);
+          navigate(`/TestCompleted?testId=${testId}`, { replace: true });
         }
     })
     .catch(error => {
