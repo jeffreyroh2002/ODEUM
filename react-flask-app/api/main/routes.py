@@ -7,6 +7,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 import re  # for email confirmation
 from datetime import datetime
 import logging
+import json
 
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
@@ -150,6 +151,7 @@ def get_prev_audio_file_id(current_audio_file_id):
 @login_required
 def submit_answer():
     data = request.json
+    print("submit answer test id submited:", data['test_id'])
     new_answer = UserAnswer(
         overall_rating=data['overall_rating'],
         genre_rating=data['genre_rating'],
@@ -159,6 +161,7 @@ def submit_answer():
         audio_id=data['audio_id'],
         test_id=data['test_id'],
     )
+    
     db.session.add(new_answer)
     db.session.commit()
 
@@ -201,6 +204,7 @@ def before_test_info():
 
         newTest = True
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+        print("new test id:", test.id)
         print("IM ABOUT TO GO BACK TO FRONTEND")
         print("audio_file", audio_file)
         return jsonify({
@@ -248,6 +252,8 @@ def get_next_questions():
 
     test_type = request.args.get('test_type', type=int)
     audio_file_id = request.args.get('audio_file_id', type=int)
+    test_id = request.args.get('test_id', type=int)
+    print("TESTID!!!!:", test_id)
 
     if not test_type or audio_file_id is None:
         return jsonify({'error': 'Missing required parameters'}), 400
@@ -255,8 +261,8 @@ def get_next_questions():
     user = current_user
 
     # Find the latest test of the specified type for the user
-    test = Test.query.filter_by(user_id=user.id, test_type=test_type).order_by(Test.test_start_time.desc()).first()
-
+    test = Test.query.filter_by(user_id=user.id, test_type=test_type, id=test_id).order_by(Test.test_start_time.desc()).first()
+    print("current test!:", test)
     # Continue with the ongoing test
     audio_file = AudioFile.query.get(audio_file_id)
     newTest = False
@@ -336,6 +342,16 @@ def get_user_info():
         'tests_data': tests_data
     })
 
+
+def get_attribute_name(index):
+    # Define the order of attributes in your feature vectors
+    attributes = ['Rock','Hip Hop','Pop Ballad','Electronic','Korean Ballad','Jazz','R&B/Soul', 
+                  'Tense', 'Bright', 'Emotional', 'Relaxed', 
+                  'Smooth', 'Dreamy', 'Raspy', 'Voiceless']
+    
+    # Return the attribute name corresponding to the given index
+    return attributes[index]
+
 @main.route("/test_results", methods=['GET'])
 @login_required
 def test_results():
@@ -343,7 +359,9 @@ def test_results():
 
     #calculate all characteristics
     user = current_user
+    print(user)
     test = Test.query.filter_by(id=test_id).first()
+    print(test)
     if test.subject != current_user: 
         return jsonify({'error': 'User does not match test owner'}), 403
 
@@ -357,7 +375,11 @@ def test_results():
     # High Rating song tracker
     high_rated_songs = []
 
+    test_answer = UserAnswer.query.filter_by(user=user).all()
+    print("test_answer", test_answer)
+
     answers = UserAnswer.query.filter_by(test_id=test_id).all()
+    print ("answers:", answers)
     for answer in answers:
         audio = AudioFile.query.get(answer.audio_id)
 
@@ -365,6 +387,9 @@ def test_results():
         genre_pred = audio.genre   #assuming audioFile is populated with scores using dictionaries with same keys
         mood_pred = audio.mood
         vocal_pred = audio.vocal
+
+        print("genre prediciton input:", genre_pred)
+        print("mood prediciton input:", mood_pred)
 
         #from Questions Form
         overall_rating = answer.overall_rating   # need to use this
@@ -577,6 +602,19 @@ def test_results():
     vocal_png.seek(0)
     vocal_encoded = base64.b64encode(vocal_png.getvalue()).decode('utf-8')
     plt.close()
+
+    print("user.id:", user.id)
+    print("test.id:", test.id)
+    print("test_type:", test.test_type)
+    print("genre_score:", genre_score)
+    print("mood_score:", mood_score)
+    print("vocal_score:", vocal_score)
+    """
+    print("genre_encoded:", genre_encoded)
+    print("mood_encoded:", mood_encoded)
+    print("vocal_encoded:", vocal_encoded)
+    """
+    print("display_messages:", display_messages)
 
     # Pass the encoded images and other necessary information to the template
     response_data = {
