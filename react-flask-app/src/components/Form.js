@@ -166,6 +166,13 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
         const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
         const testId = data.test_id;
         if (nextAudioFileId) {
+          const { overall_rating, genre_rating, mood_rating, vocal_timbre_rating } = data;
+          setSelections({
+            overallRating: overall_rating,
+            genreRating: genre_rating,
+            moodRating: mood_rating,
+            vocalRating: vocal_timbre_rating,
+          });
           onAudioFile(nextAudioFileId); 
         } else {
           navigate(`/TestCompleted?testId=${testId}`, { replace: true });

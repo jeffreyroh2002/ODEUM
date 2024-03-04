@@ -166,20 +166,42 @@ def submit_answer():
     db.session.commit()
 
     next_audio_file_id = get_next_audio_file_id(data['audio_id'])
-
+    test = Test.query.filter_by(user_id=current_user.id, id=data['test_id']).first()
+    
     if next_audio_file_id is not None:
-        return jsonify({'message': 'Answer submitted successfully', 'next_audio_file_id': next_audio_file_id, 'test_id': None})
+        #add logic to call the next values if available
+        next_audio_file = AudioFile.query.get(next_audio_file_id)
+        db_answer = UserAnswer.query.filter((UserAnswer.test == test) & (UserAnswer.audio_id == next_audio_file.id) & (UserAnswer.user == current_user)).first()
+        print("next db_answer:", db_answer)
+        if db_answer == None:
+            return jsonify({
+                'message': 'Answer submitted successfully', 
+                'next_audio_file_id': next_audio_file_id, 
+                'test_id': test.id,
+                'overall_rating': None,
+                'genre_rating': 0,
+                'mood_rating': 0,
+                'vocal_timbre_rating': 0
+            })
+        else:
+            return jsonify({
+                'message': 'Answer submitted successfully', 
+                'next_audio_file_id': next_audio_file_id, 
+                'test_id': test.id,
+                'overall_rating': db_answer.overall_rating,
+                'genre_rating': db_answer.genre_rating,
+                'mood_rating': db_answer.mood_rating,
+                'vocal_timbre_rating': db_answer.vocal_timbre_rating
+            })
     else:
         # Handle the case where there are no more audio files
         user = current_user
-        test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
         print("TEST TEST TEST!:", test )
         test.test_end_time = datetime.now()
         db.session.commit()
         print("TEST TEST TEST!:", test )
         return jsonify({'message': 'Test completed', 'next_audio_file_id': None, 'test_id': test.id})
     
-
 
 @main.route('/before_test_info', methods=['GET'])
 @login_required
@@ -275,6 +297,7 @@ def get_next_questions():
     })
 
 
+
 @login_required
 @main.route('/get_prev_questions', methods=["POST"])
 def get_prev_questions():
@@ -305,6 +328,7 @@ def get_prev_questions():
         db_answer = UserAnswer.query.filter((UserAnswer.test == test) & (UserAnswer.audio_id == prev_audio_file.id) & (UserAnswer.user == current_user)).first()
         print("db_answer:", db_answer)
         newTest = False
+
         return jsonify({
                     'status': 'in_progress',
                     'new_test': newTest,
@@ -312,9 +336,9 @@ def get_prev_questions():
                     'prev_audio_file_name': prev_audio_file.audio_name,
                     'test_id': test.id,
                     'overall_rating': db_answer.overall_rating,
-                    'genre_rating': db_answer.overall_rating,
-                    'mood_rating': db_answer.overall_rating,
-                    'vocal_timbre_rating': db_answer.overall_rating,
+                    'genre_rating': db_answer.genre_rating,
+                    'mood_rating': db_answer.mood_rating,
+                    'vocal_timbre_rating': db_answer.vocal_timbre_rating,
         })
     else:
         return jsonify({
