@@ -32,7 +32,7 @@ class User(db.Model, UserMixin):
         return User.query.get(user_id)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}')"
+        return f"User('{self.first_name}', '{self.email}')"
 
 
 class Test(db.Model):
@@ -45,7 +45,7 @@ class Test(db.Model):
 
 
     def __repr__(self):
-        return f"Test('user:{self.user_id}', 'test:{self.test_type}', '{self.test_start_time}', '{self.test_end_time}')"
+        return f"Test('user:{self.user_id}', 'id: {self.id}','test:{self.test_type}', '{self.test_start_time}', '{self.test_end_time}')"
 
 
 class AudioFile(db.Model):
