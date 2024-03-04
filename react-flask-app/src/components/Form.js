@@ -7,7 +7,7 @@ import filled_red_circle from "../images/filled-red-circle.png";
 import prev_button from "../images/prev_button.png"
 import next_button from "../images/next_button.png"
 
-export default function Form({ audioFileId, testType, onAudioFile }) {
+export default function Form({ audioFileId, testId, onAudioFile }) {
   const navigate = useNavigate();
   const [selections, setSelections] = useState({
     overallRating: null,
@@ -22,6 +22,10 @@ export default function Form({ audioFileId, testType, onAudioFile }) {
   useEffect(() => {
     console.log('Audio file id in Form:', audioFileId);
   }, [audioFileId]);
+
+  useEffect(() => {
+    console.log('testId in Form:', testId);
+  }, [testId]);
 
 
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
@@ -94,7 +98,7 @@ export default function Form({ audioFileId, testType, onAudioFile }) {
       },
       body: JSON.stringify({
         audio_id: audioFileId, 
-        test_id: testType,
+        test_id: testId,
       }),
     })
     .then(response => {
@@ -136,7 +140,7 @@ export default function Form({ audioFileId, testType, onAudioFile }) {
         mood_rating: selections.moodRating,
         vocal_timbre_rating: selections.vocalRating,
         audio_id: audioFileId, 
-        test_id: testType,
+        test_id: testId,
       }),
     })
     .then(response => {
