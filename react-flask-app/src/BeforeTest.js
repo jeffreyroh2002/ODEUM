@@ -7,16 +7,23 @@ import { useNavigate } from 'react-router-dom';
 export default function App() {
 
     const [audioFileId, setAudioFileId] = useState('');
+    const [testId, setTestId] = useState('');
 
     useEffect(() => {
         fetch(`/before_test_info`)
         .then(res => res.json())
         .then(data => {
             setAudioFileId(data.audio_file_id);
-            console.log("Initial audioFileId:",audioFileId)
+            setTestId(data.test_id)
         })
         .catch(error => console.error('Error fetching audio file info:', error));
     }, []); 
+
+    useEffect(() => {
+        // Action to be performed when audioFileId or testId changes
+        console.log("Updated audioFileId:", audioFileId);
+        console.log("Updated testId:", testId);
+    }, [audioFileId, testId]);
 
     const navigate = useNavigate();
 
@@ -24,7 +31,8 @@ export default function App() {
         // Hardcoded testType
         const testType = 1;
         console.log("Next audioFileId:",audioFileId)
-        navigate(`/Questionnaire?audio_file_id=${1}&test_type=${testType}`);
+        console.log("passing test Id:", testId)
+        navigate(`/Questionnaire?audio_file_id=${1}&test_type=${testType}&test_id=${testId}`);
         // This works for now, but it fails to dynamically update based on
         // how many questions user already answered. ideally use audioFileId
         // instead of 1 but it doesn't seem to work
@@ -57,7 +65,7 @@ export default function App() {
                     가능한 추가질문에 답해주는 것이 도움이 됩니다.
                 </li>
             </ul>
-            <button className="next--button" onClick={navigateToQuestionnaire}>
+            <button className="next--button" onClick={() => navigateToQuestionnaire(audioFileId, testId)}>
                 <img src={next_button} alt="Next Button" />
             </button>
         </div>
