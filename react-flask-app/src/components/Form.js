@@ -27,6 +27,10 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
     console.log('testId in Form:', testId);
   }, [testId]);
 
+  useEffect(() => {
+    console.log('selections', selections);
+  }, [selections]);
+
 
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
   useEffect(() => {
@@ -109,9 +113,17 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
     })
     .then(data => {
       console.log(data); // Add this line to check the structure of the response data
+      
       if (data.status === 'in_progress') {
-          onAudioFile(data.prev_audio_file_id);
-          // You can handle other data from the response here if needed
+        const { overall_rating, genre_rating, mood_rating, vocal_timbre_rating } = data;
+        setSelections({
+          overallRating: overall_rating,
+          genreRating: genre_rating,
+          moodRating: mood_rating,
+          vocalRating: vocal_timbre_rating,
+        });
+        onAudioFile(data.prev_audio_file_id);
+
       } else if (data.status === 'send_to_before_test') {
           navigate('/BeforeTest');
       } else {

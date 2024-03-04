@@ -282,16 +282,17 @@ def get_prev_questions():
     print("inside getprevquestions!")
     data = request.json
 
-    test_type = data['test_id']
+    test_id = data['test_id']
     audio_id = data['audio_id']
 
-    if not test_type or audio_id is None:
+    if not test_id or audio_id is None:
         return jsonify({'error': 'Missing required parameters'}), 400
 
     user = current_user
 
     # Find the latest test of the specified type for the user
-    test = Test.query.filter_by(user_id=user.id, test_type=test_type).order_by(Test.test_start_time.desc()).first()
+    test = Test.query.filter_by(user_id=user.id, id=test_id).order_by(Test.test_start_time.desc()).first()
+    print("HERE IS TEST!:", test)
 
     # Continue with the ongoing test
     print("audio_id:",audio_id)
