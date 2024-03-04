@@ -14,11 +14,13 @@ export default function Questionnaire() {
     const searchParams = new URLSearchParams(location.search);
     const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
     const testType = searchParams.get('test_type');
+    const testId = searchParams.get('test_id');
 
     const [audioFilePath, setAudioFilePath] = useState('');
 
     useEffect(() => {
-        const queryParams = new URLSearchParams({ audio_file_id: audioFileId, test_type: testType }).toString();
+        console.log("testID in Q:", testId);
+        const queryParams = new URLSearchParams({ audio_file_id: audioFileId, test_type: testType, test_id: testId }).toString();
         fetch(`/get_next_questions?${queryParams}`)
         .then(res => res.json())
         .then(data => {
@@ -29,7 +31,7 @@ export default function Questionnaire() {
     }, [audioFileId, testType]);
 
     useEffect(() => {
-        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}`, { replace: true });
+        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`, { replace: true });
     }, [audioFileId, testType, navigate]);
 
     const handleAudioFile = (AudioFileId) => {
@@ -49,7 +51,7 @@ export default function Questionnaire() {
             />
             <Form 
                 audioFileId={audioFileId} 
-                testType={testType} 
+                testId={testId} 
                 onAudioFile={handleAudioFile}/>
         </div>
     )
