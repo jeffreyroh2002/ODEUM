@@ -2,27 +2,28 @@
 .header {
     display: flex;
     align-items: center;
-    height: 100px;
-    background-color: #174441;
+    height: 120px; /* Increased header height */
+    background-color: black;
+    padding: 0 20px; /* Increased side padding */
     width: 100%;
 }
 
 .header--image {
-    height: 100%;
-    margin-right: 6px;
-    
+    height: 60%; /* Increase for better visibility */
+    margin-left: 10px;
+    margin-right: 20px; /* Adjusted margin */
 }
   
 .header--account--image {
-    height: 24px;
-    width: 24px;
+    height: 50px;
+    width: 50px;
     margin-left: auto;
     cursor: pointer;
 }
   
 .header--menu--image {
-    height: 24px;
-    width: 24px;
+    height: 50px;
+    width: 50px;
     margin-left: 20px;
     margin-right: 60px;
 }
@@ -85,3 +86,17 @@
   .cta-button:hover {
     background-color: #0056b3;
   }
+
+  @media (max-width: 768px) {
+    .header {
+        height: 100px; /* Adjusted for mobile */
+        padding: 0 15px; /* Slightly reduced padding on smaller screens */
+    }
+
+    .header--image,
+    .header--account--image,
+    .header--menu--image {
+        height: 25px; /* Adjust size for mobile */
+        width: 25px;
+    }
+}
