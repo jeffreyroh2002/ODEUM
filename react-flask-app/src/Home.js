@@ -27,8 +27,7 @@ export default function Home() {
       <Header />
       <div className="home-container">
         <div className="main-content">
-          <h1 className="main-title">ODEUM</h1>
-          <p className="sub-title">Unraveling the Personalized Tapestry of Musical Taste</p>
+          <h2 className="sub-title">Unravel your Personalized Tapestry of Musical Taste</h2>
           <Link 
             to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
             className="cta-button"
