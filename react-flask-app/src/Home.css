@@ -1,4 +1,8 @@
 /* Home.css */
+body{
+  font-family: 'Outfit', sans-serif;
+}
+
 .home-container {
   background-color: #000; /* Black background */
   color: #fff; /* White text for contrast */
@@ -11,9 +15,31 @@
   margin: 40px auto; /* Increased top margin for better spacing */
 }
 
+
 .sub-title {
-  font-family: 'Paytone One', sans-serif;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
   font-size: 50px; /* Larger font size for better visibility */
+  margin: 40px 0; /* Increased margin for more space */
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #ee446e, #baaaec); 
+  -webkit-background-clip: text; 
+  color: transparent;
+}
+
+.sub-text {
+  margin-top: -30px;
+  font-size: 17px;
+  font-weight: 100;
+  color: #999999
+}
+
+.sub-header {
+  font-family: 'Outfit', sans-serif;
+  font-size: 40px; /* Larger font size for better visibility */
   margin: 40px 0; /* Increased margin for more space */
 }
 
@@ -42,12 +68,12 @@
 /* Reuse and adapt .cta-button styles from earlier for contrast and visibility */
 .cta-button {
   display: inline-block; /* Allows margin to take effect */
-  margin: 10px auto; /* Center button with margin for spacing */
+  margin: 10px ; /* Center button with margin for spacing */
   width: auto; /* Adjust width based on content */
   padding: 15px 30px; /* Button padding */
   font-size: 16px; /* Button font size */
-  background-color: #007bff; /* Button background color */
-  color: #fff; /* Button text color */
+  background-color: white; /* Button background color */
+  color: black; /* Button text color */
   border-radius: 5px; /* Rounded corners for the button */
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }

@@ -27,18 +27,20 @@ export default function Home() {
       <Header />
       <div className="home-container">
         <div className="main-content">
-          <h2 className="sub-title">Unravel your Personalized Tapestry of Musical Taste</h2>
-          <Link 
+          <h2 className="sub-title">Unlock your True Musical Taste<br/>with <span className="gradient-text">AI</span></h2>
+          <h3 className="sub-text">Take a free test and receive a detailed analysis <br /> on your one-of-a-kind musical personality</h3>
+          <Link
             to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
             className="cta-button"
           >
-            Take Free Music Personality Test
+            Take Free Test
           </Link>
           {!isLoggedIn && (
             <Link to="/Signup" className="cta-button">
               Sign Up Now
             </Link>
           )}
+          <h2 className='sub-header'>Our Technology</h2>
         </div>
       </div>
     </div>
