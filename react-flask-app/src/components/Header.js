@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 import axios from 'axios';
-import full_logo from '../images/full_logo.png'
-import account_icon from '../images/account_circle_filled_white_24px.png'
+import fret_logo from '../images/fret_logo.png'
+import account_icon from '../images/account_icon.png'
 import menu_icon from '../images/menu_white_24px.png'
 
 import Sidebar from './Sidebar';
@@ -33,7 +33,7 @@ export default function Header() {
         <header className="header">
             <Link to="/">
             <img 
-                src={full_logo} 
+                src={fret_logo} 
                 alt="ODEUM" 
                 className="header--image"
             />
@@ -43,11 +43,6 @@ export default function Header() {
                 alt="account"
                 className="header--account--image"
                 onClick={toggleSidebar}
-            />
-            <img 
-                src={menu_icon} 
-                alt="menu"
-                className="header--menu--image"
             />
             <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} isLoggedIn={isLoggedIn}/>
         </header>
