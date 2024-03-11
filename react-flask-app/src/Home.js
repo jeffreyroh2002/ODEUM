@@ -33,14 +33,18 @@ export default function Home() {
             to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
             className="cta-button"
           >
-            Take Free Test
+            Take Test
           </Link>
           {!isLoggedIn && (
             <Link to="/Signup" className="cta-button">
-              Sign Up Now
+              Learn More
             </Link>
           )}
+          <h2 className='sub-header'>Image for Reference</h2>
+          <h2 className='sub-header'>text-text-text</h2>
           <h2 className='sub-header'>Our Technology</h2>
+          <h2 className='sub-header'>text-text-text</h2>
+
         </div>
       </div>
     </div>

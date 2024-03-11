@@ -4,7 +4,6 @@ import './Header.css';
 import axios from 'axios';
 import fret_logo from '../images/fret_logo.png'
 import account_icon from '../images/account_icon.png'
-import menu_icon from '../images/menu_white_24px.png'
 
 import Sidebar from './Sidebar';
 

@@ -69,15 +69,19 @@ body{
 .cta-button {
   display: inline-block; /* Allows margin to take effect */
   margin: 10px ; /* Center button with margin for spacing */
-  width: auto; /* Adjust width based on content */
+  width: 200px; /* Adjust width based on content */
+  vertical-align: middle;
   padding: 15px 30px; /* Button padding */
-  font-size: 16px; /* Button font size */
+  font-size: 20px; /* Button font size */
+  font-weight: 500;
+  display: inline-block;
   background-color: white; /* Button background color */
   color: black; /* Button text color */
-  border-radius: 5px; /* Rounded corners for the button */
+  border-radius: 10px; /* Rounded corners for the button */
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  margin-top: 30px;
 }
 
 .cta-button:hover {
-  background-color: #0056b3; /* Darker shade on hover for better interaction feedback */
+  background-color: #dbdbdb; /* Darker shade on hover for better interaction feedback */
 }
