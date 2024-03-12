@@ -45,11 +45,11 @@ body{
 /* Adjustments for a flexible layout */
 @media (max-width: 768px) {
   .home-container {
-      padding: 5vw 2vw; /* Adjust padding for mobile */
+      padding: 1vw 2vw; /* Adjust padding for mobile */
   }
 
   .main-content {
-      margin: 10vh auto; /* Adjust margin for mobile */
+      margin: 5vh auto; /* Adjust margin for mobile */
   }
 
   .sub-title {
