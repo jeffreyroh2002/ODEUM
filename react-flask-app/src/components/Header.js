@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
 import axios from 'axios';
-import fret_logo from '../images/fret_logo.png'
+import Vector from '../images/Vector.png'
 import account_icon from '../images/account_icon.png'
 
 import Sidebar from './Sidebar';
@@ -32,7 +32,7 @@ export default function Header() {
         <header className="header">
             <Link to="/">
             <img 
-                src={fret_logo} 
+                src={Vector} 
                 alt="ODEUM" 
                 className="header--image"
             />
