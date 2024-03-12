@@ -1,120 +1,93 @@
-/* Login.css or a separate CSS file for your form */
-
-
+/* Login.css */
 
 .signup-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-  }
-  
-  .signup-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
+}
+
+.signup-form {
+    max-width: 400px; /* Fixed width */
     width: 100%;
     text-align: center;
-  }
-  
-  .signup-form h2 {
-    margin-bottom: 20px;
+}
+
+.signup-form h2 {
+    margin-bottom: 20px; /* Fixed margin */
     color: #333;
-  }
-  
-  .signup-form form {
+}
+
+.signup-form form {
     display: flex;
     flex-direction: column;
-  }
-  
-  .signup-form .form-group {
-    margin-bottom: 15px; /* Keep space between form groups */
-    display: flex; /* Use flexbox for layout */
-    flex-direction: column; /* Stack elements vertically */
-    align-items: flex-start; /* Align items to the start of the flex container */
-  }
-  
-  .signup-form .form-group label {
-    margin-bottom: 5px; /* Add space below the label */
-    font-weight: bold; /* Optional: Makes label text bold */
-  }
-  
-  .signup-form input[type="text"],
-  .signup-form input[type="email"],
-  .signup-form input[type="password"] {
+}
+
+.signup-form .form-group {
+    margin-bottom: 15px; /* Fixed margin */
+}
+
+.signup-form .form-group label {
+    margin-bottom: 5px; /* Fixed margin */
+}
+
+.signup-form input[type="text"],
+.signup-form input[type="email"],
+.signup-form input[type="password"] {
     width: 100%; /* Ensure input fields take up the full container width */
-    padding: 10px; /* Padding inside input fields for better text visibility */
-    border: 1px solid #ccc; /* Border color */
-    border-radius: 4px; /* Rounded corners for input fields */
-    font-size: 16px; /* Text size within input fields */
-  }
-  
-  .signup-form button {
-    background-color: #007BFF;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-  }
-  
-  .signup-form button:hover {
-    background-color: #0056b3;
-  }
-  
-  .signup-form p {
-    margin-top: 20px;
-    font-size: 14px;
-  }
-  
-  /* Error message styling */
-  .error-messages {
+    padding: 10px; /* Fixed padding */
+    font-size: 16px; /* Fixed font size */
+}
+
+.signup-form button {
+    padding: 10px 20px; /* Fixed padding */
+    font-size: 16px; /* Fixed font size */
+}
+
+.signup-form p {
+    margin-top: 20px; /* Fixed margin */
+}
+
+.error-messages {
     color: #ff0000; /* Red color for error messages */
     text-align: left; /* Align error messages to the left */
-    margin-top: 5px; /* Add some margin on top of error messages */
-  }
-  
-  /* Adjust form-group style to accommodate error messages */
-  .signup-form .form-group {
-    margin-bottom: 15px;
-    position: relative; /* Position relative for absolute positioning of error messages */
-  }
-  
-  /* Position error messages below the input fields */
-  .signup-form .error-messages {
-    position: absolute;
-    bottom: -20px; /* Adjust the position to place error messages below input fields */
-    left: 0;
-  }
+    margin-top: 5px; /* Fixed margin */
+}
 
-  .signup-link {
-    margin-top: 20px;
+.signup-form .form-group {
+    margin-bottom: 15px; /* Fixed margin */
+    position: relative;
+}
+
+.signup-form .error-messages {
+    position: absolute;
+    bottom: -20px; /* Adjusted position to place error messages below input fields */
+    left: 0;
+}
+
+.signup-link {
+    margin-top: 20px; /* Fixed margin */
     text-align: center;
-  }
-  
-  .signup-link p {
+}
+
+.signup-link p {
     margin: 0;
     color: #666;
-    font-size: 0.9rem;
-  }
-  
-  .signup-link a {
+    font-size: 14px; /* Fixed font size */
+}
+
+.signup-link a {
     display: inline-block;
     margin-top: 5px;
     color: #007bff;
     font-weight: bold;
     text-decoration: none;
-    font-size: 1rem;
+    font-size: 16px; /* Fixed font size */
     transition: color 0.3s ease;
-  }
-  
-  .signup-link a:hover,
-  .signup-link a:focus {
+}
+
+.signup-link a:hover,
+.signup-link a:focus {
     color: #0056b3;
     text-decoration: underline;
-  }
-  
+}
