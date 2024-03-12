@@ -1,6 +1,11 @@
 /* Login.css */
 
+* {
+  color: white
+}
+
 .signup-container {
+   background-image: linear-gradient(black, rgb(2, 70, 75));
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,14 +13,16 @@
 }
 
 .signup-form {
-    max-width: 400px; /* Fixed width */
+    max-width: 500px; /* Fixed width */
     width: 100%;
     text-align: center;
+    background-color:transparent;
 }
 
 .signup-form h2 {
     margin-bottom: 20px; /* Fixed margin */
-    color: #333;
+    color: white;
+    font-size: 4vh;
 }
 
 .signup-form form {
@@ -40,8 +47,14 @@
 }
 
 .signup-form button {
-    padding: 10px 20px; /* Fixed padding */
-    font-size: 16px; /* Fixed font size */
+  background: linear-gradient(90deg, #ee446e, #baaaec, #0056b3); /* Gradient color */
+  color: white;
+  border: none;
+  border-radius: 20px; /* Rounded edges */
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* subtle shadow */
 }
 
 .signup-form p {
