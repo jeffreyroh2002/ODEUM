@@ -19,7 +19,7 @@ body{
   font-family: 'Outfit', sans-serif;
   font-weight: 600;
   line-height: 1.2;
-  font-size: 6vw; /* Adjusted font size for better visibility */
+  font-size: 5vw; /* Adjusted font size for better visibility */
   margin: 6vh 0; /* Adjusted margin for more space */
 }
 
@@ -33,12 +33,12 @@ body{
   margin-top: -3vh; /* Adjusted margin for better positioning */
   font-weight: 100;
   color: #999999;
-  font-size: 2vh; /* Adjusted font size for better visibility */
+  font-size: 3vh; /* Adjusted font size for better visibility */
 }
 
 .sub-header {
   font-family: 'Outfit', sans-serif;
-  font-size: 5vw; /* Adjusted font size for better visibility */
+  font-size: 3vw; /* Adjusted font size for better visibility */
   margin: 6vh 0; /* Adjusted margin for more space */
 }
 

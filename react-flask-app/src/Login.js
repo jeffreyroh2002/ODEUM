@@ -73,7 +73,7 @@ export default function Signup(){
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="remember-me-text">
               <label>
                 <input
                   type="checkbox"
@@ -83,7 +83,7 @@ export default function Signup(){
                 Remember Me
               </label>
             </div>
-            <button type="button" onClick={() => logInUser()} >Log in</button>
+            <button type="button" onClick={() => logInUser()} >Login</button>
             <div className="signup-link">
               <p>Don't have an account?</p>
               <Link to="/signup">Sign Up Now</Link>
