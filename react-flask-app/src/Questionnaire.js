@@ -42,17 +42,19 @@ export default function Questionnaire() {
     return (
         <div>
             <Header />
-            <div>{audioFilePath}</div>
-            <AudioPlayer 
-                key={audioFileId}
-                src={audioFilePath}
-                playIconPath = {playIcon}
-                pauseIconPath = {pauseIcon}
-            />
-            <Form 
-                audioFileId={audioFileId} 
-                testId={testId} 
-                onAudioFile={handleAudioFile}/>
+            <div className="questionnaire-container">
+                <div>{audioFilePath}</div>
+                <AudioPlayer 
+                    key={audioFileId}
+                    src={audioFilePath}
+                    playIconPath = {playIcon}
+                    pauseIconPath = {pauseIcon}
+                />
+                <Form 
+                    audioFileId={audioFileId} 
+                    testId={testId} 
+                    onAudioFile={handleAudioFile}/>
+            </div>
         </div>
     )
 }

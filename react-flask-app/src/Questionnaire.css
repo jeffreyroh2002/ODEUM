@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+.questionnaire-container{
+  background-color: black;
+}
+
 .line-with-text {
   position: relative;
   text-align: center;
@@ -22,7 +26,6 @@
   left: 50%;
   transform: translate(-50%, -50%);
   color: gray;
-  background-color: white; /* Adjust background color to match your background */
   padding: 0 10px; /* Add padding as needed */
 }
 
@@ -41,7 +44,6 @@
 .audio--player--container {
   align-items: center;
   height: 100px;
-  background: white;
   width: 100%;
   max-width: 480px; /* Adjust this to suit the width you want for phones */
   margin-left: auto;
@@ -121,7 +123,6 @@ input[type="radio"]{
   align-items: center;
   height: 100px;
   max-width: 480px;
-  background: white;
   margin-bottom: 30px;
   margin-left: auto;
   margin-right: auto;
@@ -168,3 +169,6 @@ input[type="radio"]{
   margin-left: auto;
   margin-right: 20px;
 }
+
+
+
