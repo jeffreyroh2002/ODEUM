@@ -41,56 +41,9 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
     });
   }, []);
 
-  const handleSelection = (category, value) => {
-    setSelections(prev => ({
-      ...prev,
-      [category]: prev[category] === value ? 0 : value, // Toggle selection
-    }));
-  };
-
-  const getImageStyle = (option) => {
-    const sizeMap = {
-      "-3": { width: "50px", height: "50px" },
-      "-2": { width: "40px", height: "40px" },
-      "-1": { width: "30px", height: "30px" },
-      "1": { width: "30px", height: "30px" },
-      "2": { width: "40px", height: "40px" },
-      "3": { width: "50px", height: "50px" },
-    };
-    return sizeMap[option.toString()] || { width: "30px", height: "30px" };
-  };
-
-  const getImage = (value, isSelected) => {
-    if (value <= 0) {
-      return isSelected ? filled_red_circle : empty_red_circle;
-    } else {
-      return isSelected ? filled_blue_circle : empty_blue_circle;
-    }
-  };
-
-  const renderOptions = (category, options) => {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {options.map(value => {
-          const isSelected = selections[category] === value;
-          return (
-            <button
-              key={value}
-              onClick={() => handleSelection(category, value)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <img src={getImage(value, isSelected)} alt={`Rating ${value}`}
-                   style={getImageStyle(value)} />
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
+  function handleSurveyButton(){
+    // handle function here
+  }
 
   function handlePrevButton(){
     const prevForm = '/get_prev_questions';
@@ -190,26 +143,14 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
     <div>
       <div className="rating-group">
         <h4 className="rating--label">Rate the Song.</h4>
-        {renderOptions('overallRating', [-3, -2, -1, 1, 2, 3])}
-      </div>
-
-      <div className="line-with-text">
-            <hr />
-            <div className="text">Optional Questions</div>
+        <div className="button--container">
+            <button onClick={handleSurveyButton}>Q1</button>
+            <button onClick={handleSurveyButton}>Q2</button>
+            <button onClick={handleSurveyButton}>Q3</button>
+            <button onClick={handleSurveyButton}>Q4</button>
+            <button onClick={handleSurveyButton}>Q5</button>
+            <button onClick={handleSurveyButton}>Q6</button>
         </div>
-        <p className="gray">**Leave field(s) as empty if unsure**</p>
-      
-      <div className="rating-group">
-        <h4 className="rating--label">What do you think of the 'Genre' of this song?</h4>
-        {renderOptions('genreRating', [-3, -2, -1, 1, 2, 3])}
-      </div>
-      <div className="rating-group">
-        <h4 className="rating--label">What do you think of the 'Mood' of this song?</h4>
-        {renderOptions('moodRating', [-3, -2, -1, 1, 2, 3])}
-      </div>
-      <div className="rating-group">
-        <h4 className="rating--label">What do you think of the 'Vocals' of this song?</h4>
-        {renderOptions('vocalRating', [-3, -2, -1, 1, 2, 3])}
       </div>
 
       <div className="button--container">

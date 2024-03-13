@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from "./components/Header"
-import new_audioplayer from './components/new_audioplayer';
+import AudioPlayer from './components/AudioPlayer';
 import Form from './components/Form';
 import './Questionnaire.css';
-import playIcon from './images/blob.png'
+import playIcon from './images/icons8-play-64.png'
 import pauseIcon from './images/icons8-pause-64.png'
 //import sample_audio from "./Audio/sample_audio.mp3"
 
@@ -43,8 +43,8 @@ export default function Questionnaire() {
         <div>
             <Header />
             <div className="questionnaire-container">
-                <div>Song {audioFileId}</div>
-                <new_audioplayer 
+                <div>{audioFilePath}</div>
+                <AudioPlayer 
                     key={audioFileId}
                     src={audioFilePath}
                     playIconPath = {playIcon}

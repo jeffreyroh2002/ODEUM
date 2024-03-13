@@ -4,7 +4,7 @@ import Header from "./components/Header"
 import AudioPlayer from './components/AudioPlayer';
 import Form from './components/Form';
 import './Questionnaire.css';
-import playIcon from './images/icons8-play-64.png'
+import playIcon from './images/blob.png'
 import pauseIcon from './images/icons8-pause-64.png'
 //import sample_audio from "./Audio/sample_audio.mp3"
 
@@ -43,7 +43,7 @@ export default function Questionnaire() {
         <div>
             <Header />
             <div className="questionnaire-container">
-                <div>{audioFilePath}</div>
+                <div>Song {audioFileId}</div>
                 <AudioPlayer 
                     key={audioFileId}
                     src={audioFilePath}
