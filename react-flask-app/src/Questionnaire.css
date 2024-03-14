@@ -2,41 +2,15 @@
   box-sizing: border-box;
 }
 
-.questionnaire-container{
+
+.questionnaire-container {
   background-color: black;
-}
-
-.line-with-text {
-  position: relative;
-  text-align: center;
-  max-width: 430px; /* Set the maximum width for the container */
-  margin: 0 auto; /* Center the container horizontally */
-  margin-top: 70px
-}
-
-.line-with-text hr {
-  border: none;
-  border-top: 1px solid gray; /* Customize the line's appearance */
-  margin: 0;
-}
-
-.line-with-text .text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: gray;
-  padding: 0 10px; /* Add padding as needed */
-}
-
-.gray {
-  display: flex;
-  margin-top: 30px;
-  color: gray;
-  justify-content: center;
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 0.9em;
+  padding: 20px; /* Add padding to the container */
+  box-sizing: border-box; /* Include padding in the total width/height */
+  width: 100%; /* Make sure the container spans the entire width */
+  overflow: auto; /* Add overflow auto to enable scrolling if content exceeds container height */
+  min-height: 100vh;
+  overflow-y: auto;
 }
 
 /* HANDLING HEADER */
@@ -65,54 +39,8 @@
   background: none;
 }
 
-.time-slider {
-  margin-right: 10px;
-  margin-left: 10px;
-}
 
 /* HANDLING RADIO ICONS FOR FORM */ 
-
-
-/* hide the default radio icon*/
-input[type="radio"]{
-  visibility: hidden;
-  height: 0;
-  width: 0;
-}
-
-/* Style for the selected state */
-.custom-radio-label input:checked + img {
-  border: 2px solid #007bff; /* Add a border for selected state */
-}
-
-.custom-radio-label {
-  display: flex;
-  padding: 5px; /* Adjust the padding as needed for spacing */
-  cursor: pointer; /* Make the label look clickable */
-  background-repeat: no-repeat; /* Prevent background image from repeating */
-}
-
-.custom-radio-label img {
-  width: 24px; /* Adjust the image width as needed */
-  height: 24px; /* Adjust the image height as needed */
-  margin-right: 5px; /* Adjust spacing between image and label text */
-}
-
-/* Style for the selected state */
-.custom-radio-label input:checked + img {
-  border: 2px solid #007bff; /* Add a border for selected state */
-}
-
-/* Style for the unselected state */
-.custom-radio-label input:not(:checked) + img {
-  border: 2px solid #ccc; /* Add a border for unselected state */
-}
-
-/* Hide the default radio input visually */
-.custom-radio-label input {
-  position: absolute;
-  left: -9999px;
-}
 
 
 /* Styling Form */
@@ -153,21 +81,6 @@ input[type="radio"]{
 .button--container{
   display: flex;
   flex-direction: row;
-}
-
-.prev--button {
-  border: none;
-  justify-content: center;
-  background: none;
-  margin-left: 20px;
-}
-
-.next--button {
-  border: none;
-  justify-content: center;
-  background: none;
-  margin-left: auto;
-  margin-right: 20px;
 }
 
 
