@@ -4,7 +4,7 @@ import Header from "./components/Header"
 import AudioPlayer from './components/AudioPlayer';
 import Form from './components/Form';
 import './Questionnaire.css';
-import playIcon from './images/blob.png'
+import playIcon from './images/icons8-play-64.png'
 import pauseIcon from './images/icons8-pause-64.png'
 //import sample_audio from "./Audio/sample_audio.mp3"
 
@@ -17,6 +17,7 @@ export default function Questionnaire() {
     const testId = searchParams.get('test_id');
 
     const [audioFilePath, setAudioFilePath] = useState('');
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
     useEffect(() => {
         console.log("testID in Q:", testId);
@@ -28,22 +29,35 @@ export default function Questionnaire() {
             setAudioFilePath(path);
         })
         .catch(error => console.error('Error fetching audio file info:', error));
-    }, [audioFileId, testType]);
+    }, [audioFileId, testType, testId]);
 
     useEffect(() => {
         navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`, { replace: true });
-    }, [audioFileId, testType, navigate]);
+    }, [audioFileId, testType, testId, navigate]);
 
-    const handleAudioFile = (AudioFileId) => {
-        console.log('Next audio file id:', AudioFileId);
-        setAudioFileId(AudioFileId);
+    const handleNextQuestion = () => {
+        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    };
+
+    const handlePrevQuestion = () => {
+        setCurrentQuestionIndex(prevIndex => prevIndex - 1);
+    };
+
+    const setQuestion = () => {
+        setCurrentQuestionIndex(prevIndex => prevIndex);
+    };
+
+    const handleAudioFile = (audioFileId) => {
+        console.log('Next audio file id:', audioFileId);
+        setAudioFileId(audioFileId);
+        setCurrentQuestionIndex(0); // Reset current question index when changing audio file
     };
 
     return (
         <div>
             <Header />
             <div className="questionnaire-container">
-                <div>Song {audioFileId}</div>
+                <div>{audioFilePath}</div>
                 <AudioPlayer 
                     key={audioFileId}
                     src={audioFilePath}
@@ -53,6 +67,10 @@ export default function Questionnaire() {
                 <Form 
                     audioFileId={audioFileId} 
                     testId={testId} 
+                    currentQuestionIndex={currentQuestionIndex}
+                    setQuestion = {setQuestion}
+                    onPrevQuestion={handlePrevQuestion}
+                    onNextQuestion={handleNextQuestion}
                     onAudioFile={handleAudioFile}/>
             </div>
         </div>
