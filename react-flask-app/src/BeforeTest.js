@@ -65,7 +65,7 @@ export default function App() {
                     가능한 추가질문에 답해주는 것이 도움이 됩니다.
                 </li>
             </ul>
-            <button className="next--button" onClick={() => navigateToQuestionnaire(audioFileId, testId)}>
+            <button className="start--button" onClick={() => navigateToQuestionnaire(audioFileId, testId)}>
                 <img src={next_button} alt="Next Button" />
             </button>
         </div>
