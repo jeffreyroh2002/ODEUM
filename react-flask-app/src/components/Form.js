@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import empty_blue_circle from "../images/empty-blue-circle.png";
-import empty_red_circle from "../images/empty-red-circle.png";
-import filled_blue_circle from "../images/filled-blue-circle.png";
-import filled_red_circle from "../images/filled-red-circle.png";
 import prev_button from "../images/prev_button.png"
 import next_button from "../images/next_button.png"
 
@@ -40,57 +36,6 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
       setCsrfToken(data.csrf_token);
     });
   }, []);
-
-  const handleSelection = (category, value) => {
-    setSelections(prev => ({
-      ...prev,
-      [category]: prev[category] === value ? 0 : value, // Toggle selection
-    }));
-  };
-
-  const getImageStyle = (option) => {
-    const sizeMap = {
-      "-3": { width: "50px", height: "50px" },
-      "-2": { width: "40px", height: "40px" },
-      "-1": { width: "30px", height: "30px" },
-      "1": { width: "30px", height: "30px" },
-      "2": { width: "40px", height: "40px" },
-      "3": { width: "50px", height: "50px" },
-    };
-    return sizeMap[option.toString()] || { width: "30px", height: "30px" };
-  };
-
-  const getImage = (value, isSelected) => {
-    if (value <= 0) {
-      return isSelected ? filled_red_circle : empty_red_circle;
-    } else {
-      return isSelected ? filled_blue_circle : empty_blue_circle;
-    }
-  };
-
-  const renderOptions = (category, options) => {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {options.map(value => {
-          const isSelected = selections[category] === value;
-          return (
-            <button
-              key={value}
-              onClick={() => handleSelection(category, value)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <img src={getImage(value, isSelected)} alt={`Rating ${value}`}
-                   style={getImageStyle(value)} />
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
 
   function handlePrevButton() {
     if (currentQuestionIndex > 0) {
@@ -205,6 +150,35 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
     }
   }
 
+  function handleOverallButton(rating){
+    setSelections({
+      ...selections,
+      overallRating: rating
+    });
+    handleNextButton()
+  }
+
+  function handleGenreButton(rating){
+    setSelections({
+      ...selections,
+      genreRating: rating
+    });
+    handleNextButton()
+  }
+  function handleMoodButton(rating){
+    setSelections({
+      ...selections,
+      moodRating: rating
+    });
+    handleNextButton()
+  }
+  function handleVocalButton(rating){
+    setSelections({
+      ...selections,
+      vocalRating: rating
+    });
+    handleNextButton()
+  }
 
   return (
     <div>
@@ -212,28 +186,48 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
       {currentQuestionIndex === 0 && (
         <div className="rating-group">
           <h4 className="rating--label">Rate the Song.</h4>
-          {renderOptions('overallRating', [-3, -2, -1, 1, 2, 3])}
+          <button onClick={() => handleOverallButton(3)}>could listen to it all day</button>
+          <button onClick={() => handleOverallButton(2)}>pretty decent</button>
+          <button onClick={() => handleOverallButton(1)}>could get used to it</button>
+          <button onClick={() => handleOverallButton(-1)}>would not play it myself</button>
+          <button onClick={() => handleOverallButton(-2)}>eh...</button>
+          <button onClick={() => handleOverallButton(-3)}>hate it with a passion</button>
         </div>
       )}
 
       {currentQuestionIndex === 1 && (
         <div className="rating-group">
           <h4 className="rating--label">What do you think of the 'Genre' of this song?</h4>
-          {renderOptions('genreRating', [-3, -2, -1, 1, 2, 3])}
+          <button onClick={() => handleGenreButton(3)}>Q2</button>
+          <button onClick={() => handleGenreButton(2)}>Q2</button>
+          <button onClick={() => handleGenreButton(1)}>Q2</button>
+          <button onClick={() => handleGenreButton(-1)}>Q2</button>
+          <button onClick={() => handleGenreButton(-2)}>Q2</button>
+          <button onClick={() => handleGenreButton(-3)}>Q2</button>
         </div>
       )}
 
       {currentQuestionIndex === 2 && (
         <div className="rating-group">
           <h4 className="rating--label">What do you think of the 'Mood' of this song?</h4>
-          {renderOptions('moodRating', [-3, -2, -1, 1, 2, 3])}
+          <button onClick={() => handleMoodButton(3)}>Q3</button>
+          <button onClick={() => handleMoodButton(2)}>Q3</button>
+          <button onClick={() => handleMoodButton(1)}>Q3</button>
+          <button onClick={() => handleMoodButton(-1)}>Q3</button>
+          <button onClick={() => handleMoodButton(-2)}>Q3</button>
+          <button onClick={() => handleMoodButton(-3)}>Q3</button>
         </div>
       )}
 
       {currentQuestionIndex === 3 && (
         <div className="rating-group">
           <h4 className="rating--label">What do you think of the 'Vocals' of this song?</h4>
-          {renderOptions('vocalRating', [-3, -2, -1, 1, 2, 3])}
+          <button onClick={() => handleVocalButton(3)}>Q4</button>
+          <button onClick={() => handleVocalButton(2)}>Q4</button>
+          <button onClick={() => handleVocalButton(1)}>Q4</button>
+          <button onClick={() => handleVocalButton(-1)}>Q4</button>
+          <button onClick={() => handleVocalButton(-2)}>Q4</button>
+          <button onClick={() => handleVocalButton(-3)}>Q4</button>
         </div>
       )}
 
