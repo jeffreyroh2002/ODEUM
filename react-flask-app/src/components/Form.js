@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import prev_button from "../images/prev_button.png"
 import next_button from "../images/next_button.png"
+import './Form.css';
 
 export default function Form({ audioFileId, testId, currentQuestionIndex, onAudioFile, setQuestion, onPrevQuestion, onNextQuestion }) {
   const navigate = useNavigate();
@@ -182,64 +183,64 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
 
   return (
     <div>
-      {/* Render questions based on currentQuestionIndex */}
-      {currentQuestionIndex === 0 && (
-        <div className="rating-group">
-          <h4 className="rating--label">Rate the Song.</h4>
-          <button onClick={() => handleOverallButton(3)}>could listen to it all day</button>
-          <button onClick={() => handleOverallButton(2)}>pretty decent</button>
-          <button onClick={() => handleOverallButton(1)}>could get used to it</button>
-          <button onClick={() => handleOverallButton(-1)}>would not play it myself</button>
-          <button onClick={() => handleOverallButton(-2)}>eh...</button>
-          <button onClick={() => handleOverallButton(-3)}>hate it with a passion</button>
-        </div>
-      )}
+      <div className="rating--container">
+        {/* Render questions based on currentQuestionIndex */}
+        {currentQuestionIndex === 0 && (
+          <div className="rating-group">
+            <h4 className="rating--label">Rate the Song.</h4>
+            <button className="rating--button" onClick={() => handleOverallButton(3)}>could listen to it all day</button>
+            <button className="rating--button" onClick={() => handleOverallButton(2)}>pretty decent</button>
+            <button className="rating--button" onClick={() => handleOverallButton(1)}>could get used to it</button>
+            <button className="rating--button" onClick={() => handleOverallButton(-1)}>would not play it myself</button>
+            <button className="rating--button" onClick={() => handleOverallButton(-2)}>eh...</button>
+            <button className="rating--button" onClick={() => handleOverallButton(-3)}>hate it with a passion</button>
+          </div>
+        )}
 
-      {currentQuestionIndex === 1 && (
-        <div className="rating-group">
-          <h4 className="rating--label">What do you think of the 'Genre' of this song?</h4>
-          <button onClick={() => handleGenreButton(3)}>Q2</button>
-          <button onClick={() => handleGenreButton(2)}>Q2</button>
-          <button onClick={() => handleGenreButton(1)}>Q2</button>
-          <button onClick={() => handleGenreButton(-1)}>Q2</button>
-          <button onClick={() => handleGenreButton(-2)}>Q2</button>
-          <button onClick={() => handleGenreButton(-3)}>Q2</button>
-        </div>
-      )}
+        {currentQuestionIndex === 1 && (
+          <div className="rating-group">
+            <h4 className="rating--label">What do you think of the 'Genre' of this song?</h4>
+            <button className="rating--button" onClick={() => handleGenreButton(3)}>Q2</button>
+            <button className="rating--button" onClick={() => handleGenreButton(2)}>Q2</button>
+            <button className="rating--button" onClick={() => handleGenreButton(1)}>Q2</button>
+            <button className="rating--button" onClick={() => handleGenreButton(-1)}>Q2</button>
+            <button className="rating--button" onClick={() => handleGenreButton(-2)}>Q2</button>
+            <button className="rating--button" onClick={() => handleGenreButton(-3)}>Q2</button>
+          </div>
+        )}
 
-      {currentQuestionIndex === 2 && (
-        <div className="rating-group">
-          <h4 className="rating--label">What do you think of the 'Mood' of this song?</h4>
-          <button onClick={() => handleMoodButton(3)}>Q3</button>
-          <button onClick={() => handleMoodButton(2)}>Q3</button>
-          <button onClick={() => handleMoodButton(1)}>Q3</button>
-          <button onClick={() => handleMoodButton(-1)}>Q3</button>
-          <button onClick={() => handleMoodButton(-2)}>Q3</button>
-          <button onClick={() => handleMoodButton(-3)}>Q3</button>
-        </div>
-      )}
+        {currentQuestionIndex === 2 && (
+          <div className="rating-group">
+            <h4 className="rating--label">What do you think of the 'Mood' of this song?</h4>
+            <button className="rating--button" onClick={() => handleMoodButton(3)}>Q3</button>
+            <button className="rating--button" onClick={() => handleMoodButton(2)}>Q3</button>
+            <button className="rating--button" onClick={() => handleMoodButton(1)}>Q3</button>
+            <button className="rating--button" onClick={() => handleMoodButton(-1)}>Q3</button>
+            <button className="rating--button" onClick={() => handleMoodButton(-2)}>Q3</button>
+            <button className="rating--button" onClick={() => handleMoodButton(-3)}>Q3</button>
+          </div>
+        )}
 
-      {currentQuestionIndex === 3 && (
-        <div className="rating-group">
-          <h4 className="rating--label">What do you think of the 'Vocals' of this song?</h4>
-          <button onClick={() => handleVocalButton(3)}>Q4</button>
-          <button onClick={() => handleVocalButton(2)}>Q4</button>
-          <button onClick={() => handleVocalButton(1)}>Q4</button>
-          <button onClick={() => handleVocalButton(-1)}>Q4</button>
-          <button onClick={() => handleVocalButton(-2)}>Q4</button>
-          <button onClick={() => handleVocalButton(-3)}>Q4</button>
-        </div>
-      )}
-
-      <div className="button--container">
-        <button className="prev--button" onClick={handlePrevButton}>
-          <img src={prev_button} alt="Previous Button" />
-        </button>
-
-        <button className="next--button" onClick={handleNextButton}>
-          <img src={next_button} alt="Next Button" />
-        </button>
+        {currentQuestionIndex === 3 && (
+          <div className="rating-group">
+            <h4 className="rating--label">What do you think of the 'Vocals' of this song?</h4>
+            <button className="rating--button" onClick={() => handleVocalButton(3)}>Q4</button>
+            <button className="rating--button" onClick={() => handleVocalButton(2)}>Q4</button>
+            <button className="rating--button" onClick={() => handleVocalButton(1)}>Q4</button>
+            <button className="rating--button" onClick={() => handleVocalButton(-1)}>Q4</button>
+            <button className="rating--button" onClick={() => handleVocalButton(-2)}>Q4</button>
+            <button className="rating--button" onClick={() => handleVocalButton(-3)}>Q4</button>
+          </div>
+        )}
       </div>
+      
+      <button className="prev--button" onClick={handlePrevButton}>
+        Previous Button
+      </button>
+
+      <button className="next--button" onClick={handleNextButton}>
+        Next Button
+      </button>
 
     </div>
   );
