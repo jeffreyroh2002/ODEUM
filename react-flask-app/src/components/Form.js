@@ -188,48 +188,51 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
         {currentQuestionIndex === 0 && (
           <div className="rating-group">
             <h4 className="rating--label">Rate the Song.</h4>
-            <button className="rating--button" onClick={() => handleOverallButton(3)}>could listen to it all day</button>
+            <button className="rating--button" onClick={() => handleOverallButton(3)}>could listen to it all day &#128293;</button>
             <button className="rating--button" onClick={() => handleOverallButton(2)}>pretty decent</button>
             <button className="rating--button" onClick={() => handleOverallButton(1)}>could get used to it</button>
             <button className="rating--button" onClick={() => handleOverallButton(-1)}>would not play it myself</button>
             <button className="rating--button" onClick={() => handleOverallButton(-2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleOverallButton(-3)}>hate it with a passion</button>
+            <button className="rating--button" onClick={() => handleOverallButton(-3)}>hate it with a passion &#128556;</button>
           </div>
         )}
 
         {currentQuestionIndex === 1 && (
           <div className="rating-group">
-            <h4 className="rating--label">What do you think of the 'Genre' of this song?</h4>
-            <button className="rating--button" onClick={() => handleGenreButton(3)}>Q2</button>
-            <button className="rating--button" onClick={() => handleGenreButton(2)}>Q2</button>
-            <button className="rating--button" onClick={() => handleGenreButton(1)}>Q2</button>
-            <button className="rating--button" onClick={() => handleGenreButton(-1)}>Q2</button>
-            <button className="rating--button" onClick={() => handleGenreButton(-2)}>Q2</button>
-            <button className="rating--button" onClick={() => handleGenreButton(-3)}>Q2</button>
+            <h4 className="rating--label">How is the Genre?</h4>
+            <button className="rating--button" onClick={() => handleGenreButton(3)}>Fire</button>
+            <button className="rating--button" onClick={() => handleGenreButton(2)}>Decent</button>
+            <button className="rating--button" onClick={() => handleGenreButton(1)}>Not bad</button>
+            <button className="rating--button" onClick={() => handleGenreButton(-1)}>Would not play it myself</button>
+            <button className="rating--button" onClick={() => handleGenreButton(-2)}>eh...</button>
+            <button className="rating--button" onClick={() => handleGenreButton(-3)}>Hate it</button>
+            <button className="rating--button" onClick={() => handleGenreButton(0)}>Not sure &#x1f937;</button>
           </div>
         )}
 
         {currentQuestionIndex === 2 && (
           <div className="rating-group">
-            <h4 className="rating--label">What do you think of the 'Mood' of this song?</h4>
-            <button className="rating--button" onClick={() => handleMoodButton(3)}>Q3</button>
-            <button className="rating--button" onClick={() => handleMoodButton(2)}>Q3</button>
-            <button className="rating--button" onClick={() => handleMoodButton(1)}>Q3</button>
-            <button className="rating--button" onClick={() => handleMoodButton(-1)}>Q3</button>
-            <button className="rating--button" onClick={() => handleMoodButton(-2)}>Q3</button>
-            <button className="rating--button" onClick={() => handleMoodButton(-3)}>Q3</button>
+            <h4 className="rating--label">Describe the vibe or feeling of this song.</h4>
+            <button className="rating--button" onClick={() => handleMoodButton(3)}>Fire</button>
+            <button className="rating--button" onClick={() => handleMoodButton(2)}>Decent</button>
+            <button className="rating--button" onClick={() => handleMoodButton(1)}>Not bad</button>
+            <button className="rating--button" onClick={() => handleMoodButton(-1)}>Would not play it myself</button>
+            <button className="rating--button" onClick={() => handleMoodButton(-2)}>eh...</button>
+            <button className="rating--button" onClick={() => handleMoodButton(-3)}>Hate it </button>
+            <button className="rating--button" onClick={() => handleMoodButton(0)}>Not sure &#x1f937;</button>
           </div>
         )}
 
         {currentQuestionIndex === 3 && (
           <div className="rating-group">
-            <h4 className="rating--label">What do you think of the 'Vocals' of this song?</h4>
-            <button className="rating--button" onClick={() => handleVocalButton(3)}>Q4</button>
-            <button className="rating--button" onClick={() => handleVocalButton(2)}>Q4</button>
-            <button className="rating--button" onClick={() => handleVocalButton(1)}>Q4</button>
-            <button className="rating--button" onClick={() => handleVocalButton(-1)}>Q4</button>
-            <button className="rating--button" onClick={() => handleVocalButton(-2)}>Q4</button>
-            <button className="rating--button" onClick={() => handleVocalButton(-3)}>Q4</button>
+            <h4 className="rating--label">Thoughts on the vocals?</h4>
+            <button className="rating--button" onClick={() => handleVocalButton(3)}>Fire</button>
+            <button className="rating--button" onClick={() => handleVocalButton(2)}>Decent</button>
+            <button className="rating--button" onClick={() => handleVocalButton(1)}>Not bad</button>
+            <button className="rating--button" onClick={() => handleVocalButton(-1)}>Would not play it myself</button>
+            <button className="rating--button" onClick={() => handleVocalButton(-2)}>eh...</button>
+            <button className="rating--button" onClick={() => handleVocalButton(-3)}>Hate it</button>
+            <button className="rating--button" onClick={() => handleVocalButton(0)}>Not sure &#x1f937;</button>
           </div>
         )}
       </div>
