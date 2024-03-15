@@ -26,6 +26,14 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn }) {
           Close
         </button>
         <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          {isLoggedIn && (
+            <li>
+              <Link to="/Profile">My Profile</Link>
+            </li>
+          )}
           {!isLoggedIn ? (
             <li>
               <Link to="/login">Sign Up</Link>
@@ -35,14 +43,6 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn }) {
               <Link to="/" onClick={handleLogout}>Log Out</Link>
             </li>
           )}
-          {isLoggedIn && (
-            <li>
-              <Link to="/Profile">My Profile</Link>
-            </li>
-          )}
-          <li>
-            <Link to="/help">Help Center</Link>
-          </li>
         </ul>
         <Link 
             to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
