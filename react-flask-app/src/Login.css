@@ -5,7 +5,6 @@
 }
 
 .signup-container {
-    background-image: linear-gradient(black, rgb(2, 70, 75));
     display: flex;
     justify-content: center;
     align-items: center;
