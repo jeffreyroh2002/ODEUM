@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import prev_button from "../images/prev_button.png"
-import next_button from "../images/next_button.png"
 import './Form.css';
 
 export default function Form({ audioFileId, testId, currentQuestionIndex, onAudioFile, setQuestion, onPrevQuestion, onNextQuestion }) {
