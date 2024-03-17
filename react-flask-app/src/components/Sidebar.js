@@ -42,26 +42,31 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn, onLogout}) {
         </button>
         <ul>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/" className="sidebar-button">Home</Link>
           </li>
           {isLoggedIn && (
             <li>
-              <Link to="/Profile">My Profile</Link>
+              <Link to="/Profile" className="sidebar-button">My Profile</Link>
             </li>
           )}
           {!isLoggedIn ? (
-            <li>
-              <Link to="/login">Sign Up</Link>
-            </li>
+            <>
+              <li>
+                <Link to="/Login" className="sidebar-button">Login</Link>
+              </li>
+              <li>
+                <Link to="/Signup" className="sidebar-button">Sign Up</Link>
+              </li>
+            </>
           ) : (
             <li>
-              <Link to="/" onClick={handleLogout}>Log Out</Link>
+              <Link to="/" className="sidebar-button" onClick={handleLogout}>Log Out</Link>
             </li>
           )}
         </ul>
         <Link 
             to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
-            className="cta-button"
+            className="sidebar-button"
           >
             Get Free Test
         </Link>

@@ -22,65 +22,6 @@
     margin-right: 1vh;
 }
 
-.sidebar {
-    position: fixed;
-    top: 0;
-    right: -30vw; /* Adjusted to 30% of the viewport width */
-    width: 30vw; /* Adjusted to 30% of the viewport width */
-    height: 100vh; /* Adjusted to 100% of the viewport height */
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-    transition: right 0.3s ease-in-out;
-    z-index: 1000; /* Ensure it's on top of other content */
-}
-  
-.sidebar.open {
-    right: 0; /* Slide it into view */
-}
-  
-.sidebar-content {
-    padding: 2vh; /* Adjusted to 2% of the viewport height */
-    color: white;
-}
-  
-.close-button {
-    background-color: transparent;
-    border: none;
-    color: white;
-    font-size: 2vh; /* Adjusted to 2% of the viewport height */
-    position: absolute;
-    top: 1vh; /* Adjusted to 1% of the viewport height */
-    right: 1vw; /* Adjusted to 1% of the viewport width */
-    cursor: pointer;
-}
-  
-.close-button:focus {
-    outline: none;
-}
-  
-ul {
-    list-style: none;
-    padding: 0;
-}
-  
-li {
-    margin-bottom: 2vh; /* Adjusted to 2% of the viewport height */
-}
-  
-.cta-button {
-    display: block;
-    padding: 1vh 2vw; /* Adjusted to 1% of the viewport height and 2% of the viewport width */
-    background-color: #007bff;
-    color: white;
-    text-decoration: none;
-    text-align: center;
-    border-radius: 0.5vw; /* Adjusted to 0.5% of the viewport width */
-    transition: background-color 0.3s ease;
-}
-  
-.cta-button:hover {
-    background-color: #0056b3;
-}
-
 @media (max-width: 768px) {
     .header {
         height: 8vh; /* Adjusted for mobile */

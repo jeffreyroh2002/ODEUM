@@ -81,6 +81,7 @@ body{
   border-radius: 10px; /* Rounded corners for the button */
   transition: background-color 0.3s ease; /* Smooth transition for hover effect */
   margin-top: 6vh; /* Adjusted margin for mobile */
+  text-decoration: none;
 }
 
 .cta-button:hover {
