@@ -1,32 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.css';
-import axios from 'axios';
 import Vector from '../images/Vector.png'
 import account_icon from '../images/account_icon.png'
 
 import Sidebar from './Sidebar';
 
-export default function Header() {
-
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        // Fetch isLoggedIn status from backend when component mounts
-        axios.get('/isLoggedIn')
-        .then(response => {
-            setIsLoggedIn(response.data.isLoggedIn);
-        })
-        .catch(error => {
-            console.error('Error fetching isLoggedIn status:', error);
-        });
-    }, []);
+export default function Header({ isLoggedIn, onLogout }) {
 
     const [isSidebarOpen, setSidebarOpen] = React.useState(false);
 
     const toggleSidebar = () => {
         setSidebarOpen(!isSidebarOpen);
     };
+
+    const closeSidebar = () => {
+        setSidebarOpen(false);
+    };
+
+    const handleLogout = () => {
+        onLogout(); // Call the onLogout function passed from the parent component
+        closeSidebar(); // Close the sidebar after logout
+      };
+
 
     return (
         <header className="header">
@@ -43,33 +39,12 @@ export default function Header() {
                 className="header--account--image"
                 onClick={toggleSidebar}
             />
-            <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} isLoggedIn={isLoggedIn}/>
+            <Sidebar 
+                isOpen={isSidebarOpen} 
+                onClose={toggleSidebar} 
+                isLoggedIn={isLoggedIn}
+                onLogout={handleLogout}
+                />
         </header>
     );
 }
-
-/* Nav items for later
-                <div className="nav-items">
-                    <Link to="/about" className="nav-link">About</Link>
-                    <Link to="/services" className="nav-link">Services</Link>
-                    <Link to="/contact" className="nav-link">Contact</Link>
-                </div>
-*/
-
-/*  OLD HEADER
-        <header className="header">
-            <img 
-                src={logo} alt="ODEUM" 
-                className="header--image"
-                Link to="/"
-            />
-            <img
-                src={account_icon} alt="account"
-                className="header--account--image"
-            />
-            <img 
-                src={menu_icon} alt="menu"
-                className="header--menu--image"
-            />
-        </header>
-*/

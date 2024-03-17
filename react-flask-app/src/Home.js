@@ -20,11 +20,16 @@ export default function Home() {
       });
   }, []);
 
+  const handleLogout = () => {
+    // Perform logout logic, e.g., clear tokens, reset state, etc.
+    setIsLoggedIn(false); // Update the logged-in state to false
+  };
+
   
 
   return (
     <div>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
       <div className="home-container">
         <div className="main-content">
           <h2 className="sub-title">Unlock your True <br/> Musical Taste with <span className="gradient-text">AI</span></h2>
