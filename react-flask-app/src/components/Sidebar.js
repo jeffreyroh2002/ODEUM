@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './Sidebar.css';
 import axios from 'axios';
 
-export default function Sidebar({ isOpen, onClose, isLoggedIn }) {
+export default function Sidebar({ isOpen, onClose, isLoggedIn, onLogout}) {
   
   const sidebarStyle = isOpen ? "sidebar open" : "sidebar";
   
@@ -25,6 +25,8 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn }) {
       .then(response => {
         // Handle successful logout, such as redirecting to another page or updating state
         console.log("Logout successful");
+        onLogout(); // Notify the parent component about logout
+        onClose();
       })
       .catch(error => {
         // Handle error if logout fails
