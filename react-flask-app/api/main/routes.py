@@ -127,6 +127,7 @@ def login():
 @main.route('/logout', methods=["POST"])
 @login_required  # Require the user to be logged in to access this route
 def logout():
+    print("HELLOW WORLD!!!!")
     logout_user()
     return jsonify({"message": "Logout successful"})
 

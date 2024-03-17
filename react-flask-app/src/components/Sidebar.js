@@ -1,14 +1,27 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Sidebar.css';
 import axios from 'axios';
 
 export default function Sidebar({ isOpen, onClose, isLoggedIn }) {
+  
   const sidebarStyle = isOpen ? "sidebar open" : "sidebar";
+  
+  useEffect(() => {
+    axios.get('/csrf-token').then(response => {
+      setCsrfToken(response.data.csrf_token);
+    });
+  }, []);
+
+  const [csrfToken, setCsrfToken] = useState('');
 
   // Function to handle logout
   const handleLogout = () => {
-    axios.get('/logout')
+    axios.post('/logout', {}, {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken
+      }
+    })
       .then(response => {
         // Handle successful logout, such as redirecting to another page or updating state
         console.log("Logout successful");
