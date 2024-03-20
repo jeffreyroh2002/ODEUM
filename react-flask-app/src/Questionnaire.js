@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from "./components/Header"
 import AudioPlayer from './components/AudioPlayer';
 import Form from './components/Form';
+import AudioVisualizerSphere from './components/AudioVisualizerSphere'
 import './Questionnaire.css';
 import playIcon from './images/blob.png'
 import pauseIcon from './images/dark_blob.png'
@@ -63,6 +64,10 @@ export default function Questionnaire() {
                     src={audioFilePath}
                     playIconPath = {playIcon}
                     pauseIconPath = {pauseIcon}
+                />
+                <AudioVisualizerSphere className="play--pause--button"
+                    key={audioFileId}
+                    src={audioFilePath}
                 />
                 <Form 
                     audioFileId={audioFileId} 
