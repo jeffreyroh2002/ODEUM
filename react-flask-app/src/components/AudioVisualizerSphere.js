@@ -1,60 +1,94 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import * as THREE from 'three';
+import song from './Aimyon.wav_1.wav';
 
-const AudioVisualizerSphere = ({ src }) => {
-  const mountRef = useRef(null);
-  const audioRef = useRef(new Audio(src));
-  const playingRef = useRef(false);
+class AudioVisualizerSphere extends React.Component {
+  componentDidMount() {
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.renderer = new THREE.WebGLRenderer();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.mount.appendChild(this.renderer.domElement);
+    
+    // Camera setup
+    this.camera.position.z = 5;
+    
+    // Audio setup
+    const listener = new THREE.AudioListener();
+    this.camera.add(listener);
+    const sound = new THREE.Audio(listener);
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load(song, buffer => {
+      sound.setBuffer(buffer);
+      sound.setLoop(true);
+      sound.setVolume(0.5);
+    });
+    this.sound = sound;
+    this.analyser = new THREE.AudioAnalyser(sound, 32);
 
-  useEffect(() => {
-    // Update src when changed
-    audioRef.current.src = src;
-  }, [src]);
+    // Sphere setup
+    this.createVisualizer();
 
-  useEffect(() => {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    mountRef.current.appendChild(renderer.domElement);
+    // Animation loop
+    this.animate();
 
-    // Sphere
-    const geometry = new THREE.SphereGeometry(3, 32, 32);
+    // Event listeners
+    window.addEventListener('resize', this.onWindowResize, false);
+    this.mount.addEventListener('click', this.onClick, false);
+  }
+
+  createVisualizer = () => {
+    const geometry = new THREE.SphereGeometry(1, 32, 32);
     const material = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
-    const sphere = new THREE.Mesh(geometry, material);
-    scene.add(sphere);
+    this.sphere = new THREE.Mesh(geometry, material);
+    this.scene.add(this.sphere);
+  };
 
-    camera.position.z = 15;
+  animate = () => {
+    requestAnimationFrame(this.animate);
+    this.renderer.render(this.scene, this.camera);
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      sphere.rotation.x += 0.001;
-      sphere.rotation.y += 0.001;
-      renderer.render(scene, camera);
-    };
-    animate();
+    if (this.analyser) {
+      const data = this.analyser.getAverageFrequency();
+      // Use the frequency data to modify the sphere (e.g., scale, color)
+      const scale = Math.max(1, data / 80); // Increase divisor for less sensitivity
+      this.sphere.scale.set(scale, scale, scale);
+    }
+  };
 
-    // Event listener for click to toggle audio play/pause
-    const togglePlayPause = () => {
-      if (playingRef.current) {
-        audioRef.current.pause();
+  onClick = () => {
+    if (this.sound.isPlaying) {
+      this.sound.pause();
+    } else {
+      // Check if context needs to be resumed (it might be suspended on first user interaction)
+      if (this.sound.context.state === 'suspended') {
+        this.sound.context.resume().then(() => {
+          this.sound.play();
+        });
       } else {
-        audioRef.current.play();
+        this.sound.play();
       }
-      playingRef.current = !playingRef.current;
-    };
+    }
+  };
 
-    renderer.domElement.addEventListener('click', togglePlayPause);
+  onWindowResize = () => {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  };
 
-    // Clean up
-    return () => {
-      mountRef.current.removeChild(renderer.domElement);
-      renderer.domElement.removeEventListener('click', togglePlayPause);
-      audioRef.current.pause(); // Ensure audio is stopped
-    };
-  }, [src]); // Rerender only if the src prop changes
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onWindowResize);
+    this.mount.removeEventListener('click', this.onClick);
+    if (this.sound.isPlaying) {
+      this.sound.stop();
+    }
+    this.mount.removeChild(this.renderer.domElement);
+  }
 
-  return <div ref={mountRef} />;
-};
+  render() {
+    return <div ref={ref => (this.mount = ref)} style={{ width: '100%', height: '100%' }}></div>;
+  }
+}
 
 export default AudioVisualizerSphere;
