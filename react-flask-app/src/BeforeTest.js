@@ -13,17 +13,12 @@ export default function App() {
         fetch(`/before_test_info`)
         .then(res => res.json())
         .then(data => {
+            console.log("asdfasdf");
             setAudioFileId(data.audio_file_id);
             setTestId(data.test_id)
         })
         .catch(error => console.error('Error fetching audio file info:', error));
     }, []); 
-
-    useEffect(() => {
-        // Action to be performed when audioFileId or testId changes
-        console.log("Updated audioFileId:", audioFileId);
-        console.log("Updated testId:", testId);
-    }, [audioFileId, testId]);
 
     const navigate = useNavigate();
 
@@ -32,7 +27,7 @@ export default function App() {
         const testType = 1;
         console.log("Next audioFileId:",audioFileId)
         console.log("passing test Id:", testId)
-        navigate(`/Questionnaire?audio_file_id=${1}&test_type=${testType}&test_id=${testId}`);
+        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`);
         // This works for now, but it fails to dynamically update based on
         // how many questions user already answered. ideally use audioFileId
         // instead of 1 but it doesn't seem to work

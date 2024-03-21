@@ -17,10 +17,9 @@ export default function Questionnaire() {
     const testId = searchParams.get('test_id');
 
     const [audioFilePath, setAudioFilePath] = useState('');
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [questionIndex, setQuestionIndex] = useState(1);
 
     useEffect(() => {
-        console.log("testID in Q:", testId);
         const queryParams = new URLSearchParams({ audio_file_id: audioFileId, test_type: testType, test_id: testId }).toString();
         fetch(`/get_next_questions?${queryParams}`)
         .then(res => res.json())
@@ -36,21 +35,11 @@ export default function Questionnaire() {
     }, [audioFileId, testType, testId, navigate]);
 
     const handleNextQuestion = () => {
-        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+        setQuestionIndex(prevIndex => prevIndex + 1);
     };
 
     const handlePrevQuestion = () => {
-        setCurrentQuestionIndex(prevIndex => prevIndex - 1);
-    };
-
-    const setQuestion = () => {
-        setCurrentQuestionIndex(prevIndex => prevIndex);
-    };
-
-    const handleAudioFile = (audioFileId) => {
-        console.log('Next audio file id:', audioFileId);
-        setAudioFileId(audioFileId);
-        setCurrentQuestionIndex(0); // Reset current question index when changing audio file
+        setQuestionIndex(prevIndex => prevIndex - 1);
     };
 
     return (
@@ -65,13 +54,10 @@ export default function Questionnaire() {
                     pauseIconPath = {pauseIcon}
                 />
                 <Form 
-                    audioFileId={audioFileId} 
                     testId={testId} 
-                    currentQuestionIndex={currentQuestionIndex}
-                    setQuestion = {setQuestion}
+                    questionIndex={questionIndex}
                     onPrevQuestion={handlePrevQuestion}
-                    onNextQuestion={handleNextQuestion}
-                    onAudioFile={handleAudioFile}/>
+                    onNextQuestion={handleNextQuestion}/>
             </div>
         </div>
     )

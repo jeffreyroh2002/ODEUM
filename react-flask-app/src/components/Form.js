@@ -2,30 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Form.css';
 
-export default function Form({ audioFileId, testId, currentQuestionIndex, onAudioFile, setQuestion, onPrevQuestion, onNextQuestion }) {
+export default function Form({ testId, questionIndex, onPrevQuestion, onNextQuestion }) {
   const navigate = useNavigate();
-  const [selections, setSelections] = useState({
-    overallRating: null,
-    genreRating: 0,
-    moodRating: 0,
-    vocalRating: 0,
-  });
-
   const [csrfToken, setCsrfToken] = useState('');
+  const [selection, setSelection] = useState(0);
+  const [type, setType] = useState('');
+  const NUM_AUDIOS = 3;
+  const ANSWERS_PER_AUDIO = 4;
+  const EXTRA_ANSWERS = 0;
+  const NUM_ANSWERS = NUM_AUDIOS * ANSWERS_PER_AUDIO + EXTRA_ANSWERS;
 
-
-  useEffect(() => {
-    console.log('Audio file id in Form:', audioFileId);
-  }, [audioFileId]);
-
-  useEffect(() => {
-    console.log('testId in Form:', testId);
-  }, [testId]);
-
-  useEffect(() => {
-    console.log('selections', selections);
-  }, [selections]);
-
+  const audioFileId = Math.ceil(questionIndex / 4);
 
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
   useEffect(() => {
@@ -37,153 +24,65 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
   }, []);
 
   function handlePrevButton() {
-    if (currentQuestionIndex > 0) {
-      // If currentQuestionIndex is greater than 0, go to the previous question
-      onPrevQuestion();
-    } else {
-      // If currentQuestionIndex is 0, fetch the previous audio file
-      const prevForm = '/get_prev_questions';
-      fetch(prevForm, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({
-          audio_id: audioFileId, 
-          test_id: testId,
-        }),
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.status === 'send_to_before_test') {
-          // If the server response indicates to navigate to the BeforeTest page, do so
-          navigate('/BeforeTest');
-        } 
-        else {
-          const prevAudioFileId = data.prev_audio_file_id; // Extract next audio file id from server response
-          console.log("prev audio file id: ", prevAudioFileId)
-          if (prevAudioFileId) {
-            // Load new audio file
-            onAudioFile(prevAudioFileId);
-            // Reset selections
-            setSelections({
-              overallRating: null,
-              genreRating: 0,
-              moodRating: 0,
-              vocalRating: 0,
-          });
-
-          setQuestion(3);
-          }
-        }
-      })
-      .catch(error => {
-        console.error('Error getting previous questions:', error);
-        alert('There was an error getting previous questions. Please try again.');
-      });
+    if (questionIndex === 0) {
+      
     }
-  }
-  
-  
+    else {
 
-  // submitting to the Flask backend
-  function handleNextButton() {
-    if (currentQuestionIndex < 3) {
-      onNextQuestion() // Go to next question
-    } else {
-      // All questions are answered, load new audio file or navigate to completion page
-      const submitUrl = '/submit_answer';
+    }
+  };
   
-      fetch(submitUrl, {
+  // submitting to the Flask backend
+  function handleNextButton(type, rating) {
+    if (questionIndex === NUM_ANSWERS) {
+      navigate(`TestCompleted?testId=${testId}`, { replace: true });
+    } else {
+      console.log("selection:", rating); // 변경된 부분: rating을 직접 사용
+      fetch('/submit_answer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken, // Assuming CSRF protection is enabled
         },
         body: JSON.stringify({
-          overall_rating: selections.overallRating,
-          genre_rating: selections.genreRating,
-          mood_rating: selections.moodRating,
-          vocal_timbre_rating: selections.vocalRating,
-          audio_id: audioFileId, 
           test_id: testId,
-        }),
+          audio_id: audioFileId,
+          type: type,
+          rating: rating // 변경된 부분: rating을 직접 사용
+        })
       })
       .then(response => {
+        console.log("here: ", rating); // 변경된 부분: rating을 직접 사용
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        return response.json();
-      })
-      .then(data => {
-        const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
-        const nextTestId = data.test_id;
-  
-        if (nextAudioFileId) {
-          // Load new audio file
-          onAudioFile(nextAudioFileId);
-          // Reset selections
-          setSelections({
-            overallRating: null,
-            genreRating: 0,
-            moodRating: 0,
-            vocalRating: 0,
-          });
-          // Reset question index to 0
-          setQuestion(0);
-        } else {
-          // Navigate to test completion page
-          navigate(`/TestCompleted?testId=${nextTestId}`, { replace: true });
-        }
-      })
-      .catch(error => {
-        console.error('Error submitting answers:', error);
-        alert('There was an error submitting your answers. Please try again.');
+        onNextQuestion();
       });
     }
   }
 
   function handleOverallButton(rating){
-    setSelections({
-      ...selections,
-      overallRating: rating
-    });
-    handleNextButton()
+    setSelection(rating);
+    handleNextButton('overall_rating', rating);
   }
-
   function handleGenreButton(rating){
-    setSelections({
-      ...selections,
-      genreRating: rating
-    });
-    handleNextButton()
+    setSelection(rating);
+    handleNextButton('genre_rating', rating)
   }
   function handleMoodButton(rating){
-    setSelections({
-      ...selections,
-      moodRating: rating
-    });
-    handleNextButton()
+    setSelection(rating);
+    handleNextButton('mood_rating', rating)
   }
   function handleVocalButton(rating){
-    setSelections({
-      ...selections,
-      vocalRating: rating
-    });
-    handleNextButton()
+    setSelection(rating);
+    handleNextButton('vocal_timbre_rating', rating)
   }
 
   return (
     <div>
       <div className="rating--container">
         {/* Render questions based on currentQuestionIndex */}
-        {currentQuestionIndex === 0 && (
+        {questionIndex % 4 === 1 && (
           <div className="rating-group">
             <h4 className="rating--label">Rate the Song.</h4>
             <button className="rating--button" onClick={() => handleOverallButton(3)}>could listen to it all day &#128293;</button>
@@ -195,7 +94,7 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
           </div>
         )}
 
-        {currentQuestionIndex === 1 && (
+        {questionIndex % 4 === 2 && (
           <div className="rating-group">
             <h4 className="rating--label">How is the Genre?</h4>
             <button className="rating--button" onClick={() => handleGenreButton(3)}>Fire</button>
@@ -208,7 +107,7 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
           </div>
         )}
 
-        {currentQuestionIndex === 2 && (
+        {questionIndex % 4 === 3 && (
           <div className="rating-group">
             <h4 className="rating--label">Describe the vibe or feeling of this song.</h4>
             <button className="rating--button" onClick={() => handleMoodButton(3)}>Fire</button>
@@ -221,7 +120,7 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
           </div>
         )}
 
-        {currentQuestionIndex === 3 && (
+        {questionIndex % 4 === 0 && (
           <div className="rating-group">
             <h4 className="rating--label">Thoughts on the vocals?</h4>
             <button className="rating--button" onClick={() => handleVocalButton(3)}>Fire</button>
