@@ -203,18 +203,20 @@ def submit_answer():
         print("TEST TEST TEST!:", test )
         return jsonify({'message': 'Test completed', 'next_audio_file_id': None, 'test_id': test.id})
     
+def check_empty_test(test_id):
+    answers = UserAnswer.query.filter_by(test_id=test_id).all()
+    for answer in answers:
+        if answer.overall_rating == None:
+            return True
+    return False
 
 @main.route('/before_test_info', methods=['GET'])
 @login_required
 def before_test_info():
-
     user = current_user
-    #test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+    num_audio = 3
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-    print(test)
-    # haven't taken this test before or need to start a new one
-    if not test or test.test_end_time:
-        print("CREATING NEW TEST NOW!")
+    if test == None or test.test_end_time:        
         test_val = Test(
             test_type = 1,
             test_start_time = datetime.now(),
@@ -222,52 +224,46 @@ def before_test_info():
         )
         db.session.add(test_val)
         db.session.commit()
+        is_new_test = True
         audio_file_id = 1
         audio_file = AudioFile.query.get_or_404(audio_file_id)
-
-        newTest = True
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-        print("new test id:", test.id)
-        print("IM ABOUT TO GO BACK TO FRONTEND")
-        print("audio_file", audio_file)
+
+        for audio_index in range(1, num_audio + 1):
+            tmp = UserAnswer(user_id=user.id, audio_id=audio_index, test_id=test.id)
+            print(tmp)
+            db.session.add(tmp)
+            db.session.commit()
+
         return jsonify({
                     'status': 'in_progress',
-                    'new_test': newTest,
+                    'new_test': is_new_test,
                     'audio_file_id': audio_file_id,
                     'audio_file_name': audio_file.audio_name,
                     'test_id': test.id
         })
-    
 
-    #need to continue ongoing test
     else:
-        print("BEFORE LAST answer:")
-        newTest = False
-        last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
+        print("There is an existing test info, loading")
+        is_new_test = False
+        last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.overall_rating == None).first() \
+                                    #   .order_by(UserAnswer.id).first()
+        print("Answer that is not completed: ", last_answer)
         if last_answer == None:
-            audio_file = AudioFile.query.get_or_404(1)
-            return jsonify({
+            audio_file_id = 1
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+        else:
+            audio_file_id = last_answer.audio_id
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+
+        return jsonify({
                     'status': 'in_progress',
-                    'new_test': newTest,
-                    'audio_file_id': audio_file.id,
+                    'new_test': is_new_test,
+                    'audio_file_id': audio_file_id,
                     'audio_file_name': audio_file.audio_name,
                     'test_id': test.id
         })
-        else:
-            print("last answer:", last_answer)
-            audio_file_id = last_answer.audio_id
-            print("audio_file_id:", audio_file_id)
-            audio_file = AudioFile.query.get_or_404(audio_file_id)
-            print("audio_file:", audio_file)
-            newTest = False
-            # print("new audio file id: ",audio_file_id)
-            return jsonify({
-                        'status': 'in_progress',
-                        'new_test': newTest,
-                        'audio_file_id': audio_file_id,
-                        'audio_file_name': audio_file.audio_name,
-                        'test_id': test.id
-            })
+
 
 @login_required
 @main.route('/get_next_questions', methods=["GET"])
