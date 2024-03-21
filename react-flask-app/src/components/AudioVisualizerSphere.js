@@ -1,6 +1,6 @@
 import React from 'react';
 import * as THREE from 'three';
-import song from './Aimyon.wav_1.wav';
+import song from './Aimyon.wav';
 
 class AudioVisualizerSphere extends React.Component {
   componentDidMount() {
