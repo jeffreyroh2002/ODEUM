@@ -387,7 +387,6 @@ def test_results():
     user = current_user
     print(user)
     test = Test.query.filter_by(id=test_id).first()
-    print(test)
     if test.subject != current_user: 
         return jsonify({'error': 'User does not match test owner'}), 403
 
@@ -401,258 +400,25 @@ def test_results():
     # High Rating song tracker
     high_rated_songs = []
 
-    test_answer = UserAnswer.query.filter_by(user=user).all()
-    print("test_answer", test_answer)
-
-    answers = UserAnswer.query.filter_by(test_id=test_id).all()
-    print ("answers:", answers)
-    for answer in answers:
-        audio = AudioFile.query.get(answer.audio_id)
-
-        #from audioFile model
-        genre_pred = audio.genre   #assuming audioFile is populated with scores using dictionaries with same keys
-        mood_pred = audio.mood
-        vocal_pred = audio.vocal
-
-        print("genre prediciton input:", genre_pred)
-        print("mood prediciton input:", mood_pred)
-
-        #from Questions Form
-        overall_rating = answer.overall_rating   # need to use this
-        genre_rating = answer.genre_rating
-        mood_rating = answer.mood_rating
-        vocal_rating = answer.vocal_timbre_rating
-
-        #Calculate overall score
-        #Calculate each genre score
-        genre_weighted = {}
-        if genre_pred and not isinstance(audio.genre, float):
-            genre_scores = audio.genre
-            try:
-                genre_data = json.loads(genre_scores)
-            except json.JSONDecodeError:
-                print("Error decoding genre_data JSON.")
-                return jsonify({'error: Error decoding genre_data JSON'}), 404 
-
-            #if user is not sure about the genre, calculate the genre_score based on overall rating
-            if genre_rating == 0:
-                for genre_name, proportion in genre_data.items():
-                    genre_weighted[genre_name] = proportion * overall_rating
-            
-            #in other case, calculate the genre_score based on (0.3 portion of overall_rating) and (0.7 portion of genre_rating)
-            else:
-                for genre_name, proportion in genre_data.items():
-                    genre_weighted[genre_name] = (proportion * overall_rating * 0.3) + (proportion * genre_rating * 0.7)
-
-            for genre in genre_weighted:
-                genre_score[genre] += genre_weighted[genre]
-
-        else:
-            print("Genre data is not available or is in an unexpected format.")
-            return jsonify({'error: Genre data is not available or is in an unexpected format'}), 404 
-
-        #Calculate each mood score
-        mood_weighted = {}
-        if mood_pred and not isinstance(audio.mood, float):
-            mood_scores = audio.mood
-            try:
-                mood_data = json.loads(mood_scores)
-            except json.JSONDecodeError:
-                print("Error decoding mood_data JSON.")
-                return jsonify({'error: Error decoding mood_data JSON'}), 404 
-
-            #if user is not sure about the mood, calculate the mood_score based on overall rating
-            if mood_rating == 0:
-                for mood_name, proportion in mood_data.items():
-                    mood_weighted[mood_name] = proportion * overall_rating
-            
-            #in other case, calculate the mood_score based on (0.3 portion of overall_rating) and (0.7 portion of mood_rating)
-            else:
-                for mood_name, proportion in mood_data.items():
-                    mood_weighted[mood_name] = (proportion * overall_rating * 0.3) + (proportion * mood_rating * 0.7)
-
-            for mood in mood_weighted:
-                mood_score[mood] += mood_weighted[mood]
-
-        else:
-            print("Mood data is not available or is in an unexpected format.")
-            return jsonify({'error: Mood data is not available or is in an unexpected format'}), 404 
-
-        #Calculate each vocal timbre score
-        vocal_weighted = {}
-        if vocal_pred and not isinstance(audio.vocal, float):
-            vocal_scores = audio.vocal
-            try:
-                vocal_data = json.loads(vocal_scores)
-            except json.JSONDecodeError:
-                print("Error decoding vocal_data JSON.")
-                return jsonify({'error: Error decoding vocal_data JSON'}), 404 
-
-            #if user is not sure about the vocal, calculate the vocal_score based on overall rating
-            if vocal_rating == 0:
-                for vocal_name, proportion in vocal_data.items():
-                    vocal_weighted[vocal_name] = proportion * overall_rating
-            
-            #in other case, calculate the vocal_score based on (0.3 portion of overall_rating) and (0.7 portion of vocal_rating)
-            else:
-                for vocal_name, proportion in vocal_data.items():
-                    vocal_weighted[vocal_name] = (proportion * overall_rating * 0.3) + (proportion * vocal_rating * 0.7)
-
-            for vocal in vocal_weighted:
-                vocal_score[vocal] += vocal_weighted[vocal]
-
-        else:
-            print("Vocal data is not available or is in an unexpected format.")
-            return jsonify({'error: Vocal data is not available or is in an unexpected format'}), 404 
-        
-    # store highly rated songs into high_rated songs list
-        if (overall_rating >= 2):
-            high_rated_songs.append(answer.audio_id)
-
-    # array of arrays to store each feature vector of highly rated songs
-    high_rated_feature_vectors = []
-    for high_rated_song in high_rated_songs:
-        audio = AudioFile.query.get(high_rated_song)
-        genre_data = json.loads(audio.genre)
-        mood_data = json.loads(audio.mood)
-        vocal_data = json.loads(audio.vocal)
-
-        # Flatten the dictionaries into a single array
-        feature_vector = list(genre_data.values()) + list(mood_data.values()) + list(vocal_data.values())
-
-        # Normalize the feature vector
-        normalized_vector = normalize([feature_vector])[0]
-        high_rated_feature_vectors.append(normalized_vector)
-
-    
-    ## ALGORITHM FOR CUSTOM BINNING HISTORGRAM ##
-
-    # Initialize a dictionary to store all values for each attribute
-    attribute_values = defaultdict(list)
-
-    # Collect values for each attribute across all high-rated songs
-    for vector in high_rated_feature_vectors:
-        for attr_index, value in enumerate(vector):
-            attribute_name = get_attribute_name(attr_index)
-            attribute_values[attribute_name].append(value)
-
-    # Determine the most populated range for each attribute
-    attribute_ranges = {}
-    range_size = 0.2  # Define the size of each range
-
-    for attr, values in attribute_values.items():
-        # Filter out values less than or equal to 0.2
-        filtered_values = [value for value in values if value > 0.2]
-
-        # Bin values into ranges starting from 0.2
-        bins = np.arange(0.2, 1 + range_size, range_size)
-        hist, bin_edges = np.histogram(filtered_values, bins=bins)
-
-        # Find the range with the maximum count
-        max_count_index = np.argmax(hist)
-        common_range = (bin_edges[max_count_index], bin_edges[max_count_index + 1])
-        
-        attribute_ranges[attr] = common_range
-
-
-    # Prepare the display message
-    display_messages.append("Most common ranges for attributes in your top-rated songs (excluding 0 to 0.2):")
-    for attr, common_range in attribute_ranges.items():
-        display_messages.append(f"- {attr}: Most Common Range {common_range}")
-
-
-    # PLOTTING DENSITY PLOT
-
-    # Initialize a dictionary to store all values for each attribute
-    attribute_values = defaultdict(list)
-
-    # Collect values for each attribute across all high-rated songs
-    for vector in high_rated_feature_vectors:
-        for attr_index, value in enumerate(vector):
-            attribute_name = get_attribute_name(attr_index)
-            if value > 0.2:  # Exclude values between 0.0 and 0.2
-                attribute_values[attribute_name].append(value)
-
-    # Define color palettes for each category
-    genre_colors = sns.color_palette('Set1', len(genre_score))
-    mood_colors = sns.color_palette('Set2', len(mood_score))
-    vocal_colors = sns.color_palette('Set3', len(vocal_score))
-
-    
-    # Create a combined density plot for each category
-
-    # Plot for Genres
-    plt.figure(figsize=(5, 3))
-    for (genre, _), color in zip(genre_score.items(), genre_colors):
-        sns.kdeplot(attribute_values[genre], label=genre, color=color, fill=True, bw_adjust=0.5)
-    plt.title('Density Plots for Genres', fontsize=14)
-    plt.xlabel('Attribute Values', fontsize=12)
-    plt.ylabel('Density', fontsize=12)
-    plt.legend()
-    plt.tight_layout()
-    # Save the first plot
-    genre_png = io.BytesIO()
-    plt.savefig(genre_png, format='png')
-    genre_png.seek(0)
-    genre_encoded = base64.b64encode(genre_png.getvalue()).decode('utf-8')
-    plt.close()
-
-    # Plot for Moods
-    plt.figure(figsize=(5, 3))
-    for (mood, _), color in zip(mood_score.items(), mood_colors):
-        sns.kdeplot(attribute_values[mood], label=mood, color=color, fill=True, bw_adjust=0.5)
-    plt.title('Density Plots for Moods', fontsize=14)
-    plt.xlabel('Attribute Values', fontsize=12)
-    plt.ylabel('Density', fontsize=12)
-    plt.legend()
-    plt.tight_layout()
-    # Save the second plot
-    mood_png = io.BytesIO()
-    plt.savefig(mood_png, format='png')
-    mood_png.seek(0)
-    mood_encoded = base64.b64encode(mood_png.getvalue()).decode('utf-8')
-    plt.close()
-
-    # Plot for Vocals
-    plt.figure(figsize=(5, 3))
-    for (vocal, _), color in zip(vocal_score.items(), vocal_colors):
-        sns.kdeplot(attribute_values[vocal], label=vocal, color=color, fill=True, bw_adjust=0.5)
-    plt.title('Density Plots for Vocals', fontsize=14)
-    plt.xlabel('Attribute Values', fontsize=12)
-    plt.ylabel('Density', fontsize=12)
-    plt.legend()
-    plt.tight_layout()
-    # Save the third plot
-    vocal_png = io.BytesIO()
-    plt.savefig(vocal_png, format='png')
-    vocal_png.seek(0)
-    vocal_encoded = base64.b64encode(vocal_png.getvalue()).decode('utf-8')
-    plt.close()
-
-    print("user.id:", user.id)
-    print("test.id:", test.id)
-    print("test_type:", test.test_type)
-    print("genre_score:", genre_score)
-    print("mood_score:", mood_score)
-    print("vocal_score:", vocal_score)
-    """
-    print("genre_encoded:", genre_encoded)
-    print("mood_encoded:", mood_encoded)
-    print("vocal_encoded:", vocal_encoded)
-    """
-    print("display_messages:", display_messages)
-
+    test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
+    for answer in test_answers:
+        if (answer):
+            audio = AudioFile.query.filter_by(id = answer.audio_id).first()
+            print("HELLO WORLD")
+            print("audio.id:", audio.id)
+            print("-----")
+            print("user's overall rating score", answer.overall_rating)
+            print("audio's genre:", audio.genre)
+            print("user's genre rating score", answer.genre_rating)
+            print("audio's mood:", audio.mood)
+            print("user's mood rating score", answer.mood_rating)
+            print("audio's vocal:", audio.vocal)
+            print("user's vocal rating score", answer.vocal_timbre_rating)
+            print("-----")
     # Pass the encoded images and other necessary information to the template
     response_data = {
         'user_id': user.id,
         'test_id': test.id,
         'test_type': test.test_type,
-        'genre_score': genre_score,
-        'mood_score': mood_score,
-        'vocal_score': vocal_score,
-        'genre_image': genre_encoded,
-        'mood_image': mood_encoded,
-        'vocal_image': vocal_encoded,
-        'display_messages': display_messages
     }
     return jsonify(response_data)
