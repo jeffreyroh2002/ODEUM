@@ -401,11 +401,14 @@ def test_results():
     high_rated_songs = []
 
     test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
+    for a in test_answers:
+        print("test_answers:", a.audio_id)
     for answer in test_answers:
-        if (answer):
+        if (answer and answer.audio_id):
             audio = AudioFile.query.filter_by(id = answer.audio_id).first()
             print("HELLO WORLD")
             print("audio.id:", audio.id)
+            print("answer.audio_id:", answer.audio_id)
             print("-----")
             print("user's overall rating score", answer.overall_rating)
             print("audio's genre:", audio.genre)
