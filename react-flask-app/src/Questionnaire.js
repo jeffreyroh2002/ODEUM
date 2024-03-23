@@ -24,9 +24,7 @@ export default function Questionnaire() {
     const testId = parseInt(searchParams.get('test_id'));
 
     const [questionIndex, setQuestionIndex] = useState(4 * currentAudioFileId - 3);
-    console.log("questionIndex:", questionIndex);
     const [audioFilePath, setAudioFilePath] = useState(audioFiles[currentAudioFileId - 1]);
-    console.log("audioFilePath: ", audioFilePath);
 
 
     useEffect(() => {
@@ -36,23 +34,22 @@ export default function Questionnaire() {
     }, [questionIndex])
 
     useEffect(() => {
-        console.log("a")
         setAudioFilePath(audioFiles[audioFileId - 1])
     }, [audioFileId])
 
     useEffect(() => {
-        console.log("b")
         if (currentAudioFileId !== audioFileId) {
             navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`)
         }
     }, [audioFilePath])
 
     const handleNextQuestion = () => {
-        setQuestionIndex(prevIndex => prevIndex + 1);
+        if (questionIndex === 12) navigate(`/TestCompleted?testId=${testId}`, { replace: true });
+        else setQuestionIndex(prevIndex => prevIndex + 1);
     };
 
     const handlePrevQuestion = () => {
-        setQuestionIndex(prevIndex => prevIndex - 1);
+        if (questionIndex !== 1) setQuestionIndex(prevIndex => prevIndex - 1);
     };
 
     return (

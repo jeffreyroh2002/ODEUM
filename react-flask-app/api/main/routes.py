@@ -204,37 +204,24 @@ def before_test_info():
             db.session.add(tmp)
             db.session.commit()
 
-        return jsonify({
-                    'status': 'in_progress',
-                    'new_test': is_new_test,
-                    'audio_file_id': audio_file_id,
-                    'audio_file_name': audio_file.audio_name,
-                    'test_id': test.id
-        })
-
     else:
         is_new_test = False
-        print("test id: ", test.id)
         last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.overall_rating != None) \
                                       .order_by(UserAnswer.audio_id.desc()).first()
         if last_answer == None:
-            print("no last answer!!!!")
             audio_file_id = 1
             audio_file = AudioFile.query.get_or_404(audio_file_id)
         else:
-            print(last_answer)
             audio_file_id = last_answer.audio_id
-            print(audio_file_id)
             audio_file = AudioFile.query.get_or_404(audio_file_id)
-            print(audio_file)
-
-        return jsonify({
-                    'status': 'in_progress',
-                    'new_test': is_new_test,
-                    'audio_file_id': audio_file_id,
-                    'audio_file_name': audio_file.audio_name,
-                    'test_id': test.id
-        })
+    
+    return jsonify({
+                'status': 'in_progress',
+                'new_test': is_new_test,
+                'audio_file_id': audio_file_id,
+                'audio_file_name': audio_file.audio_name,
+                'test_id': test.id
+    })
 
 
 @login_required
