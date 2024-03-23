@@ -12,27 +12,40 @@ export default function Questionnaire() {
     const location = useLocation();
     const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
-    const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
-    const testType = searchParams.get('test_type');
-    const testId = searchParams.get('test_id');
+    const audioFiles = [
+        `static/audio_files/Aimyon.wav_1.wav`,
+        `static/audio_files/FKJ_something.wav_2.wav`,
+        `static/audio_files/KendrickLamar.wav_3.wav`,
+    ]
 
-    const [audioFilePath, setAudioFilePath] = useState('');
-    const [questionIndex, setQuestionIndex] = useState(1);
+    const [audioFileId, setAudioFileId] = useState(1);
+    const currentAudioFileId = parseInt(searchParams.get('audio_file_id'));
+    const testType = parseInt(searchParams.get('test_type'));
+    const testId = parseInt(searchParams.get('test_id'));
+
+    const [questionIndex, setQuestionIndex] = useState(4 * currentAudioFileId - 3);
+    console.log("questionIndex:", questionIndex);
+    const [audioFilePath, setAudioFilePath] = useState(audioFiles[currentAudioFileId - 1]);
+    console.log("audioFilePath: ", audioFilePath);
+
 
     useEffect(() => {
-        const queryParams = new URLSearchParams({ audio_file_id: audioFileId, test_type: testType, test_id: testId }).toString();
-        fetch(`/get_next_questions?${queryParams}`)
-        .then(res => res.json())
-        .then(data => {
-            const path = `/static/audio_files/${data.audio_file_name}`;
-            setAudioFilePath(path);
-        })
-        .catch(error => console.error('Error fetching audio file info:', error));
-    }, [audioFileId, testType, testId]);
+        if (Math.ceil(questionIndex / 4) !== audioFileId) {
+            setAudioFileId(Math.ceil(questionIndex / 4))
+        }
+    }, [questionIndex])
 
     useEffect(() => {
-        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`, { replace: true });
-    }, [audioFileId, testType, testId, navigate]);
+        console.log("a")
+        setAudioFilePath(audioFiles[audioFileId - 1])
+    }, [audioFileId])
+
+    useEffect(() => {
+        console.log("b")
+        if (currentAudioFileId !== audioFileId) {
+            navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`)
+        }
+    }, [audioFilePath])
 
     const handleNextQuestion = () => {
         setQuestionIndex(prevIndex => prevIndex + 1);

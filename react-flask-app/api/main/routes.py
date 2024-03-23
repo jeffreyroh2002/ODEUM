@@ -29,6 +29,11 @@ import seaborn as sns
 
 main = Blueprint('main', __name__)
 
+NUM_AUDIO = 3
+NUM_QUESTIONS_PER_AUDIO = 4
+EXTRA_QUESTIONS = 0
+TOTAL_QUESTIONS = NUM_AUDIO * NUM_QUESTIONS_PER_AUDIO + EXTRA_QUESTIONS
+
 @main.route('/')
 def home():
     return("Welcome to Flask App!")
@@ -148,20 +153,32 @@ def get_prev_audio_file_id(current_audio_file_id):
     prev_audio_file = AudioFile.query.filter(AudioFile.id < current_audio_file_id).order_by(AudioFile.id.desc()).first()
     return prev_audio_file.id if prev_audio_file else None
 
+def can_submit_test(answers):
+    for answer in answers:
+        if answer.overall_rating == None:
+            return False
+    return True
+
 @main.route('/submit_answer', methods=['POST'])
 @login_required
 def submit_answer():
     data = request.data.decode('utf-8')
     data = json.loads(data)
-    print(data)
+    question_index = data['question_index']
+    audio_index = (question_index - 1) // 4 + 1
     answer = UserAnswer.query.filter_by(test_id=int(data['test_id']), 
-                                        audio_id=int(data['audio_id'])).first()
+                                        audio_id=audio_index).first()
     answer_type = data['type']
     rating = data['rating']
-    print("answer1:", answer)
     setattr(answer, answer_type, rating)
-    print(answer_type, rating)
-    print("answer: ",answer)
+    db.session.commit()
+    answers = UserAnswer.query.filter_by(test_id=int(data['test_id'])).all()
+
+    if question_index == TOTAL_QUESTIONS:
+        test = Test.query.get(data['test_id'])
+        test.test_end_time = datetime.now()
+        db.session.commit()
+        
     return jsonify({"Hello": "World"})
     
 @main.route('/before_test_info', methods=['GET'])
@@ -170,7 +187,7 @@ def before_test_info():
     user = current_user
     num_audio = 3
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-    if test == None or test.test_end_time:        
+    if not test or test.test_end_time:        
         test_val = Test(
             test_type = 1,
             test_start_time = datetime.now(),
@@ -182,10 +199,8 @@ def before_test_info():
         audio_file_id = 1
         audio_file = AudioFile.query.get_or_404(audio_file_id)
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-
         for audio_index in range(1, num_audio + 1):
             tmp = UserAnswer(user_id=user.id, audio_id=audio_index, test_id=test.id)
-            print(tmp)
             db.session.add(tmp)
             db.session.commit()
 
@@ -198,17 +213,20 @@ def before_test_info():
         })
 
     else:
-        print("There is an existing test info, loading")
         is_new_test = False
-        last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.overall_rating == None).first() \
-                                    #   .order_by(UserAnswer.id).first()
-        print("Answer that is not completed: ", last_answer)
+        print("test id: ", test.id)
+        last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.overall_rating != None) \
+                                      .order_by(UserAnswer.audio_id.desc()).first()
         if last_answer == None:
+            print("no last answer!!!!")
             audio_file_id = 1
             audio_file = AudioFile.query.get_or_404(audio_file_id)
         else:
+            print(last_answer)
             audio_file_id = last_answer.audio_id
+            print(audio_file_id)
             audio_file = AudioFile.query.get_or_404(audio_file_id)
+            print(audio_file)
 
         return jsonify({
                     'status': 'in_progress',
@@ -233,7 +251,7 @@ def get_next_questions():
     user = current_user
 
     # Find the latest test of the specified type for the user
-    test = Test.query.filter_by(user_id=user.id, test_type=test_type, id=test_id).order_by(Test.test_start_time.desc()).first()
+    test = Test.query.filter_by(user_id=user.id, test_type=test_type, id=test_id).first()
     # Continue with the ongoing test
     audio_file = AudioFile.query.get(audio_file_id)
     newTest = False

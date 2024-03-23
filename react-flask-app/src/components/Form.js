@@ -6,13 +6,10 @@ export default function Form({ testId, questionIndex, onPrevQuestion, onNextQues
   const navigate = useNavigate();
   const [csrfToken, setCsrfToken] = useState('');
   const [selection, setSelection] = useState(0);
-  const [type, setType] = useState('');
   const NUM_AUDIOS = 3;
   const ANSWERS_PER_AUDIO = 4;
   const EXTRA_ANSWERS = 0;
   const NUM_ANSWERS = NUM_AUDIOS * ANSWERS_PER_AUDIO + EXTRA_ANSWERS;
-
-  const audioFileId = Math.ceil(questionIndex / 4);
 
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
   useEffect(() => {
@@ -24,58 +21,59 @@ export default function Form({ testId, questionIndex, onPrevQuestion, onNextQues
   }, []);
 
   function handlePrevButton() {
-    if (questionIndex === 0) {
-      
-    }
-    else {
-
-    }
+    if (questionIndex !== 0) {
+      onPrevQuestion();
+    } 
   };
   
-  // submitting to the Flask backend
-  function handleNextButton(type, rating) {
-    if (questionIndex === NUM_ANSWERS) {
-      navigate(`TestCompleted?testId=${testId}`, { replace: true });
-    } else {
-      console.log("selection:", rating); // 변경된 부분: rating을 직접 사용
-      fetch('/submit_answer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken, // Assuming CSRF protection is enabled
-        },
-        body: JSON.stringify({
-          test_id: testId,
-          audio_id: audioFileId,
-          type: type,
-          rating: rating // 변경된 부분: rating을 직접 사용
-        })
-      })
-      .then(response => {
-        console.log("here: ", rating); // 변경된 부분: rating을 직접 사용
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        onNextQuestion();
-      });
-    }
+  function handleNextButton() {
+    onNextQuestion();
   }
+
+  // submitting to the Flask backend
+  function handleSelection(selection_type, type_rating) {
+    console.log(testId, questionIndex, selection_type, type_rating);
+    fetch('/submit_answer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken,
+      },
+      body: JSON.stringify({
+        test_id: testId,
+        question_index: questionIndex,
+        type: selection_type,
+        rating: type_rating 
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+    });
+
+    if (questionIndex === NUM_ANSWERS) {
+      navigate(`/TestCompleted?testId=${testId}`, { replace: true });
+    } 
+    else { onNextQuestion() };
+  }
+
 
   function handleOverallButton(rating){
     setSelection(rating);
-    handleNextButton('overall_rating', rating);
+    handleSelection('overall_rating', rating);
   }
   function handleGenreButton(rating){
     setSelection(rating);
-    handleNextButton('genre_rating', rating)
+    handleSelection('genre_rating', rating)
   }
   function handleMoodButton(rating){
     setSelection(rating);
-    handleNextButton('mood_rating', rating)
+    handleSelection('mood_rating', rating)
   }
   function handleVocalButton(rating){
     setSelection(rating);
-    handleNextButton('vocal_timbre_rating', rating)
+    handleSelection('vocal_timbre_rating', rating)
   }
 
   return (
