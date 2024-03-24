@@ -51,6 +51,17 @@ class Test(db.Model):
         return f"Test('user:{self.user_id}', 'id: {self.id}','test:{self.test_type}', '{self.test_start_time}', '{self.test_end_time}')"
 
 
+### NEED TO CHANGE genre, mood, vocal to non-text,  adding serialization and deserialization 
+### methods to ease the process of working with these fields in Python as dictionaries
+"""
+Consider Adding Utility Methods: 
+For complex data like your JSON fields, utility methods in the models that parse these 
+fields into a more usable format for analysis can save time. For example, methods that 
+return the genre, mood, and vocal data as a Python dictionary directly could be beneficial.
+
+GPT4 -> advice READ!
+"""
+
 class AudioFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     audio_name = db.Column(db.String(50), nullable=False)
