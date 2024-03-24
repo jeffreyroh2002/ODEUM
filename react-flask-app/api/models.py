@@ -3,6 +3,9 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask import current_app
 from api import db, login_manager
 from flask_login import UserMixin
+import openai
+
+openai.api_key = ''
 
 
 @login_manager.user_loader
@@ -58,8 +61,8 @@ class AudioFile(db.Model):
     answers = db.relationship("UserAnswer", backref="audio", lazy=True)
 
     def __repr__(self):
-        return f"AudioFile('{self.audio_name}', '{self.file_path}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
-
+        #return f"AudioFile('{self.audio_name}', '{self.file_path}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
+        return f"AudioFile('{self.audio_name}')"
 
 class UserAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -73,5 +76,5 @@ class UserAnswer(db.Model):
 
     def __repr__(self):
         return (
-            f"UserAnswer('user:{self.user_id}', 'test:{self.test_id}' 'audio:{self.audio_id}', 'rating:{self.overall_rating}')"
+            f"UserAnswer('rating:{self.id}')"
         )
