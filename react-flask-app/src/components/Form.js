@@ -94,12 +94,12 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
 
   // submitting to the Flask backend
   function handleNextButton() {
-    if (currentQuestionIndex < 3) {
+    if (currentQuestionIndex < 4) {
       onNextQuestion() // Go to next question
     } else {
       // All questions are answered, load new audio file or navigate to completion page
       const submitUrl = '/submit_answer';
-  
+      console.log("VOCAL_TIMBRE_RATING:", selections.vocalRating)
       fetch(submitUrl, {
         method: 'POST',
         headers: {
