@@ -371,11 +371,13 @@ def get_user_info():
     })
 
 
+# Adjusted function to handle available and valid columns for correlation
 def get_focused_correlations(correlation_matrix, score_column, attribute_columns):
     """
-    Returns correlations between a specific score and a set of attribute columns.
+    Extracts and returns sorted correlations between a score column and attribute columns.
     """
-    correlations = correlation_matrix.loc[attribute_columns, score_column]
+    valid_attributes = [col for col in attribute_columns if col in correlation_matrix.index]
+    correlations = correlation_matrix.loc[valid_attributes, score_column].dropna()
     return correlations.sort_values(ascending=False)
 
 @main.route("/test_results", methods=['GET'])
@@ -416,33 +418,45 @@ def test_results():
     genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
     mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
     vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
+    # Note: 'Voiceless' is intentionally excluded based on your requirement
 
     # Use pandas for data analysis
     df = pd.DataFrame(structured_data)
+    correlation_matrix = df.corr()
 
-    # Identify and remove constant columns (handling NaN)
-    constant_columns = [col for col in df.columns if df[col].nunique() == 1 and col not in rating_columns]
-    df_filtered = df.drop(columns=constant_columns)
+    # Identifying columns with non-NaN correlations
+    valid_columns_for_analysis = correlation_matrix.columns[correlation_matrix.notna().any()]
 
-    correlation_matrix = df_filtered.corr()
+    non_rating_columns = [col for col in valid_columns_for_analysis if col not in rating_columns]
 
+    if len(valid_columns_for_analysis) <= len(rating_columns):
+        # Indicates that beyond rating columns, there are no or insufficient non-rating columns for meaningful analysis
+        print("Not enough variability in attributes for meaningful correlation analysis.")
+        return jsonify({'message': 'Not enough variability in attributes for meaningful correlation analysis.'}), 200
+
+    """
     # Extract correlations with ratings (FOR VIEWING PURPOSES)
     rating_correlations = correlation_matrix[['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']]
     significant_correlations = rating_correlations[(rating_correlations > 0.5) | (rating_correlations < -0.5)]
     print(significant_correlations.dropna(how='all'))  # This drops characteristics with no significant correlation
+"""
 
+    # Proceed with focused correlation analysis for non-empty, valid columns
+    # Assuming get_focused_correlations is defined as provided
+    for score in ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']:
+        relevant_attributes = {
+            'overall_rating': genre_columns + mood_columns + vocal_columns,
+            'genre_rating': genre_columns,
+            'mood_rating': mood_columns,
+            'vocal_timbre_rating': vocal_columns
+        }.get(score, [])
 
-    # Example usage
-    overall_score_correlations = get_focused_correlations(correlation_matrix, 'overall_rating', genre_columns + mood_columns + vocal_columns)
-    genre_score_correlations = get_focused_correlations(correlation_matrix, 'genre_rating', genre_columns)
-    mood_score_correlations = get_focused_correlations(correlation_matrix, 'mood_rating', mood_columns)
-    vocal_score_correlations = get_focused_correlations(correlation_matrix, 'vocal_timbre_rating', vocal_columns)
-
-    # Display or further analyze the correlations
-    print("Overall Score Correlations:\n", overall_score_correlations)
-    print("\nGenre Score Correlations:\n", genre_score_correlations)
-    print("\nMood Score Correlations:\n", mood_score_correlations)
-    print("\nVocal Score Correlations:\n", vocal_score_correlations)
+        focused_correlations = get_focused_correlations(correlation_matrix, score, relevant_attributes)
+        # Check if focused_correlations is not empty before printing
+        if not focused_correlations.empty:
+            print(f"\n{score} Correlations:\n", focused_correlations)
+        else:
+            print(f"\n{score} Correlations: Insufficient data for meaningful analysis.")
 
     response_data = {
         'user_id': user.id,
