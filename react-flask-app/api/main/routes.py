@@ -25,7 +25,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import MaxNLocator
 from collections import defaultdict
 import seaborn as sns
-
+import os
 
 main = Blueprint('main', __name__)
 
@@ -132,7 +132,6 @@ def login():
 @main.route('/logout', methods=["POST"])
 @login_required  # Require the user to be logged in to access this route
 def logout():
-    print("HELLOW WORLD!!!!")
     logout_user()
     return jsonify({"message": "Logout successful"})
 
@@ -153,11 +152,6 @@ def get_prev_audio_file_id(current_audio_file_id):
     prev_audio_file = AudioFile.query.filter(AudioFile.id < current_audio_file_id).order_by(AudioFile.id.desc()).first()
     return prev_audio_file.id if prev_audio_file else None
 
-def can_submit_test(answers):
-    for answer in answers:
-        if answer.overall_rating == None:
-            return False
-    return True
 
 @main.route('/submit_answer', methods=['POST'])
 @login_required
@@ -298,6 +292,25 @@ def get_prev_questions():
         return jsonify({
             'status': 'send_to_before_test'
         })
+
+@login_required
+@main.route('/get_audio_num', methods=["GET"])
+def get_audio_num():
+    dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+    filenames = os.listdir(dir_path)
+    full_filenames = ['static/audio_files/' + filename for filename in filenames]
+    return jsonify({"num_audio": len(filenames)})
+
+@login_required
+@main.route('/get_audio_filename', methods=["GET"])
+def get_audio_filename():
+    audio_id = request.args.get('audio_id')
+    dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+    filenames = os.listdir(dir_path)
+    full_filenames = ['static/audio_files/' + filename for filename in filenames]
+    print(audio_id)
+    return jsonify({"audio_filename": full_filenames[int(audio_id) - 1]})
+
 
 @login_required
 @main.route('/get_user_info', methods=["GET"])

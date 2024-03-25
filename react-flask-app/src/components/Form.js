@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './Form.css';
-
-export default function Form({ testId, questionIndex, onPrevQuestion, onNextQuestion }) {
+import { useNavigate } from 'react-router-dom';
+export default function Form({ testId, questionIndex, onPrevQuestion, onNextQuestion, audiosNum, questionsNum}) {
+  console.log(audiosNum, questionsNum)
   const [csrfToken, setCsrfToken] = useState('');
-  const ANSWERS_PER_AUDIO = 4;
-
+  const navigate = useNavigate();
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
   useEffect(() => {
     fetch('/csrf-token').then(response => {
@@ -31,14 +31,22 @@ export default function Form({ testId, questionIndex, onPrevQuestion, onNextQues
       })
     })
     .then(response => { if (!response.ok) { throw new Error('Network response was not ok'); } });
-    onNextQuestion();
+    if (questionIndex !== audiosNum * questionsNum) onNextQuestion();
+    else onSubmit()
   }
 
+  function onQuit() {
+    navigate(`/`);
+  }
+
+  function onSubmit() {
+    navigate(`/TestCompleted?testId=${testId}`, { replace: true });
+  }
   return (
     <div>
       <div className="rating--container">
         {/* Render questions based on currentQuestionIndex */}
-        {questionIndex % ANSWERS_PER_AUDIO === 1 && (
+        {questionIndex % questionsNum === 1 && (
           <div className="rating-group">
             <h4 className="rating--label">Rate the Song.</h4>
             <button className="rating--button" onClick={() => handleSelection('overall_rating', 3)}>could listen to it all day &#128293;</button>
@@ -50,7 +58,7 @@ export default function Form({ testId, questionIndex, onPrevQuestion, onNextQues
           </div>
         )}
 
-        {questionIndex % ANSWERS_PER_AUDIO === 2 && (
+        {questionIndex % questionsNum === 2 && (
           <div className="rating-group">
             <h4 className="rating--label">How is the Genre?</h4>
             <button className="rating--button" onClick={() => handleSelection('genre_rating', 3)}>Fire</button>
@@ -63,7 +71,7 @@ export default function Form({ testId, questionIndex, onPrevQuestion, onNextQues
           </div>
         )}
 
-        {questionIndex % ANSWERS_PER_AUDIO === 3 && (
+        {questionIndex % questionsNum === 3 && (
           <div className="rating-group">
             <h4 className="rating--label">Describe the vibe or feeling of this song.</h4>
             <button className="rating--button" onClick={() => handleSelection('mood_rating', 3)}>Fire</button>
@@ -76,7 +84,7 @@ export default function Form({ testId, questionIndex, onPrevQuestion, onNextQues
           </div>
         )}
 
-        {questionIndex % ANSWERS_PER_AUDIO === 0 && (
+        {questionIndex % questionsNum === 0 && (
           <div className="rating-group">
             <h4 className="rating--label">Thoughts on the vocals?</h4>
             <button className="rating--button" onClick={() => handleSelection('vocal_timbre_rating', 3)}>Fire</button>
@@ -90,9 +98,13 @@ export default function Form({ testId, questionIndex, onPrevQuestion, onNextQues
         )}
       </div>
       
-      <button className="prev--button" onClick={onPrevQuestion}>Previous Button</button>
+      {questionIndex === 1 ? 
+        <button className="quit--button" onClick={onQuit}>Quit Test</button> :
+        <button className="prev--button" onClick={onPrevQuestion}>Previous Button</button>}
 
-      <button className="next--button" onClick={onNextQuestion}>Next Button</button>
+      {questionIndex ===  audiosNum * questionsNum ?  
+        <button className="submit--button" onClick={onSubmit}>Submit Test</button> :
+        <button className="next--button" onClick={onNextQuestion}>Next Button</button>}
 
     </div>
   );

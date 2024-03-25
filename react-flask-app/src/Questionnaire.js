@@ -6,35 +6,41 @@ import Form from './components/Form';
 import './Questionnaire.css';
 import playIcon from './images/blob.png'
 import pauseIcon from './images/dark_blob.png'
+import axios from 'axios';
 //import sample_audio from "./Audio/sample_audio.mp3"
 
 export default function Questionnaire() {
     const location = useLocation();
     const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
-    const audioFiles = [
-        `static/audio_files/Aimyon.wav_1.wav`,
-        `static/audio_files/FKJ_something.wav_2.wav`,
-        `static/audio_files/KendrickLamar.wav_3.wav`,
-    ]
+
 
     const [audioFileId, setAudioFileId] = useState(1);
+    const [audioFilePath, setAudioFilePath] = useState('');
     const currentAudioFileId = parseInt(searchParams.get('audio_file_id'));
     const testType = parseInt(searchParams.get('test_type'));
     const testId = parseInt(searchParams.get('test_id'));
+    const questionsNum = 4;
+    const [questionIndex, setQuestionIndex] = useState(questionsNum * (audioFileId - 1) + 1);
+    const [audiosNum, setAudiosNum] = useState(1);
 
-    const [questionIndex, setQuestionIndex] = useState(4 * currentAudioFileId - 3);
-    const [audioFilePath, setAudioFilePath] = useState(audioFiles[currentAudioFileId - 1]);
-
+    //getting the number of audio files
+    useEffect(() => {
+        axios.get('/get_audio_num')
+             .then(response => { setAudiosNum(response.data.num_audio) });
+    }, [])
 
     useEffect(() => {
-        if (Math.ceil(questionIndex / 4) !== audioFileId) {
-            setAudioFileId(Math.ceil(questionIndex / 4))
+        if (Math.ceil(questionIndex / questionsNum) !== audioFileId) {
+            setAudioFileId(Math.ceil(questionIndex / questionsNum))
         }
     }, [questionIndex])
 
     useEffect(() => {
-        setAudioFilePath(audioFiles[audioFileId - 1])
+        axios.get(`/get_audio_filename?audio_id=${audioFileId}`)
+             .then((response) => {
+                setAudioFilePath(response.data.audio_filename);
+             })
     }, [audioFileId])
 
     useEffect(() => {
@@ -44,12 +50,11 @@ export default function Questionnaire() {
     }, [audioFilePath])
 
     const handleNextQuestion = () => {
-        if (questionIndex === 12) navigate(`/TestCompleted?testId=${testId}`, { replace: true });
-        else setQuestionIndex(prevIndex => prevIndex + 1);
+        setQuestionIndex(prevIndex => prevIndex + 1);
     };
 
     const handlePrevQuestion = () => {
-        if (questionIndex !== 1) setQuestionIndex(prevIndex => prevIndex - 1);
+        setQuestionIndex(prevIndex => prevIndex - 1);
     };
 
     return (
@@ -67,7 +72,9 @@ export default function Questionnaire() {
                     testId={testId} 
                     questionIndex={questionIndex}
                     onPrevQuestion={handlePrevQuestion}
-                    onNextQuestion={handleNextQuestion}/>
+                    onNextQuestion={handleNextQuestion}
+                    audiosNum={audiosNum}
+                    questionsNum={questionsNum}/>
             </div>
         </div>
     )
