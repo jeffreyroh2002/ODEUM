@@ -8,6 +8,7 @@ import re  # for email confirmation
 from datetime import datetime
 import logging
 import json
+import pandas as pd
 
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
@@ -162,6 +163,7 @@ def submit_answer():
         audio_id=data['audio_id'],
         test_id=data['test_id'],
     )
+    print("VOCAL TIMBRE RATING:", new_answer.vocal_timbre_rating)
     
     db.session.add(new_answer)
     db.session.commit()
@@ -369,14 +371,12 @@ def get_user_info():
     })
 
 
-def get_attribute_name(index):
-    # Define the order of attributes in your feature vectors
-    attributes = ['Rock','Hip Hop','Pop Ballad','Electronic','Korean Ballad','Jazz','R&B/Soul', 
-                  'Tense', 'Bright', 'Emotional', 'Relaxed', 
-                  'Smooth', 'Dreamy', 'Raspy', 'Voiceless']
-    
-    # Return the attribute name corresponding to the given index
-    return attributes[index]
+def get_focused_correlations(correlation_matrix, score_column, attribute_columns):
+    """
+    Returns correlations between a specific score and a set of attribute columns.
+    """
+    correlations = correlation_matrix.loc[attribute_columns, score_column]
+    return correlations.sort_values(ascending=False)
 
 @main.route("/test_results", methods=['GET'])
 @login_required
@@ -390,6 +390,66 @@ def test_results():
     if test.subject != current_user: 
         return jsonify({'error': 'User does not match test owner'}), 403
 
+    # Initialize list to hold structured data
+    structured_data = []
+
+    test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
+    for answer in test_answers:
+        audio = AudioFile.query.filter_by(id=answer.audio_id).first()
+        if audio:
+             # Structure each row of data
+            data_row = {
+                "overall_rating": answer.overall_rating,
+                "genre_rating": answer.genre_rating,
+                "mood_rating": answer.mood_rating,
+                "vocal_timbre_rating": answer.vocal_timbre_rating,
+                **audio.genre,  # Unpack genre dict into row
+                **audio.mood,  # Unpack mood dict into row
+                **audio.vocal  # Unpack vocal dict into row
+            }
+            structured_data.append(data_row)
+
+    for data in structured_data:
+        print(data)
+
+    genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
+    mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
+    vocal_columns = ['Smooth', 'Dreamy', 'Raspy', 'Voiceless']
+
+    # Use pandas for data analysis
+    df = pd.DataFrame(structured_data)
+
+    correlation_matrix = df.corr()
+
+
+    # Extract correlations with ratings (FOR VIEWING PURPOSES)
+    rating_correlations = correlation_matrix[['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']]
+    significant_correlations = rating_correlations[(rating_correlations > 0.5) | (rating_correlations < -0.5)]
+    print(significant_correlations.dropna(how='all'))  # This drops characteristics with no significant correlation
+
+
+    # Example usage
+    overall_score_correlations = get_focused_correlations(correlation_matrix, 'overall_rating', genre_columns + mood_columns + vocal_columns)
+    genre_score_correlations = get_focused_correlations(correlation_matrix, 'genre_rating', genre_columns)
+    mood_score_correlations = get_focused_correlations(correlation_matrix, 'mood_rating', mood_columns)
+    vocal_score_correlations = get_focused_correlations(correlation_matrix, 'vocal_timbre_rating', vocal_columns)
+
+    # Display or further analyze the correlations
+    print("Overall Score Correlations:\n", overall_score_correlations)
+    print("\nGenre Score Correlations:\n", genre_score_correlations)
+    print("\nMood Score Correlations:\n", mood_score_correlations)
+    print("\nVocal Score Correlations:\n", vocal_score_correlations)
+
+    response_data = {
+        'user_id': user.id,
+        'test_id': test.id,
+        'test_type': test.test_type,
+        'structured_data': structured_data
+    }
+    return jsonify(response_data)
+
+
+"""
     display_messages = []
     
     #Update Preference each Song
@@ -425,3 +485,4 @@ def test_results():
         'test_type': test.test_type,
     }
     return jsonify(response_data)
+"""
