@@ -452,9 +452,62 @@ def test_results():
     vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
     # Note: 'Voiceless' is intentionally excluded based on your requirement
 
-    ### CORRELATION COEFFICEINT CALCULATION ###
     # Use pandas for data analysis
     df = pd.DataFrame(structured_data)
+
+    ### FINDING CLUSTERS  ###
+    from sklearn.cluster import KMeans
+    from sklearn.preprocessing import StandardScaler
+
+    # Creating user_ratings DataFrame
+    # Here, we are simplifying by assuming the presence of 'user_id' and 'song_id' in your structured data
+    user_ratings = pd.DataFrame([
+        {'user_id': answer.user_id, 'song_id': answer.audio_id, 'rating': answer.overall_rating}
+        for answer in test_answers
+    ])
+
+    print("\nUser Ratings DataFrame:")
+    print(user_ratings.head())
+
+    # Standardizing the features for clustering
+    scaler = StandardScaler()
+    feature_columns = genre_columns + mood_columns
+    scaled_features = scaler.fit_transform(df[feature_columns])
+
+    # Performing KMeans clustering
+    kmeans = KMeans(n_clusters=5, random_state=42)
+    df['cluster'] = kmeans.fit_predict(scaled_features)
+
+    # Assuming 'user_ratings' DataFrame that includes 'user_id', 'song_id', 'rating'
+    # Merge to include cluster labels in user_ratings
+    user_ratings_clustered = pd.merge(user_ratings, df[['song_id', 'cluster']], on='song_id')
+
+    # Calculate average rating per cluster for each user
+    avg_ratings_by_cluster = user_ratings_clustered.groupby(['user_id', 'cluster'])['rating'].mean().reset_index()
+
+    # Print average ratings by cluster for insight
+    print("\nAverage Ratings by Cluster:")
+    print(avg_ratings_by_cluster.head())
+
+    # Analyze which clusters are rated more positively on average
+    # Considering your scale of -3 to 3
+    for cluster_num in range(kmeans.n_clusters):
+        cluster_avg_rating = avg_ratings_by_cluster[avg_ratings_by_cluster['cluster'] == cluster_num]['rating'].mean()
+        print(f"Cluster {cluster_num} Average Rating: {cluster_avg_rating}")
+
+    # Further analysis can be done based on the findings, such as identifying which clusters are generally liked or disliked
+    # Example: Finding users who particularly like or dislike certain clusters
+    liked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] > 0]  # Clusters with positive average ratings
+    disliked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] < 0]  # Clusters with negative average ratings
+    
+    print("\nLiked Clusters (Positive Average Rating):")
+    print(liked_clusters)
+    
+    print("\nDisliked Clusters (Negative Average Rating):")
+    print(disliked_clusters)
+
+    ### CORRELATION COEFFICEINT CALCULATION ###
+    
     correlation_matrix = df.corr()
 
     # Identifying columns with non-NaN correlations
@@ -525,7 +578,7 @@ def test_results():
 
     #######
 
-    
+
     response_data = {
         'user_id': user.id,
         'test_id': test.id,
