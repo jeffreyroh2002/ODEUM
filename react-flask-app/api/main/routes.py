@@ -12,10 +12,17 @@ import pandas as pd
 
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import statsmodels.api as sm
 import numpy as np
 from collections import defaultdict
 import statistics
 import matplotlib.pyplot as plt
+from sklearn.linear_model import Lasso
+
+
 
 #imports for saving png files
 import io
@@ -371,134 +378,57 @@ def get_user_info():
     })
 
 
-# Adjusted function to handle available and valid columns for correlation
-def get_focused_correlations(correlation_matrix, score_column, attribute_columns):
-    """
-    Extracts and returns sorted correlations between a score column and attribute columns.
-    """
-    valid_attributes = [col for col in attribute_columns if col in correlation_matrix.index]
-    correlations = correlation_matrix.loc[valid_attributes, score_column].dropna()
-    return correlations.sort_values(ascending=False)
-
-def find_significant_correlations(correlation_matrix, threshold, columns=None):
-    """
-    Identifies and lists pairs of attributes with high positive or negative correlation based on the specified threshold.
-    
-    Parameters:
-    - correlation_matrix: DataFrame, the correlation matrix from which to identify significant correlations.
-    - threshold: float, the minimum absolute value of correlation coefficients to consider as significant.
-    - columns: list, optional, specific columns to examine for significant correlations. If None, examines all columns.
-    
-    Returns:
-    - significant_pairs: DataFrame, pairs of attributes with correlation coefficients that meet the threshold criteria.
-    """
-    significant_pairs = []
-    
-    if columns is None:
-        columns = correlation_matrix.columns
-    
-    for col in columns:
-        # Filter for significant correlations in the current column
-        significant = correlation_matrix.loc[
-            (correlation_matrix[col].abs() >= threshold) & (correlation_matrix[col] != 1.0), col]
-        
-        # Append significant correlations to the list
-        for row_index in significant.index:
-            if row_index != col:  # Avoid self-correlation
-                significant_pairs.append((col, row_index, significant[row_index]))
-    
-    # Convert to DataFrame for easier handling and readability
-    significant_pairs_df = pd.DataFrame(significant_pairs, columns=['Attribute 1', 'Attribute 2', 'Correlation'])
-    
-    return significant_pairs_df
-
-@main.route("/test_results", methods=['GET'])
-@login_required
-def test_results():
-    test_id = request.args.get('testId')
-
-    #calculate all characteristics
-    user = current_user
-    print(user)
-    test = Test.query.filter_by(id=test_id).first()
-    if test.subject != current_user: 
-        return jsonify({'error': 'User does not match test owner'}), 403
-
-    # Initialize list to hold structured data
+def prepare_structured_data(test_answers):
+    """Extracts and structures data from test answers."""
     structured_data = []
-
-    test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
     for answer in test_answers:
         audio = AudioFile.query.filter_by(id=answer.audio_id).first()
         if audio:
-             # Structure each row of data
             data_row = {
                 "overall_rating": answer.overall_rating,
                 "genre_rating": answer.genre_rating,
                 "mood_rating": answer.mood_rating,
                 "vocal_timbre_rating": answer.vocal_timbre_rating,
-                **audio.genre,  # Unpack genre dict into row
-                **audio.mood,  # Unpack mood dict into row
-                **audio.vocal  # Unpack vocal dict into row
+                **json.loads(audio.genre),
+                **json.loads(audio.mood),
+                **json.loads(audio.vocal)
             }
             structured_data.append(data_row)
+    return structured_data
 
-    for data in structured_data:
-        print(data)
-
-    rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
-    genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
-    mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
-    vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
-    # Note: 'Voiceless' is intentionally excluded based on your requirement
-
-    # Use pandas for data analysis
-    df = pd.DataFrame(structured_data)
-
-    ### FINDING CLUSTERS  ###
-    from sklearn.cluster import KMeans
-    from sklearn.preprocessing import StandardScaler
-
-    # Creating user_ratings DataFrame
-    # Here, we are simplifying by assuming the presence of 'user_id' and 'song_id' in your structured data
+def create_user_ratings_df(test_answers):
+    """Creates a DataFrame from test answers containing user ratings."""
     user_ratings = pd.DataFrame([
         {'user_id': answer.user_id, 'song_id': answer.audio_id, 'rating': answer.overall_rating}
         for answer in test_answers
     ])
+    return user_ratings
 
-    print("\nUser Ratings DataFrame:")
-    print(user_ratings.head())
 
-    # Standardizing the features for clustering
+
+def perform_kmeans_clustering(df, feature_columns, n_clusters=5):
+    """Performs KMeans clustering on the given DataFrame."""
     scaler = StandardScaler()
-    feature_columns = genre_columns + mood_columns
     scaled_features = scaler.fit_transform(df[feature_columns])
-
-    # Performing KMeans clustering
-    kmeans = KMeans(n_clusters=5, random_state=42)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     df['cluster'] = kmeans.fit_predict(scaled_features)
+    return df, kmeans
 
-    # Assuming 'user_ratings' DataFrame that includes 'user_id', 'song_id', 'rating'
-    # Merge to include cluster labels in user_ratings
-    user_ratings_clustered = pd.merge(user_ratings, df[['song_id', 'cluster']], on='song_id')
-
-    # Calculate average rating per cluster for each user
+def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
+    """Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked."""
     avg_ratings_by_cluster = user_ratings_clustered.groupby(['user_id', 'cluster'])['rating'].mean().reset_index()
 
-    # Print average ratings by cluster for insight
     print("\nAverage Ratings by Cluster:")
     print(avg_ratings_by_cluster.head())
 
     # Analyze which clusters are rated more positively on average
-    # Considering your scale of -3 to 3
-    for cluster_num in range(kmeans.n_clusters):
+    for cluster_num in range(n_clusters):
         cluster_avg_rating = avg_ratings_by_cluster[avg_ratings_by_cluster['cluster'] == cluster_num]['rating'].mean()
         print(f"Cluster {cluster_num} Average Rating: {cluster_avg_rating}")
 
-    # Further analysis can be done based on the findings, such as identifying which clusters are generally liked or disliked
-    # Example: Finding users who particularly like or dislike certain clusters
-    liked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] > 0]  # Clusters with positive average ratings
-    disliked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] < 0]  # Clusters with negative average ratings
+    # Further analysis can be done based on the findings
+    liked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] > 0].groupby('cluster')['rating'].mean()
+    disliked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] < 0].groupby('cluster')['rating'].mean()
     
     print("\nLiked Clusters (Positive Average Rating):")
     print(liked_clusters)
@@ -506,78 +436,103 @@ def test_results():
     print("\nDisliked Clusters (Negative Average Rating):")
     print(disliked_clusters)
 
-    ### CORRELATION COEFFICEINT CALCULATION ###
-    
+def find_significant_correlations(correlation_matrix, threshold, columns):
+    significant_pairs = []
+    for column in columns:
+        for index, value in correlation_matrix[column].items():
+            if abs(value) >= threshold and value != 1.0 and index != column:
+                # Avoid self-correlation and ensure correlation meets threshold
+                significant_pairs.append({"Attribute 1": column, "Attribute 2": index, "Correlation": value})
+
+    significant_correlations = pd.DataFrame(significant_pairs)
+    return significant_correlations
+
+def calculate_significant_correlations_for_ratings(df, rating_columns, genre_columns, mood_columns, vocal_columns, threshold=0.7):
+    """Calculates and prints significant correlations for each rating type with relevant song attributes,
+    ensuring there's sufficient variability in attributes for meaningful analysis."""
     correlation_matrix = df.corr()
-
-    # Identifying columns with non-NaN correlations
-    valid_columns_for_analysis = correlation_matrix.columns[correlation_matrix.notna().any()]
-
-    non_rating_columns = [col for col in valid_columns_for_analysis if col not in rating_columns]
-
-    if len(valid_columns_for_analysis) <= len(rating_columns):
-        # Indicates that beyond rating columns, there are no or insufficient non-rating columns for meaningful analysis
+    
+    # Exclude rating columns to focus on song attributes
+    non_rating_columns = [col for col in df.columns if col not in rating_columns]
+    
+    # Ensure there's sufficient variability in attributes for meaningful analysis
+    if len(non_rating_columns) <= len(rating_columns):
         print("Not enough variability in attributes for meaningful correlation analysis.")
-        return jsonify({'message': 'Not enough variability in attributes for meaningful correlation analysis.'}), 200
+        return
+    
+    # Mapping of rating types to their relevant attributes
+    rating_to_attributes = {
+        'overall_rating': genre_columns + mood_columns + vocal_columns,
+        'genre_rating': genre_columns,
+        'mood_rating': mood_columns,
+        'vocal_timbre_rating': vocal_columns
+    }
 
-    """
-    # Extract correlations with ratings (FOR VIEWING PURPOSES)
-    rating_correlations = correlation_matrix[['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']]
-    significant_correlations = rating_correlations[(rating_correlations > 0.5) | (rating_correlations < -0.5)]
-    print(significant_correlations.dropna(how='all'))  # This drops characteristics with no significant correlation
-    """
+    for score in rating_columns:  # Iterate through each specific rating type
+        relevant_attributes = rating_to_attributes.get(score, [])
 
-    # CORRELATION COEFFICIENT THRESHOLD SET HERE #
-    threshold = 0.7
+        # Ensure attributes related to the score are in the correlation matrix
+        valid_attributes = [attr for attr in relevant_attributes if attr in correlation_matrix.columns]
 
-    # Proceed with focused correlation analysis for non-empty, valid columns
-    # Assuming get_focused_correlations is defined as provided
-    for score in ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']:
-        relevant_attributes = {
-            'overall_rating': genre_columns + mood_columns + vocal_columns,
-            'genre_rating': genre_columns,
-            'mood_rating': mood_columns,
-            'vocal_timbre_rating': vocal_columns
-        }.get(score, [])
+        for attribute in valid_attributes:
+            # Calculate and print significant correlations for the attribute
+            significant_correlations = find_significant_correlations(correlation_matrix, threshold, columns=[score, attribute])
 
-        focused_correlations = get_focused_correlations(correlation_matrix, score, relevant_attributes)
+            if not significant_correlations.empty:
+                print(f"\nSignificant Correlations for {score} with {attribute} (|correlation| >= {threshold}):\n", significant_correlations)
+            else:
+                print(f"\nNo significant correlations found for {score} with {attribute} at the threshold of {threshold}.")
 
-        # Apply the threshold directly to filter significant correlations
-        significant_correlations = focused_correlations[abs(focused_correlations) >= threshold]
-
-        # Check if focused_correlations is not empty before printing
-        if not focused_correlations.empty:
-            print(f"\nSignificant {score} Correlations (|correlation| >= {threshold}):\n", significant_correlations)
-        else:
-            print(f"\n{score} Correlations: Insufficient data for meaningful analysis.")
-
-    #######
-
-    # REGRESSION MODEL FOR NUANCED ANALYSIS
-    from sklearn.linear_model import Lasso
-    from sklearn.model_selection import train_test_split
-    import statsmodels.api as sm
-    import numpy as np
-    import statsmodels.api as sm
-
+def perform_regression_analysis(df, genre_columns, mood_columns):
+    """Performs regression analysis to model the impact of genre and mood on overall rating."""
+    # Creating interaction terms
     for genre_col in genre_columns:
         for mood_col in mood_columns:
             interaction_col_name = f'{genre_col}_{mood_col}_interaction'
             df[interaction_col_name] = df[genre_col] * df[mood_col]
-        
+            
     X_columns = genre_columns + mood_columns + [f'{g}_{m}_interaction' for g in genre_columns for m in mood_columns]
     X = sm.add_constant(df[X_columns])  # Add a constant term for the intercept
-
+    
     y_overall = df['overall_rating']
-
-    # Fit the model for overall rating
+    
     model_overall = sm.OLS(y_overall, X).fit()
-
-    # Print out the statistics
+    print("\nRegression Analysis Summary for Overall Rating:")
     print(model_overall.summary())
 
-    #######
 
+@main.route("/test_results", methods=['GET'])
+@login_required
+def test_results():
+    test_id = request.args.get('testId')
+    user = current_user
+    test = Test.query.filter_by(id=test_id).first()
+
+    if test.subject != current_user: 
+        return jsonify({'error': 'User does not match test owner'}), 403
+
+    test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
+    structured_data = prepare_structured_data(test_answers)
+    df = pd.DataFrame(structured_data)
+
+    rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
+    genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
+    mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
+    vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
+    # Note: 'Voiceless' is intentionally excluded based on your requirement
+
+    ### CORRELATION COEFFICIENT ###
+    calculate_significant_correlations_for_ratings(df, rating_columns, genre_columns, mood_columns, vocal_columns)
+    
+    ### REGRESSION ANALYSIS ###
+    perform_regression_analysis(df, genre_columns, mood_columns)
+    
+    ### REGRESSION ### 
+    user_ratings = create_user_ratings_df(test_answers)
+    feature_columns = genre_columns + mood_columns
+    df, kmeans = perform_kmeans_clustering(df, feature_columns)
+    user_ratings_clustered = pd.merge(user_ratings, df[['song_id', 'cluster']], on='song_id')
+    analyze_cluster_ratings(user_ratings_clustered, kmeans.n_clusters)
 
     response_data = {
         'user_id': user.id,
@@ -586,42 +541,3 @@ def test_results():
         'structured_data': structured_data
     }
     return jsonify(response_data)
-
-
-"""
-    display_messages = []
-    
-    #Update Preference each Song
-    genre_score = {'Rock': 0,'Hip Hop': 0,'Pop Ballad': 0,'Electronic': 0,'Korean Ballad': 0,'Jazz': 0,'R&B/Soul': 0}
-    mood_score = {'Tense': 0, 'Bright': 0, 'Emotional': 0, 'Relaxed': 0}
-    vocal_score = {'Smooth': 0,'Dreamy': 0,'Raspy': 0,'Voiceless': 0}
-
-    # High Rating song tracker
-    high_rated_songs = []
-
-    test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
-    for a in test_answers:
-        print("test_answers:", a.audio_id)
-    for answer in test_answers:
-        if (answer and answer.audio_id):
-            audio = AudioFile.query.filter_by(id = answer.audio_id).first()
-            print("HELLO WORLD")
-            print("audio.id:", audio.id)
-            print("answer.audio_id:", answer.audio_id)
-            print("-----")
-            print("user's overall rating score", answer.overall_rating)
-            print("audio's genre:", audio.genre)
-            print("user's genre rating score", answer.genre_rating)
-            print("audio's mood:", audio.mood)
-            print("user's mood rating score", answer.mood_rating)
-            print("audio's vocal:", audio.vocal)
-            print("user's vocal rating score", answer.vocal_timbre_rating)
-            print("-----")
-    # Pass the encoded images and other necessary information to the template
-    response_data = {
-        'user_id': user.id,
-        'test_id': test.id,
-        'test_type': test.test_type,
-    }
-    return jsonify(response_data)
-"""
