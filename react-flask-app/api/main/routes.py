@@ -378,6 +378,8 @@ def get_user_info():
     })
 
 
+
+
 def prepare_structured_data(test_answers):
     """Extracts and structures data from test answers."""
     structured_data = []
@@ -389,9 +391,9 @@ def prepare_structured_data(test_answers):
                 "genre_rating": answer.genre_rating,
                 "mood_rating": answer.mood_rating,
                 "vocal_timbre_rating": answer.vocal_timbre_rating,
-                **json.loads(audio.genre),
-                **json.loads(audio.mood),
-                **json.loads(audio.vocal)
+                **audio.genre,
+                **audio.mood,
+                **audio.vocal
             }
             structured_data.append(data_row)
     return structured_data
@@ -403,8 +405,6 @@ def create_user_ratings_df(test_answers):
         for answer in test_answers
     ])
     return user_ratings
-
-
 
 def perform_kmeans_clustering(df, feature_columns, n_clusters=5):
     """Performs KMeans clustering on the given DataFrame."""
