@@ -4,6 +4,9 @@ from flask import current_app
 from api import db, login_manager
 from flask_login import UserMixin
 import openai
+from sqlalchemy.ext.hybrid import hybrid_property
+import json
+
 
 openai.api_key = ''
 
@@ -66,10 +69,34 @@ class AudioFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     audio_name = db.Column(db.String(50), nullable=False)
     file_path = db.Column(db.String(100), nullable=False)
-    genre = db.Column(db.Text, nullable=False)  # save with json.dump
-    mood = db.Column(db.Text, nullable=False)
-    vocal = db.Column(db.Text, nullable=False)
+    _genre = db.Column('genre', db.Text, nullable=False)
+    _mood = db.Column('mood', db.Text, nullable=False)
+    _vocal = db.Column('vocal', db.Text, nullable=False)
     answers = db.relationship("UserAnswer", backref="audio", lazy=True)
+
+    @hybrid_property
+    def genre(self):
+        return json.loads(self._genre)
+
+    @genre.setter
+    def genre(self, value):
+        self._genre = json.dumps(value)
+
+    @hybrid_property
+    def mood(self):
+        return json.loads(self._mood)
+
+    @mood.setter
+    def mood(self, value):
+        self._mood = json.dumps(value)
+
+    @hybrid_property
+    def vocal(self):
+        return json.loads(self._vocal)
+
+    @vocal.setter
+    def vocal(self, value):
+        self._vocal = json.dumps(value)
 
     def __repr__(self):
         #return f"AudioFile('{self.audio_name}', '{self.file_path}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
