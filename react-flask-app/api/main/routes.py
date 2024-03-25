@@ -380,6 +380,38 @@ def get_focused_correlations(correlation_matrix, score_column, attribute_columns
     correlations = correlation_matrix.loc[valid_attributes, score_column].dropna()
     return correlations.sort_values(ascending=False)
 
+def find_significant_correlations(correlation_matrix, threshold, columns=None):
+    """
+    Identifies and lists pairs of attributes with high positive or negative correlation based on the specified threshold.
+    
+    Parameters:
+    - correlation_matrix: DataFrame, the correlation matrix from which to identify significant correlations.
+    - threshold: float, the minimum absolute value of correlation coefficients to consider as significant.
+    - columns: list, optional, specific columns to examine for significant correlations. If None, examines all columns.
+    
+    Returns:
+    - significant_pairs: DataFrame, pairs of attributes with correlation coefficients that meet the threshold criteria.
+    """
+    significant_pairs = []
+    
+    if columns is None:
+        columns = correlation_matrix.columns
+    
+    for col in columns:
+        # Filter for significant correlations in the current column
+        significant = correlation_matrix.loc[
+            (correlation_matrix[col].abs() >= threshold) & (correlation_matrix[col] != 1.0), col]
+        
+        # Append significant correlations to the list
+        for row_index in significant.index:
+            if row_index != col:  # Avoid self-correlation
+                significant_pairs.append((col, row_index, significant[row_index]))
+    
+    # Convert to DataFrame for easier handling and readability
+    significant_pairs_df = pd.DataFrame(significant_pairs, columns=['Attribute 1', 'Attribute 2', 'Correlation'])
+    
+    return significant_pairs_df
+
 @main.route("/test_results", methods=['GET'])
 @login_required
 def test_results():
@@ -439,7 +471,10 @@ def test_results():
     rating_correlations = correlation_matrix[['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']]
     significant_correlations = rating_correlations[(rating_correlations > 0.5) | (rating_correlations < -0.5)]
     print(significant_correlations.dropna(how='all'))  # This drops characteristics with no significant correlation
-"""
+    """
+
+    ### CORRELATION COEFFICIENT THRESHOLD SET HERE ###
+    threshold = 0.7
 
     # Proceed with focused correlation analysis for non-empty, valid columns
     # Assuming get_focused_correlations is defined as provided
@@ -452,9 +487,13 @@ def test_results():
         }.get(score, [])
 
         focused_correlations = get_focused_correlations(correlation_matrix, score, relevant_attributes)
+
+        # Apply the threshold directly to filter significant correlations
+        significant_correlations = focused_correlations[abs(focused_correlations) >= threshold]
+
         # Check if focused_correlations is not empty before printing
         if not focused_correlations.empty:
-            print(f"\n{score} Correlations:\n", focused_correlations)
+            print(f"\nSignificant {score} Correlations (|correlation| >= {threshold}):\n", significant_correlations)
         else:
             print(f"\n{score} Correlations: Insufficient data for meaningful analysis.")
 
