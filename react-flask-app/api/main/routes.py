@@ -452,6 +452,7 @@ def test_results():
     vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
     # Note: 'Voiceless' is intentionally excluded based on your requirement
 
+    ### CORRELATION COEFFICEINT CALCULATION ###
     # Use pandas for data analysis
     df = pd.DataFrame(structured_data)
     correlation_matrix = df.corr()
@@ -473,7 +474,7 @@ def test_results():
     print(significant_correlations.dropna(how='all'))  # This drops characteristics with no significant correlation
     """
 
-    ### CORRELATION COEFFICIENT THRESHOLD SET HERE ###
+    # CORRELATION COEFFICIENT THRESHOLD SET HERE #
     threshold = 0.7
 
     # Proceed with focused correlation analysis for non-empty, valid columns
@@ -497,6 +498,34 @@ def test_results():
         else:
             print(f"\n{score} Correlations: Insufficient data for meaningful analysis.")
 
+    #######
+
+    # REGRESSION MODEL FOR NUANCED ANALYSIS
+    from sklearn.linear_model import Lasso
+    from sklearn.model_selection import train_test_split
+    import statsmodels.api as sm
+    import numpy as np
+    import statsmodels.api as sm
+
+    for genre_col in genre_columns:
+        for mood_col in mood_columns:
+            interaction_col_name = f'{genre_col}_{mood_col}_interaction'
+            df[interaction_col_name] = df[genre_col] * df[mood_col]
+        
+    X_columns = genre_columns + mood_columns + [f'{g}_{m}_interaction' for g in genre_columns for m in mood_columns]
+    X = sm.add_constant(df[X_columns])  # Add a constant term for the intercept
+
+    y_overall = df['overall_rating']
+
+    # Fit the model for overall rating
+    model_overall = sm.OLS(y_overall, X).fit()
+
+    # Print out the statistics
+    print(model_overall.summary())
+
+    #######
+
+    
     response_data = {
         'user_id': user.id,
         'test_id': test.id,
