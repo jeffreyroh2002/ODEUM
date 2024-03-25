@@ -412,15 +412,19 @@ def test_results():
     for data in structured_data:
         print(data)
 
+    rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
     genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
     mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
-    vocal_columns = ['Smooth', 'Dreamy', 'Raspy', 'Voiceless']
+    vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
 
     # Use pandas for data analysis
     df = pd.DataFrame(structured_data)
 
-    correlation_matrix = df.corr()
+    # Identify and remove constant columns (handling NaN)
+    constant_columns = [col for col in df.columns if df[col].nunique() == 1 and col not in rating_columns]
+    df_filtered = df.drop(columns=constant_columns)
 
+    correlation_matrix = df_filtered.corr()
 
     # Extract correlations with ratings (FOR VIEWING PURPOSES)
     rating_correlations = correlation_matrix[['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']]
