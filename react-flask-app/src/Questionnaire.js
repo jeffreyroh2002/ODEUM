@@ -46,13 +46,9 @@ export default function Questionnaire() {
         }
     }, [audioFilePath])
 
-    const handleNextQuestion = () => {
-        setQuestionIndex(prevIndex => prevIndex + 1);
-    };
+    const handleNextQuestion = () => { setQuestionIndex(prevIndex => prevIndex + 1); };
 
-    const handlePrevQuestion = () => {
-        setQuestionIndex(prevIndex => prevIndex - 1);
-    };
+    const handlePrevQuestion = () => { setQuestionIndex(prevIndex => prevIndex - 1); };
 
     return (
         <div>

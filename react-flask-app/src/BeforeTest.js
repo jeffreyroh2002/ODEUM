@@ -15,7 +15,6 @@ export default function BeforeTest() {
         .then(data => {
             setAudioFileId(data.audio_file_id);
             setTestId(data.test_id);
-            console.log(data.audio_file_id, data.test_id);
         })
         .catch(error => console.error('Error fetching audio file info:', error));
     }, []); // .
