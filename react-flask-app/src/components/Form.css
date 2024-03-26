@@ -45,6 +45,9 @@ body {
     border-radius: 20px; /* Add rounded corners */
 }
 
+.yellow-background {
+    background-color: yellow;
+}
 
 .prev--button,
 .next--button,

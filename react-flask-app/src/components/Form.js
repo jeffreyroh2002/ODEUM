@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import './Form.css';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import axios from 'axios'
 
 export default function Form({ testId, questionIndex, onPrevButton, onNextButton, audiosNum, questionsNum, onQuit, onTestSubmit}) {
   const [csrfToken, setCsrfToken] = useState('');
   const MySwal = withReactContent(Swal)
-
-  const selection_types = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
-  const selection_type = selection_types[questionIndex % questionsNum]
-
+  const [savedRating, setSavedRating] = useState();
+  const selectionTypes = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
+  const [selectionType, setSelectionType] = useState(selectionTypes[questionIndex % questionsNum])
+  const buttons = document.querySelectorAll('.rating--button')
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
   useEffect(() => {
     fetch('/csrf-token').then(response => {
@@ -19,11 +20,50 @@ export default function Form({ testId, questionIndex, onPrevButton, onNextButton
     });
   }, []);
 
-  // submitting to the Flask backend
-  function handleSelection(selection_type, type_rating) {
-    console.log(questionIndex)
+  useEffect(() => {
+    axios.get(`/get_useranswer?question_index=${questionIndex}&test_id=${testId}`)
+         .then(response => {
+            console.log("response rating: ",response.data.rating);
+            setSavedRating(parseInt(response.data.rating));
+         })
+         .catch(error => {console.log("error in fetching useranswer data: ", error)});
+    setSelectionType(selectionTypes[questionIndex % questionsNum]);
+  }, [questionIndex])
 
-    if (questionIndex % questionsNum === 1 && type_rating === undefined) {
+  useEffect(() => {
+    buttons.forEach(button => { button.classList.remove('yellow-background'); });
+    switch(savedRating) {
+      case 3:
+          document.getElementById(`button1`).classList.add('yellow-background');
+          break;
+      case 2:
+          document.getElementById(`button2`).classList.add('yellow-background');
+          break;
+      case 1:
+          document.getElementById(`button3`).classList.add('yellow-background');
+          break;
+      case -1:
+          document.getElementById(`button4`).classList.add('yellow-background');
+          break;
+      case -2:
+          document.getElementById(`button5`).classList.add('yellow-background');
+          break;
+      case -3:
+          document.getElementById(`button6`).classList.add('yellow-background');
+          break;
+      case 0:
+          console.log("no selection => default 0");
+          break;
+      default:
+          console.log("No valid selection");
+    }
+  }, [savedRating])
+
+  function handleSelection(rating) { setSavedRating(rating); }
+  // submitting to the Flask backend
+
+  function handleSelectionSubmit() {
+    if (questionIndex % questionsNum === 1 && !savedRating) {
       MySwal.fire({
         icon: "error",
         title: "This question is required!",
@@ -31,8 +71,9 @@ export default function Form({ testId, questionIndex, onPrevButton, onNextButton
     }
     
     else {
-      if (type_rating === undefined) type_rating = 0
+      if (!savedRating) setSavedRating(0)
       // When a user selects an answer, post the answer to the backend
+      console.log(selectionType, savedRating)
       fetch('/submit_answer', {
         method: 'POST',
         headers: {
@@ -42,14 +83,14 @@ export default function Form({ testId, questionIndex, onPrevButton, onNextButton
         body: JSON.stringify({
           test_id: testId,
           question_index: questionIndex,
-          type: selection_type,
-          rating: type_rating 
+          type: selectionType,
+          rating: savedRating 
         })
       })
-      .then(response => { if (!response.ok) { throw new Error('Network response was not ok'); } });
       onNextButton();
     }
   }
+
 
   return (
     <div>
@@ -58,51 +99,48 @@ export default function Form({ testId, questionIndex, onPrevButton, onNextButton
         {questionIndex % questionsNum === 1 && (
           <div className="rating-group">
             <h4 className="rating--label">Rate the Song.</h4>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 3)}>could listen to it all day &#128293;</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 2)}>pretty decent</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 1)}>could get used to it</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -1)}>would not play it myself</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -3)}>hate it with a passion &#128556;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>could listen to it all day &#128293;</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>pretty decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>could get used to it</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>hate it with a passion &#128556;</button>
           </div>
         )}
 
         {questionIndex % questionsNum === 2 && (
           <div className="rating-group">
             <h4 className="rating--label">How is the Genre?</h4>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 3)}>Fire</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 2)}>Decent</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 1)}>Not bad</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -1)}>Would not play it myself</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -3)}>Hate it</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 0)}>Not sure &#x1f937;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>Fire</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>Decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>Not bad</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>Would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>Hate it</button>
           </div>
         )}
 
         {questionIndex % questionsNum === 3 && (
           <div className="rating-group">
             <h4 className="rating--label">Describe the vibe or feeling of this song.</h4>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 3)}>Fire</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 2)}>Decent</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 1)}>Not bad</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -1)}>Would not play it myself</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -3)}>Hate it </button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 0)}>Not sure &#x1f937;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>Fire</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>Decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>Not bad</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>Would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>Hate it </button>
           </div>
         )}
 
         {questionIndex % questionsNum === 0 && (
           <div className="rating-group">
             <h4 className="rating--label">Thoughts on the vocals?</h4>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 3)}>Fire</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 2)}>Decent</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 1)}>Not bad</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -1)}>Would not play it myself</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, -3)}>Hate it</button>
-            <button className="rating--button" onClick={() => handleSelection(selection_type, 0)}>Not sure &#x1f937;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>Fire</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>Decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>Not bad</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>Would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>Hate it</button>
           </div>
         )}
       </div>
@@ -112,8 +150,8 @@ export default function Form({ testId, questionIndex, onPrevButton, onNextButton
         <button className="prev--button" onClick={onPrevButton}>Previous Button</button>}
 
       {questionIndex ===  audiosNum * questionsNum ?  
-        <button className="submit--button" onClick={() => handleSelection(selection_type, undefined)}>Submit Test</button> :
-        <button className="next--button" onClick={() => handleSelection(selection_type, undefined)}>Next Button</button>}
+        <button className="submit--button" onClick={() => handleSelectionSubmit()}>Submit Test</button> :
+        <button className="next--button" onClick={() => handleSelectionSubmit()}>Next Button</button>}
 
     </div>
   );
