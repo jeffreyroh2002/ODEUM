@@ -16,6 +16,8 @@
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.5",
     "react-typist": "^2.0.5",
+    "sweetalert2": "^11.10.7",
+    "sweetalert2-react-content": "^5.0.7",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

@@ -160,11 +160,13 @@ def submit_answer():
     data = json.loads(data)
     question_index = data['question_index']
     answer_type = data['type']
+    print("rating: ", data['rating'])
     rating = data['rating']
     test_id = int(data['test_id'])
     audio_index = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
     
     if question_index % NUM_QUESTIONS_PER_AUDIO == 1:
+        print("new answer added")
         new_answer = UserAnswer(audio_id=audio_index, test_id=test_id, user_id=current_user.id)
         db.session.add(new_answer)
         db.session.commit()
@@ -173,6 +175,7 @@ def submit_answer():
     setattr(answer, answer_type, rating)
     db.session.commit()
     answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
+    print(answer)
 
     if question_index == TOTAL_QUESTIONS:
         test = Test.query.get(test_id)
