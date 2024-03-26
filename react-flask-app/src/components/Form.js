@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './Form.css';
 import { useNavigate } from 'react-router-dom';
 export default function Form({ testId, questionIndex, onPrevQuestion, onNextQuestion, audiosNum, questionsNum}) {
-  console.log(audiosNum, questionsNum)
   const [csrfToken, setCsrfToken] = useState('');
   const navigate = useNavigate();
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled

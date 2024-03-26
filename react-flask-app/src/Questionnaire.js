@@ -14,33 +14,30 @@ export default function Questionnaire() {
     const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
 
-
-    const [audioFileId, setAudioFileId] = useState(1);
+    const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
     const [audioFilePath, setAudioFilePath] = useState('');
     const currentAudioFileId = parseInt(searchParams.get('audio_file_id'));
     const testType = parseInt(searchParams.get('test_type'));
     const testId = parseInt(searchParams.get('test_id'));
     const questionsNum = 4;
     const [questionIndex, setQuestionIndex] = useState(questionsNum * (audioFileId - 1) + 1);
-    const [audiosNum, setAudiosNum] = useState(1);
+    const [audiosNum, setAudiosNum] = useState(2);
 
     //getting the number of audio files
     useEffect(() => {
         axios.get('/get_audio_num')
-             .then(response => { setAudiosNum(response.data.num_audio) });
+             .then(response => { setAudiosNum(parseInt(response.data.num_audio)) });
     }, [])
 
     useEffect(() => {
         if (Math.ceil(questionIndex / questionsNum) !== audioFileId) {
             setAudioFileId(Math.ceil(questionIndex / questionsNum))
         }
-    }, [questionIndex])
+    }, [questionIndex, audiosNum])
 
     useEffect(() => {
         axios.get(`/get_audio_filename?audio_id=${audioFileId}`)
-             .then((response) => {
-                setAudioFilePath(response.data.audio_filename);
-             })
+             .then((response) => { setAudioFilePath(response.data.audio_filename); })
     }, [audioFileId])
 
     useEffect(() => {

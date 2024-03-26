@@ -166,7 +166,8 @@ def submit_answer():
     rating = data['rating']
     setattr(answer, answer_type, rating)
     db.session.commit()
-    answers = UserAnswer.query.filter_by(test_id=int(data['test_id'])).all()
+    answer = UserAnswer.query.filter_by(test_id=int(data['test_id']), audio_id=audio_index).first()
+    print(answer.overall_rating, answer.genre_rating, answer.mood_rating, answer.vocal_timbre_rating)
 
     if question_index == TOTAL_QUESTIONS:
         test = Test.query.get(data['test_id'])
@@ -181,6 +182,7 @@ def before_test_info():
     user = current_user
     num_audio = 3
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+    print(test)
     if not test or test.test_end_time:        
         test_val = Test(
             test_type = 1,
@@ -208,7 +210,8 @@ def before_test_info():
         else:
             audio_file_id = last_answer.audio_id
             audio_file = AudioFile.query.get_or_404(audio_file_id)
-    
+
+        print(audio_file_id, audio_file.audio_name)
     return jsonify({
                 'status': 'in_progress',
                 'new_test': is_new_test,
@@ -298,7 +301,7 @@ def get_prev_questions():
 def get_audio_num():
     dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
     filenames = os.listdir(dir_path)
-    full_filenames = ['static/audio_files/' + filename for filename in filenames]
+    print(len(filenames))
     return jsonify({"num_audio": len(filenames)})
 
 @login_required
@@ -308,7 +311,6 @@ def get_audio_filename():
     dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
     filenames = os.listdir(dir_path)
     full_filenames = ['static/audio_files/' + filename for filename in filenames]
-    print(audio_id)
     return jsonify({"audio_filename": full_filenames[int(audio_id) - 1]})
 
 

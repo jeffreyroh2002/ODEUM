@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import playIcon from './images/blob.png'
 
 export default function BeforeTest() {
-
-    const [audioFileId, setAudioFileId] = useState();
-    const [testId, setTestId] = useState();
+    const navigate = useNavigate()
+    const [audioFileId, setAudioFileId] = useState(1);
+    const [testId, setTestId] = useState(1);
 
     useEffect(() => {
         fetch(`/before_test_info`)
@@ -15,13 +15,14 @@ export default function BeforeTest() {
         .then(data => {
             setAudioFileId(data.audio_file_id);
             setTestId(data.test_id);
+            console.log(data.audio_file_id, data.test_id);
         })
         .catch(error => console.error('Error fetching audio file info:', error));
     }, []); // .
 
-    const navigate = useNavigate()
     const navigateToQuestionnaire = () => {
         const testType = 1;
+        console.log(audioFileId, testType, testId)
         navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`)
     };
 
