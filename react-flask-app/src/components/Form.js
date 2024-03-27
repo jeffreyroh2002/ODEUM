@@ -1,32 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './Form.css';
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+import axios from 'axios'
 
-export default function Form({ audioFileId, testId, currentQuestionIndex, onAudioFile, setQuestion, onPrevQuestion, onNextQuestion }) {
-  const navigate = useNavigate();
-  const [selections, setSelections] = useState({
-    overallRating: null,
-    genreRating: 0,
-    moodRating: 0,
-    vocalRating: 0,
-  });
-
+export default function Form({ testId, questionIndex, onPrevButton, onNextButton, audiosNum, questionsNum, onQuit, onTestSubmit}) {
   const [csrfToken, setCsrfToken] = useState('');
-
-
-  useEffect(() => {
-    console.log('Audio file id in Form:', audioFileId);
-  }, [audioFileId]);
-
-  useEffect(() => {
-    console.log('testId in Form:', testId);
-  }, [testId]);
-
-  useEffect(() => {
-    console.log('selections', selections);
-  }, [selections]);
-
-
+  const MySwal = withReactContent(Swal)
+  const [savedRating, setSavedRating] = useState();
+  const selectionTypes = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
+  const [selectionType, setSelectionType] = useState(selectionTypes[questionIndex % questionsNum])
+  const buttons = document.querySelectorAll('.rating--button')
   // Fetch CSRF token on component mount if your Flask app has CSRF protection enabled
   useEffect(() => {
     fetch('/csrf-token').then(response => {
@@ -36,212 +20,136 @@ export default function Form({ audioFileId, testId, currentQuestionIndex, onAudi
     });
   }, []);
 
-  function handlePrevButton() {
-    if (currentQuestionIndex > 0) {
-      // If currentQuestionIndex is greater than 0, go to the previous question
-      onPrevQuestion();
-    } else {
-      // If currentQuestionIndex is 0, fetch the previous audio file
-      const prevForm = '/get_prev_questions';
-      fetch(prevForm, {
+  useEffect(() => {
+    axios.get(`/get_useranswer?question_index=${questionIndex}&test_id=${testId}`)
+         .then(response => {
+            console.log("response rating: ",response.data.rating);
+            setSavedRating(parseInt(response.data.rating));
+         })
+         .catch(error => {console.log("error in fetching useranswer data: ", error)});
+    setSelectionType(selectionTypes[questionIndex % questionsNum]);
+  }, [questionIndex])
+
+  useEffect(() => {
+    buttons.forEach(button => { button.classList.remove('yellow-background'); });
+    switch(savedRating) {
+      case 3:
+          document.getElementById(`button1`).classList.add('yellow-background');
+          break;
+      case 2:
+          document.getElementById(`button2`).classList.add('yellow-background');
+          break;
+      case 1:
+          document.getElementById(`button3`).classList.add('yellow-background');
+          break;
+      case -1:
+          document.getElementById(`button4`).classList.add('yellow-background');
+          break;
+      case -2:
+          document.getElementById(`button5`).classList.add('yellow-background');
+          break;
+      case -3:
+          document.getElementById(`button6`).classList.add('yellow-background');
+          break;
+      case 0:
+          console.log("no selection => default 0");
+          break;
+      default:
+          console.log("No valid selection");
+    }
+  }, [savedRating])
+
+  function handleSelection(rating) { setSavedRating(rating); }
+  // submitting to the Flask backend
+
+  function handleSelectionSubmit() {
+    if (questionIndex % questionsNum === 1 && !savedRating) {
+      MySwal.fire({
+        icon: "error",
+        title: "This question is required!",
+      });
+    }
+    
+    else {
+      // When a user selects an answer, post the answer to the backend
+      fetch('/submit_answer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrfToken,
         },
         body: JSON.stringify({
-          audio_id: audioFileId, 
           test_id: testId,
-        }),
+          question_index: questionIndex,
+          type: selectionType,
+          rating: (savedRating ? savedRating : 0)
+        })
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.status === 'send_to_before_test') {
-          // If the server response indicates to navigate to the BeforeTest page, do so
-          navigate('/BeforeTest');
-        } 
-        else {
-          const prevAudioFileId = data.prev_audio_file_id; // Extract next audio file id from server response
-          console.log("prev audio file id: ", prevAudioFileId)
-          if (prevAudioFileId) {
-            // Load new audio file
-            onAudioFile(prevAudioFileId);
-            // Reset selections
-            setSelections({
-              overallRating: null,
-              genreRating: 0,
-              moodRating: 0,
-              vocalRating: 0,
-          });
-
-          setQuestion(3);
-          }
-        }
-      })
-      .catch(error => {
-        console.error('Error getting previous questions:', error);
-        alert('There was an error getting previous questions. Please try again.');
-      });
-    }
-  }
-  
-  
-
-  // submitting to the Flask backend
-  function handleNextButton() {
-    if (currentQuestionIndex < 4) {
-      onNextQuestion() // Go to next question
-    } else {
-      // All questions are answered, load new audio file or navigate to completion page
-      const submitUrl = '/submit_answer';
-      console.log("VOCAL_TIMBRE_RATING:", selections.vocalRating)
-      fetch(submitUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken, // Assuming CSRF protection is enabled
-        },
-        body: JSON.stringify({
-          overall_rating: selections.overallRating,
-          genre_rating: selections.genreRating,
-          mood_rating: selections.moodRating,
-          vocal_timbre_rating: selections.vocalRating,
-          audio_id: audioFileId, 
-          test_id: testId,
-        }),
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
-        const nextTestId = data.test_id;
-  
-        if (nextAudioFileId) {
-          // Load new audio file
-          onAudioFile(nextAudioFileId);
-          // Reset selections
-          setSelections({
-            overallRating: null,
-            genreRating: 0,
-            moodRating: 0,
-            vocalRating: 0,
-          });
-          // Reset question index to 0
-          setQuestion(0);
-        } else {
-          // Navigate to test completion page
-          navigate(`/TestCompleted?testId=${nextTestId}`, { replace: true });
-        }
-      })
-      .catch(error => {
-        console.error('Error submitting answers:', error);
-        alert('There was an error submitting your answers. Please try again.');
-      });
+      onNextButton();
     }
   }
 
-  function handleOverallButton(rating){
-    setSelections({
-      ...selections,
-      overallRating: rating
-    });
-    handleNextButton()
-  }
-
-  function handleGenreButton(rating){
-    setSelections({
-      ...selections,
-      genreRating: rating
-    });
-    handleNextButton()
-  }
-  function handleMoodButton(rating){
-    setSelections({
-      ...selections,
-      moodRating: rating
-    });
-    handleNextButton()
-  }
-  function handleVocalButton(rating){
-    setSelections({
-      ...selections,
-      vocalRating: rating
-    });
-    handleNextButton()
-  }
 
   return (
     <div>
       <div className="rating--container">
-        {/* Render questions based on currentQuestionIndex */}
-        {currentQuestionIndex === 0 && (
+        {/* Render questions based on currentQOKuestionIndex */}
+        {questionIndex % questionsNum === 1 && (
           <div className="rating-group">
             <h4 className="rating--label">Rate the Song.</h4>
-            <button className="rating--button" onClick={() => handleOverallButton(3)}>could listen to it all day &#128293;</button>
-            <button className="rating--button" onClick={() => handleOverallButton(2)}>pretty decent</button>
-            <button className="rating--button" onClick={() => handleOverallButton(1)}>could get used to it</button>
-            <button className="rating--button" onClick={() => handleOverallButton(-1)}>would not play it myself</button>
-            <button className="rating--button" onClick={() => handleOverallButton(-2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleOverallButton(-3)}>hate it with a passion &#128556;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>could listen to it all day &#128293;</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>pretty decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>could get used to it</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>hate it with a passion &#128556;</button>
           </div>
         )}
 
-        {currentQuestionIndex === 1 && (
+        {questionIndex % questionsNum === 2 && (
           <div className="rating-group">
             <h4 className="rating--label">How is the Genre?</h4>
-            <button className="rating--button" onClick={() => handleGenreButton(3)}>Fire</button>
-            <button className="rating--button" onClick={() => handleGenreButton(2)}>Decent</button>
-            <button className="rating--button" onClick={() => handleGenreButton(1)}>Not bad</button>
-            <button className="rating--button" onClick={() => handleGenreButton(-1)}>Would not play it myself</button>
-            <button className="rating--button" onClick={() => handleGenreButton(-2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleGenreButton(-3)}>Hate it</button>
-            <button className="rating--button" onClick={() => handleGenreButton(0)}>Not sure &#x1f937;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>Fire</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>Decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>Not bad</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>Would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>Hate it</button>
           </div>
         )}
 
-        {currentQuestionIndex === 2 && (
+        {questionIndex % questionsNum === 3 && (
           <div className="rating-group">
             <h4 className="rating--label">Describe the vibe or feeling of this song.</h4>
-            <button className="rating--button" onClick={() => handleMoodButton(3)}>Fire</button>
-            <button className="rating--button" onClick={() => handleMoodButton(2)}>Decent</button>
-            <button className="rating--button" onClick={() => handleMoodButton(1)}>Not bad</button>
-            <button className="rating--button" onClick={() => handleMoodButton(-1)}>Would not play it myself</button>
-            <button className="rating--button" onClick={() => handleMoodButton(-2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleMoodButton(-3)}>Hate it </button>
-            <button className="rating--button" onClick={() => handleMoodButton(0)}>Not sure &#x1f937;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>Fire</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>Decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>Not bad</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>Would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>Hate it </button>
           </div>
         )}
 
-        {currentQuestionIndex === 3 && (
+        {questionIndex % questionsNum === 0 && (
           <div className="rating-group">
             <h4 className="rating--label">Thoughts on the vocals?</h4>
-            <button className="rating--button" onClick={() => handleVocalButton(3)}>Fire</button>
-            <button className="rating--button" onClick={() => handleVocalButton(2)}>Decent</button>
-            <button className="rating--button" onClick={() => handleVocalButton(1)}>Not bad</button>
-            <button className="rating--button" onClick={() => handleVocalButton(-1)}>Would not play it myself</button>
-            <button className="rating--button" onClick={() => handleVocalButton(-2)}>eh...</button>
-            <button className="rating--button" onClick={() => handleVocalButton(-3)}>Hate it</button>
-            <button className="rating--button" onClick={() => handleVocalButton(0)}>Not sure &#x1f937;</button>
+            <button id="button1" className="rating--button" onClick={() => handleSelection(3)}>Fire</button>
+            <button id="button2" className="rating--button" onClick={() => handleSelection(2)}>Decent</button>
+            <button id="button3" className="rating--button" onClick={() => handleSelection(1)}>Not bad</button>
+            <button id="button4" className="rating--button" onClick={() => handleSelection(-1)}>Would not play it myself</button>
+            <button id="button5" className="rating--button" onClick={() => handleSelection(-2)}>eh...</button>
+            <button id="button6" className="rating--button" onClick={() => handleSelection(-3)}>Hate it</button>
           </div>
         )}
       </div>
       
-      <button className="prev--button" onClick={handlePrevButton}>
-        Previous Button
-      </button>
+      {questionIndex === 1 ? 
+        <button className="quit--button" onClick={onQuit}>Quit Test</button> :
+        <button className="prev--button" onClick={onPrevButton}>Previous Button</button>}
 
-      <button className="next--button" onClick={handleNextButton}>
-        Next Button
-      </button>
+      {questionIndex ===  audiosNum * questionsNum ?  
+        <button className="submit--button" onClick={() => handleSelectionSubmit()}>Submit Test</button> :
+        <button className="next--button" onClick={() => handleSelectionSubmit()}>Next Button</button>}
 
     </div>
   );

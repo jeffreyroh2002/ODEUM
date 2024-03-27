@@ -104,10 +104,10 @@ class AudioFile(db.Model):
 
 class UserAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    overall_rating = db.Column(db.Integer, nullable=False)
-    genre_rating = db.Column(db.Integer, nullable=False)
-    mood_rating = db.Column(db.Integer, nullable=False)
-    vocal_timbre_rating = db.Column(db.Integer, nullable=False)
+    overall_rating = db.Column(db.Integer, nullable=True)
+    genre_rating = db.Column(db.Integer, nullable=True)
+    mood_rating = db.Column(db.Integer, nullable=True)
+    vocal_timbre_rating = db.Column(db.Integer, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     audio_id = db.Column(db.Integer, db.ForeignKey("audio_file.id"), nullable=False)
     test_id = db.Column(db.Integer, db.ForeignKey("test.id"), nullable=False)
