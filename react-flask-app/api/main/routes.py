@@ -371,20 +371,6 @@ def get_user_info():
         'tests_data': tests_data
     })
 
-
-@main.route("/test_results", methods=['GET'])
-@login_required
-def test_results():
-    test_id = request.args.get('testId')
-
-    #calculate all characteristics
-    user = current_user
-    print(user)
-    test = Test.query.filter_by(id=test_id).first()
-    answers = UserAnswer.query.filter_by(test_id=test_id).all()
-    if test.subject != current_user: 
-        return jsonify({'error': 'User does not match test owner'}), 403
-
 def prepare_structured_data(test_answers):
     """Extracts and structures data from test answers."""
     structured_data = []

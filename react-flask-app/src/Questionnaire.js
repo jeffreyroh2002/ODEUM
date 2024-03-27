@@ -92,11 +92,6 @@ export default function Questionnaire() {
         })
       }
     
-
-    const handlePlayPause = () => {
-        setIsPlaying(!isPlaying);
-    }
-
     return (
         <div>
             <Header />
