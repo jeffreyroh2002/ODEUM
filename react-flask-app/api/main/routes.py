@@ -33,9 +33,14 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import MaxNLocator
 from collections import defaultdict
 import seaborn as sns
-
+import os
 
 main = Blueprint('main', __name__)
+
+NUM_AUDIO = 3
+NUM_QUESTIONS_PER_AUDIO = 4
+EXTRA_QUESTIONS = 0
+TOTAL_QUESTIONS = NUM_AUDIO * NUM_QUESTIONS_PER_AUDIO + EXTRA_QUESTIONS
 
 @main.route('/')
 def home():
@@ -135,7 +140,6 @@ def login():
 @main.route('/logout', methods=["POST"])
 @login_required  # Require the user to be logged in to access this route
 def logout():
-    print("HELLOW WORLD!!!!")
     logout_user()
     return jsonify({"message": "Logout successful"})
 
@@ -156,74 +160,64 @@ def get_prev_audio_file_id(current_audio_file_id):
     prev_audio_file = AudioFile.query.filter(AudioFile.id < current_audio_file_id).order_by(AudioFile.id.desc()).first()
     return prev_audio_file.id if prev_audio_file else None
 
+@login_required
+@main.route('/get_useranswer', methods=['GET'])
+def get_useranswer():
+    question_index = int(request.args.get('question_index'))
+    test_id = int(request.args.get('test_id'))
+    selection_types = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
+    audio_id = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
+    selection_type = selection_types[question_index % NUM_QUESTIONS_PER_AUDIO]
+    print("audio_id, selection_type: ", audio_id, selection_type)
+    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_id).first()
+    if answer == None:
+        rating = None
+    else:
+        rating = getattr(answer, selection_type)
+    print("rating: ", rating)
+    return jsonify({"rating" : rating})
+
 @main.route('/submit_answer', methods=['POST'])
 @login_required
 def submit_answer():
-    data = request.json
-    print("submit answer test id submited:", data['test_id'])
-    new_answer = UserAnswer(
-        overall_rating=data['overall_rating'],
-        genre_rating=data['genre_rating'],
-        mood_rating=data['mood_rating'],
-        vocal_timbre_rating=data['vocal_timbre_rating'],
-        user_id=current_user.id,
-        audio_id=data['audio_id'],
-        test_id=data['test_id'],
-    )
-    print("VOCAL TIMBRE RATING:", new_answer.vocal_timbre_rating)
-    
-    db.session.add(new_answer)
-    db.session.commit()
+    data = request.data.decode('utf-8')
+    data = json.loads(data)
+    question_index = data['question_index']
+    answer_type = data['type']
+    print("answer_type: ", answer_type)
+    print("rating: ", data['rating'])
+    rating = data['rating']
+    test_id = int(data['test_id'])
+    audio_index = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
+    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
 
-    next_audio_file_id = get_next_audio_file_id(data['audio_id'])
-    test = Test.query.filter_by(user_id=current_user.id, id=data['test_id']).first()
-    
-    if next_audio_file_id is not None:
-        #add logic to call the next values if available
-        next_audio_file = AudioFile.query.get(next_audio_file_id)
-        db_answer = UserAnswer.query.filter((UserAnswer.test == test) & (UserAnswer.audio_id == next_audio_file.id) & (UserAnswer.user == current_user)).first()
-        print("next db_answer:", db_answer)
-        if db_answer == None:
-            return jsonify({
-                'message': 'Answer submitted successfully', 
-                'next_audio_file_id': next_audio_file_id, 
-                'test_id': test.id,
-                'overall_rating': None,
-                'genre_rating': 0,
-                'mood_rating': 0,
-                'vocal_timbre_rating': 0
-            })
-        else:
-            return jsonify({
-                'message': 'Answer submitted successfully', 
-                'next_audio_file_id': next_audio_file_id, 
-                'test_id': test.id,
-                'overall_rating': db_answer.overall_rating,
-                'genre_rating': db_answer.genre_rating,
-                'mood_rating': db_answer.mood_rating,
-                'vocal_timbre_rating': db_answer.vocal_timbre_rating
-            })
-    else:
-        # Handle the case where there are no more audio files
-        user = current_user
-        print("TEST TEST TEST!:", test )
+    if question_index % NUM_QUESTIONS_PER_AUDIO == 1 and not answer:
+        print("new answer added")
+        new_answer = UserAnswer(audio_id=audio_index, test_id=test_id, user_id=current_user.id)
+        db.session.add(new_answer)
+        db.session.commit()
+        answer = UserAnswer.query.filter_by(audio_id=audio_index, test_id=test_id, user_id=current_user.id).first()
+
+    setattr(answer, answer_type, rating)
+    db.session.commit()
+    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
+    print(answer.overall_rating, answer.genre_rating, answer.mood_rating, answer.vocal_timbre_rating)
+
+    if question_index == TOTAL_QUESTIONS:
+        test = Test.query.get(test_id)
         test.test_end_time = datetime.now()
         db.session.commit()
-        print("TEST TEST TEST!:", test )
-        return jsonify({'message': 'Test completed', 'next_audio_file_id': None, 'test_id': test.id})
+        
+    return jsonify({"Hello": "World"})
     
-
 @main.route('/before_test_info', methods=['GET'])
 @login_required
 def before_test_info():
-
     user = current_user
-    #test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+    num_audio = 3
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-    print(test)
-    # haven't taken this test before or need to start a new one
-    if not test or test.test_end_time:
-        print("CREATING NEW TEST NOW!")
+
+    if not test or test.test_end_time:        
         test_val = Test(
             test_type = 1,
             test_start_time = datetime.now(),
@@ -231,52 +225,36 @@ def before_test_info():
         )
         db.session.add(test_val)
         db.session.commit()
+        is_new_test = True
         audio_file_id = 1
         audio_file = AudioFile.query.get_or_404(audio_file_id)
-
-        newTest = True
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-        print("new test id:", test.id)
-        print("IM ABOUT TO GO BACK TO FRONTEND")
-        print("audio_file", audio_file)
-        return jsonify({
-                    'status': 'in_progress',
-                    'new_test': newTest,
-                    'audio_file_id': audio_file_id,
-                    'audio_file_name': audio_file.audio_name,
-                    'test_id': test.id
-        })
-    
+        # for audio_index in range(1, num_audio + 1):
+        #     tmp = UserAnswer(user_id=user.id, audio_id=audio_index, test_id=test.id)
+        #     db.session.add(tmp)
+        #     db.session.commit()
 
-    #need to continue ongoing test
     else:
-        print("BEFORE LAST answer:")
-        newTest = False
-        last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
+        is_new_test = False
+        last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.overall_rating != None) \
+                                      .order_by(UserAnswer.audio_id.desc()).first()
         if last_answer == None:
-            audio_file = AudioFile.query.get_or_404(1)
-            return jsonify({
-                    'status': 'in_progress',
-                    'new_test': newTest,
-                    'audio_file_id': audio_file.id,
-                    'audio_file_name': audio_file.audio_name,
-                    'test_id': test.id
-        })
-        else:
-            print("last answer:", last_answer)
-            audio_file_id = last_answer.audio_id
-            print("audio_file_id:", audio_file_id)
+            audio_file_id = 1
             audio_file = AudioFile.query.get_or_404(audio_file_id)
-            print("audio_file:", audio_file)
-            newTest = False
-            # print("new audio file id: ",audio_file_id)
-            return jsonify({
-                        'status': 'in_progress',
-                        'new_test': newTest,
-                        'audio_file_id': audio_file_id,
-                        'audio_file_name': audio_file.audio_name,
-                        'test_id': test.id
-            })
+        else:
+            audio_file_id = last_answer.audio_id
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+
+        print(audio_file_id, audio_file.audio_name)
+    
+    return jsonify({
+                'status': 'in_progress',
+                'new_test': is_new_test,
+                'audio_file_id': audio_file_id,
+                'audio_file_name': audio_file.audio_name,
+                'test_id': test.id
+    })
+
 
 @login_required
 @main.route('/get_next_questions', methods=["GET"])
@@ -285,7 +263,6 @@ def get_next_questions():
     test_type = request.args.get('test_type', type=int)
     audio_file_id = request.args.get('audio_file_id', type=int)
     test_id = request.args.get('test_id', type=int)
-    print("TESTID!!!!:", test_id)
 
     if not test_type or audio_file_id is None:
         return jsonify({'error': 'Missing required parameters'}), 400
@@ -293,8 +270,7 @@ def get_next_questions():
     user = current_user
 
     # Find the latest test of the specified type for the user
-    test = Test.query.filter_by(user_id=user.id, test_type=test_type, id=test_id).order_by(Test.test_start_time.desc()).first()
-    print("current test!:", test)
+    test = Test.query.filter_by(user_id=user.id, test_type=test_type, id=test_id).first()
     # Continue with the ongoing test
     audio_file = AudioFile.query.get(audio_file_id)
     newTest = False
@@ -356,6 +332,24 @@ def get_prev_questions():
         })
 
 @login_required
+@main.route('/get_audio_num', methods=["GET"])
+def get_audio_num():
+    dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+    filenames = os.listdir(dir_path)
+    print(len(filenames))
+    return jsonify({"num_audio": len(filenames)})
+
+@login_required
+@main.route('/get_audio_filename', methods=["GET"])
+def get_audio_filename():
+    audio_id = request.args.get('audio_id')
+    dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+    filenames = os.listdir(dir_path)
+    full_filenames = ['static/audio_files/' + filename for filename in filenames]
+    return jsonify({"audio_filename": full_filenames[int(audio_id) - 1]})
+
+
+@login_required
 @main.route('/get_user_info', methods=["GET"])
 def get_user_info():
     user = current_user
@@ -378,7 +372,18 @@ def get_user_info():
     })
 
 
+@main.route("/test_results", methods=['GET'])
+@login_required
+def test_results():
+    test_id = request.args.get('testId')
 
+    #calculate all characteristics
+    user = current_user
+    print(user)
+    test = Test.query.filter_by(id=test_id).first()
+    answers = UserAnswer.query.filter_by(test_id=test_id).all()
+    if test.subject != current_user: 
+        return jsonify({'error': 'User does not match test owner'}), 403
 
 def prepare_structured_data(test_answers):
     """Extracts and structures data from test answers."""

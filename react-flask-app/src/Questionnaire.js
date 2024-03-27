@@ -7,58 +7,91 @@ import AudioVisualizerSphere from './components/AudioVisualizerSphere'
 import './Questionnaire.css';
 import playIcon from './images/blob.png'
 import pauseIcon from './images/dark_blob.png'
-//import sample_audio from "./Audio/sample_audio.mp3"
+import axios from 'axios';
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
 export default function Questionnaire() {
     const location = useLocation();
     const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
+
     const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
-    const testType = searchParams.get('test_type');
-    const testId = searchParams.get('test_id');
-
     const [audioFilePath, setAudioFilePath] = useState('');
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(false); 
+    const currentAudioFileId = parseInt(searchParams.get('audio_file_id'));
+    const testType = parseInt(searchParams.get('test_type'));
+    const testId = parseInt(searchParams.get('test_id'));
+    const questionsNum = 4;
+    const [questionIndex, setQuestionIndex] = useState(questionsNum * (audioFileId - 1) + 1);
+    const [audiosNum, setAudiosNum] = useState(2);
+
+    const MySwal = withReactContent(Swal)
+
+    //getting the number of audio files
+    useEffect(() => {
+        axios.get('/get_audio_num')
+             .then(response => { setAudiosNum(parseInt(response.data.num_audio)) });
+    }, [])
 
     useEffect(() => {
-        console.log('Audio file path:', audioFilePath);
-        const queryParams = new URLSearchParams({ audio_file_id: audioFileId, test_type: testType, test_id: testId }).toString();
-        fetch(`/get_next_questions?${queryParams}`)
-        .then(res => res.json())
-        .then(data => {
-            const path = `/static/audio_files/${data.audio_file_name}`;
-            setAudioFilePath(path);
-        })
-        .catch(error => console.error('Error fetching audio file info:', error));
-    }, [audioFileId, testType, testId]);
+        if (Math.ceil(questionIndex / questionsNum) !== audioFileId) {
+            setAudioFileId(Math.ceil(questionIndex / questionsNum))
+        }
+    }, [questionIndex, audiosNum])
 
     useEffect(() => {
-        // Code that uses the updated audioFilePath 
-        console.log('Updated audio file path:', audioFilePath);  
-    }, [audioFilePath]); // Add a useEffect that depends on audioFilePath
+        axios.get(`/get_audio_filename?audio_id=${audioFileId}`)
+             .then((response) => { setAudioFilePath(response.data.audio_filename); })
+    }, [audioFileId])
+
+    useEffect(() => {
+        if (currentAudioFileId !== audioFileId) {
+            navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`)
+        }
+    }, [audioFilePath])
     
-    useEffect(() => {
-        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`, { replace: true });
-    }, [audioFileId, testType, testId, navigate]);
-
-    const handleNextQuestion = () => {
-        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+    const handleNextButton = () => { 
+        if (questionIndex !== audiosNum * questionsNum) setQuestionIndex(prev => prev + 1);
+        else handleTestSubmit();
     };
-
-    const handlePrevQuestion = () => {
-        setCurrentQuestionIndex(prevIndex => prevIndex - 1);
-    };
-
-    const setQuestion = () => {
-        setCurrentQuestionIndex(prevIndex => prevIndex);
-    };
-
-    const handleAudioFile = (audioFileId) => {
-        console.log('Next audio file id:', audioFileId);
-        setAudioFileId(audioFileId);
-        setCurrentQuestionIndex(0); // Reset current question index when changing audio file
-    };
+    
+    function handleTestSubmit() {
+        MySwal.fire({
+            title: "Do you want to submit the test in progress?",
+            showConfirmButton: true,
+            showDenyButton: false,
+            showCancelButton: true,
+            confirmButtonText: `Submit`
+        }).then((result) => {
+            if (result.isConfirmed) {
+            navigate(`/TestCompleted?testId=${testId}`, { replace: true });
+            };
+        })
+    }
+    const handlePrevButton = () => { setQuestionIndex(prevIndex => prevIndex - 1); };
+    
+    function handleQuit() {
+        MySwal.fire({
+          title: "Do you want to quit the test in progress?",
+          showConfirmButton: false,
+          showDenyButton: true,
+          showCancelButton: true,
+          denyButtonText: `Quit`
+        }).then((result) => {
+          if (result.isDenied) {
+            MySwal.fire({
+              title: "Navigating to home...",
+              timer: 500,
+              timerProgressBar: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+          };
+          navigate('/');
+        })
+      }
+    
 
     const handlePlayPause = () => {
         setIsPlaying(!isPlaying);
@@ -84,13 +117,14 @@ export default function Questionnaire() {
                     pauseIconPath = {pauseIcon}
                 />
                 <Form 
-                    audioFileId={audioFileId} 
                     testId={testId} 
-                    currentQuestionIndex={currentQuestionIndex}
-                    setQuestion = {setQuestion}
-                    onPrevQuestion={handlePrevQuestion}
-                    onNextQuestion={handleNextQuestion}
-                    onAudioFile={handleAudioFile}/>
+                    questionIndex={questionIndex}
+                    onPrevButton={handlePrevButton}
+                    onNextButton={handleNextButton}
+                    audiosNum={audiosNum}
+                    questionsNum={questionsNum}
+                    onQuit={handleQuit}
+                    onTestSubmit={handleTestSubmit}/>
             </div>
         </div>
     )
