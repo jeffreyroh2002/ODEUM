@@ -176,22 +176,24 @@ def submit_answer():
     data = json.loads(data)
     question_index = data['question_index']
     answer_type = data['type']
+    print("answer_type: ", answer_type)
     print("rating: ", data['rating'])
     rating = data['rating']
     test_id = int(data['test_id'])
     audio_index = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
-    
-    if question_index % NUM_QUESTIONS_PER_AUDIO == 1:
+    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
+
+    if question_index % NUM_QUESTIONS_PER_AUDIO == 1 and not answer:
         print("new answer added")
         new_answer = UserAnswer(audio_id=audio_index, test_id=test_id, user_id=current_user.id)
         db.session.add(new_answer)
         db.session.commit()
+        answer = UserAnswer.query.filter_by(audio_id=audio_index, test_id=test_id, user_id=current_user.id).first()
 
-    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
     setattr(answer, answer_type, rating)
     db.session.commit()
     answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
-    print(answer)
+    print(answer.overall_rating, answer.genre_rating, answer.mood_rating, answer.vocal_timbre_rating)
 
     if question_index == TOTAL_QUESTIONS:
         test = Test.query.get(test_id)
@@ -380,7 +382,7 @@ def test_results():
     user = current_user
     print(user)
     test = Test.query.filter_by(id=test_id).first()
-    print(test)
+    answers = UserAnswer.query.filter_by(test_id=test_id).all()
     if test.subject != current_user: 
         return jsonify({'error': 'User does not match test owner'}), 403
 

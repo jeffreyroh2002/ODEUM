@@ -53,6 +53,7 @@ export default function Questionnaire() {
         if (questionIndex !== audiosNum * questionsNum) setQuestionIndex(prev => prev + 1);
         else handleTestSubmit();
     };
+    
     function handleTestSubmit() {
         MySwal.fire({
             title: "Do you want to submit the test in progress?",

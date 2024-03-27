@@ -71,9 +71,7 @@ export default function Form({ testId, questionIndex, onPrevButton, onNextButton
     }
     
     else {
-      if (!savedRating) setSavedRating(0)
       // When a user selects an answer, post the answer to the backend
-      console.log(selectionType, savedRating)
       fetch('/submit_answer', {
         method: 'POST',
         headers: {
@@ -84,7 +82,7 @@ export default function Form({ testId, questionIndex, onPrevButton, onNextButton
           test_id: testId,
           question_index: questionIndex,
           type: selectionType,
-          rating: savedRating 
+          rating: (savedRating ? savedRating : 0)
         })
       })
       onNextButton();
