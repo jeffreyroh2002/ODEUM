@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Header from "./components/Header"
 import AudioPlayer from './components/AudioPlayer';
 import Form from './components/Form';
+import AudioVisualizerSphere from './components/AudioVisualizerSphere'
 import './Questionnaire.css';
 import playIcon from './images/blob.png'
 import pauseIcon from './images/dark_blob.png'
@@ -92,11 +93,23 @@ export default function Questionnaire() {
       }
     
 
+    const handlePlayPause = () => {
+        setIsPlaying(!isPlaying);
+    }
+
     return (
         <div>
             <Header />
             <div className="questionnaire-container">
                 <div>{audioFilePath}</div>
+                {/*
+                <AudioVisualizerSphere className="play--pause--button"
+                    key={audioFileId}
+                    src={audioFilePath}
+                    isPlaying={isPlaying}
+                    togglePlayPause={handlePlayPause}
+                />
+                */}
                 <AudioPlayer className="play--pause--button"
                     key={audioFileId}
                     src={audioFilePath}
