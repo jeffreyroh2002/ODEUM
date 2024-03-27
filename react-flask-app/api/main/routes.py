@@ -518,7 +518,7 @@ def test_results():
     ### REGRESSION ANALYSIS ###
     perform_regression_analysis(df, genre_columns, mood_columns)
     
-    ### REGRESSION ### 
+    ### CLUSTERING ### 
     user_ratings = create_user_ratings_df(test_answers)
     feature_columns = genre_columns + mood_columns
     df, kmeans = perform_kmeans_clustering(df, feature_columns)
