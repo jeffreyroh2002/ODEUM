@@ -20,7 +20,7 @@ export default function TestCompleted() {
             console.error('Test ID is missing.');
             return;
         }
-
+        console.log("test id: ", testId);
         fetch(`/test_results?testId=${testId}`) // Adjust this URL for your backend
             .then(res => {
                 if (!res.ok) {
