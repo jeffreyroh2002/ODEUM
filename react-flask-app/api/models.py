@@ -3,6 +3,12 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask import current_app
 from api import db, login_manager
 from flask_login import UserMixin
+import openai
+from sqlalchemy.ext.hybrid import hybrid_property
+import json
+
+
+openai.api_key = ''
 
 
 @login_manager.user_loader
@@ -48,30 +54,65 @@ class Test(db.Model):
         return f"Test('user:{self.user_id}', 'id: {self.id}','test:{self.test_type}', '{self.test_start_time}', '{self.test_end_time}')"
 
 
+### NEED TO CHANGE genre, mood, vocal to non-text,  adding serialization and deserialization 
+### methods to ease the process of working with these fields in Python as dictionaries
+"""
+Consider Adding Utility Methods: 
+For complex data like your JSON fields, utility methods in the models that parse these 
+fields into a more usable format for analysis can save time. For example, methods that 
+return the genre, mood, and vocal data as a Python dictionary directly could be beneficial.
+
+GPT4 -> advice READ!
+"""
+
 class AudioFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     audio_name = db.Column(db.String(50), nullable=False)
     file_path = db.Column(db.String(100), nullable=False)
-    genre = db.Column(db.Text, nullable=False)  # save with json.dump
-    mood = db.Column(db.Text, nullable=False)
-    vocal = db.Column(db.Text, nullable=False)
+    _genre = db.Column('genre', db.Text, nullable=False)
+    _mood = db.Column('mood', db.Text, nullable=False)
+    _vocal = db.Column('vocal', db.Text, nullable=False)
     answers = db.relationship("UserAnswer", backref="audio", lazy=True)
 
-    def __repr__(self):
-        return f"AudioFile('{self.audio_name}', '{self.file_path}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
+    @hybrid_property
+    def genre(self):
+        return json.loads(self._genre)
 
+    @genre.setter
+    def genre(self, value):
+        self._genre = json.dumps(value)
+
+    @hybrid_property
+    def mood(self):
+        return json.loads(self._mood)
+
+    @mood.setter
+    def mood(self, value):
+        self._mood = json.dumps(value)
+
+    @hybrid_property
+    def vocal(self):
+        return json.loads(self._vocal)
+
+    @vocal.setter
+    def vocal(self, value):
+        self._vocal = json.dumps(value)
+
+    def __repr__(self):
+        #return f"AudioFile('{self.audio_name}', '{self.file_path}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
+        return f"AudioFile('{self.audio_name}')"
 
 class UserAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    overall_rating = db.Column(db.Integer, nullable=False)
-    genre_rating = db.Column(db.Integer, nullable=False)
-    mood_rating = db.Column(db.Integer, nullable=False)
-    vocal_timbre_rating = db.Column(db.Integer, nullable=False)
+    overall_rating = db.Column(db.Integer, nullable=True)
+    genre_rating = db.Column(db.Integer, nullable=True)
+    mood_rating = db.Column(db.Integer, nullable=True)
+    vocal_timbre_rating = db.Column(db.Integer, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     audio_id = db.Column(db.Integer, db.ForeignKey("audio_file.id"), nullable=False)
     test_id = db.Column(db.Integer, db.ForeignKey("test.id"), nullable=False)
 
     def __repr__(self):
         return (
-            f"UserAnswer('user:{self.user_id}', 'test:{self.test_id}' 'audio:{self.audio_id}', 'rating:{self.overall_rating}')"
+            f"UserAnswer('rating:{self.id}')"
         )

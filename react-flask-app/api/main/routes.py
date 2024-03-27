@@ -8,13 +8,21 @@ import re  # for email confirmation
 from datetime import datetime
 import logging
 import json
+import pandas as pd
 
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import statsmodels.api as sm
 import numpy as np
 from collections import defaultdict
 import statistics
 import matplotlib.pyplot as plt
+from sklearn.linear_model import Lasso
+
+
 
 #imports for saving png files
 import io
@@ -25,9 +33,14 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import MaxNLocator
 from collections import defaultdict
 import seaborn as sns
-
+import os
 
 main = Blueprint('main', __name__)
+
+NUM_AUDIO = 3
+NUM_QUESTIONS_PER_AUDIO = 4
+EXTRA_QUESTIONS = 0
+TOTAL_QUESTIONS = NUM_AUDIO * NUM_QUESTIONS_PER_AUDIO + EXTRA_QUESTIONS
 
 @main.route('/')
 def home():
@@ -127,7 +140,6 @@ def login():
 @main.route('/logout', methods=["POST"])
 @login_required  # Require the user to be logged in to access this route
 def logout():
-    print("HELLOW WORLD!!!!")
     logout_user()
     return jsonify({"message": "Logout successful"})
 
@@ -148,73 +160,64 @@ def get_prev_audio_file_id(current_audio_file_id):
     prev_audio_file = AudioFile.query.filter(AudioFile.id < current_audio_file_id).order_by(AudioFile.id.desc()).first()
     return prev_audio_file.id if prev_audio_file else None
 
+@login_required
+@main.route('/get_useranswer', methods=['GET'])
+def get_useranswer():
+    question_index = int(request.args.get('question_index'))
+    test_id = int(request.args.get('test_id'))
+    selection_types = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
+    audio_id = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
+    selection_type = selection_types[question_index % NUM_QUESTIONS_PER_AUDIO]
+    print("audio_id, selection_type: ", audio_id, selection_type)
+    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_id).first()
+    if answer == None:
+        rating = None
+    else:
+        rating = getattr(answer, selection_type)
+    print("rating: ", rating)
+    return jsonify({"rating" : rating})
+
 @main.route('/submit_answer', methods=['POST'])
 @login_required
 def submit_answer():
-    data = request.json
-    print("submit answer test id submited:", data['test_id'])
-    new_answer = UserAnswer(
-        overall_rating=data['overall_rating'],
-        genre_rating=data['genre_rating'],
-        mood_rating=data['mood_rating'],
-        vocal_timbre_rating=data['vocal_timbre_rating'],
-        user_id=current_user.id,
-        audio_id=data['audio_id'],
-        test_id=data['test_id'],
-    )
-    
-    db.session.add(new_answer)
-    db.session.commit()
+    data = request.data.decode('utf-8')
+    data = json.loads(data)
+    question_index = data['question_index']
+    answer_type = data['type']
+    print("answer_type: ", answer_type)
+    print("rating: ", data['rating'])
+    rating = data['rating']
+    test_id = int(data['test_id'])
+    audio_index = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
+    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
 
-    next_audio_file_id = get_next_audio_file_id(data['audio_id'])
-    test = Test.query.filter_by(user_id=current_user.id, id=data['test_id']).first()
-    
-    if next_audio_file_id is not None:
-        #add logic to call the next values if available
-        next_audio_file = AudioFile.query.get(next_audio_file_id)
-        db_answer = UserAnswer.query.filter((UserAnswer.test == test) & (UserAnswer.audio_id == next_audio_file.id) & (UserAnswer.user == current_user)).first()
-        print("next db_answer:", db_answer)
-        if db_answer == None:
-            return jsonify({
-                'message': 'Answer submitted successfully', 
-                'next_audio_file_id': next_audio_file_id, 
-                'test_id': test.id,
-                'overall_rating': None,
-                'genre_rating': 0,
-                'mood_rating': 0,
-                'vocal_timbre_rating': 0
-            })
-        else:
-            return jsonify({
-                'message': 'Answer submitted successfully', 
-                'next_audio_file_id': next_audio_file_id, 
-                'test_id': test.id,
-                'overall_rating': db_answer.overall_rating,
-                'genre_rating': db_answer.genre_rating,
-                'mood_rating': db_answer.mood_rating,
-                'vocal_timbre_rating': db_answer.vocal_timbre_rating
-            })
-    else:
-        # Handle the case where there are no more audio files
-        user = current_user
-        print("TEST TEST TEST!:", test )
+    if question_index % NUM_QUESTIONS_PER_AUDIO == 1 and not answer:
+        print("new answer added")
+        new_answer = UserAnswer(audio_id=audio_index, test_id=test_id, user_id=current_user.id)
+        db.session.add(new_answer)
+        db.session.commit()
+        answer = UserAnswer.query.filter_by(audio_id=audio_index, test_id=test_id, user_id=current_user.id).first()
+
+    setattr(answer, answer_type, rating)
+    db.session.commit()
+    answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
+    print(answer.overall_rating, answer.genre_rating, answer.mood_rating, answer.vocal_timbre_rating)
+
+    if question_index == TOTAL_QUESTIONS:
+        test = Test.query.get(test_id)
         test.test_end_time = datetime.now()
         db.session.commit()
-        print("TEST TEST TEST!:", test )
-        return jsonify({'message': 'Test completed', 'next_audio_file_id': None, 'test_id': test.id})
+        
+    return jsonify({"Hello": "World"})
     
-
 @main.route('/before_test_info', methods=['GET'])
 @login_required
 def before_test_info():
-
     user = current_user
-    #test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
+    num_audio = 3
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-    print(test)
-    # haven't taken this test before or need to start a new one
-    if not test or test.test_end_time:
-        print("CREATING NEW TEST NOW!")
+
+    if not test or test.test_end_time:        
         test_val = Test(
             test_type = 1,
             test_start_time = datetime.now(),
@@ -222,52 +225,36 @@ def before_test_info():
         )
         db.session.add(test_val)
         db.session.commit()
+        is_new_test = True
         audio_file_id = 1
         audio_file = AudioFile.query.get_or_404(audio_file_id)
-
-        newTest = True
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-        print("new test id:", test.id)
-        print("IM ABOUT TO GO BACK TO FRONTEND")
-        print("audio_file", audio_file)
-        return jsonify({
-                    'status': 'in_progress',
-                    'new_test': newTest,
-                    'audio_file_id': audio_file_id,
-                    'audio_file_name': audio_file.audio_name,
-                    'test_id': test.id
-        })
-    
+        # for audio_index in range(1, num_audio + 1):
+        #     tmp = UserAnswer(user_id=user.id, audio_id=audio_index, test_id=test.id)
+        #     db.session.add(tmp)
+        #     db.session.commit()
 
-    #need to continue ongoing test
     else:
-        print("BEFORE LAST answer:")
-        newTest = False
-        last_answer = UserAnswer.query.order_by(UserAnswer.id.desc()).first()
+        is_new_test = False
+        last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.overall_rating != None) \
+                                      .order_by(UserAnswer.audio_id.desc()).first()
         if last_answer == None:
-            audio_file = AudioFile.query.get_or_404(1)
-            return jsonify({
-                    'status': 'in_progress',
-                    'new_test': newTest,
-                    'audio_file_id': audio_file.id,
-                    'audio_file_name': audio_file.audio_name,
-                    'test_id': test.id
-        })
-        else:
-            print("last answer:", last_answer)
-            audio_file_id = last_answer.audio_id
-            print("audio_file_id:", audio_file_id)
+            audio_file_id = 1
             audio_file = AudioFile.query.get_or_404(audio_file_id)
-            print("audio_file:", audio_file)
-            newTest = False
-            # print("new audio file id: ",audio_file_id)
-            return jsonify({
-                        'status': 'in_progress',
-                        'new_test': newTest,
-                        'audio_file_id': audio_file_id,
-                        'audio_file_name': audio_file.audio_name,
-                        'test_id': test.id
-            })
+        else:
+            audio_file_id = last_answer.audio_id
+            audio_file = AudioFile.query.get_or_404(audio_file_id)
+
+        print(audio_file_id, audio_file.audio_name)
+    
+    return jsonify({
+                'status': 'in_progress',
+                'new_test': is_new_test,
+                'audio_file_id': audio_file_id,
+                'audio_file_name': audio_file.audio_name,
+                'test_id': test.id
+    })
+
 
 @login_required
 @main.route('/get_next_questions', methods=["GET"])
@@ -276,7 +263,6 @@ def get_next_questions():
     test_type = request.args.get('test_type', type=int)
     audio_file_id = request.args.get('audio_file_id', type=int)
     test_id = request.args.get('test_id', type=int)
-    print("TESTID!!!!:", test_id)
 
     if not test_type or audio_file_id is None:
         return jsonify({'error': 'Missing required parameters'}), 400
@@ -284,8 +270,7 @@ def get_next_questions():
     user = current_user
 
     # Find the latest test of the specified type for the user
-    test = Test.query.filter_by(user_id=user.id, test_type=test_type, id=test_id).order_by(Test.test_start_time.desc()).first()
-    print("current test!:", test)
+    test = Test.query.filter_by(user_id=user.id, test_type=test_type, id=test_id).first()
     # Continue with the ongoing test
     audio_file = AudioFile.query.get(audio_file_id)
     newTest = False
@@ -347,6 +332,24 @@ def get_prev_questions():
         })
 
 @login_required
+@main.route('/get_audio_num', methods=["GET"])
+def get_audio_num():
+    dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+    filenames = os.listdir(dir_path)
+    print(len(filenames))
+    return jsonify({"num_audio": len(filenames)})
+
+@login_required
+@main.route('/get_audio_filename', methods=["GET"])
+def get_audio_filename():
+    audio_id = request.args.get('audio_id')
+    dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+    filenames = os.listdir(dir_path)
+    full_filenames = ['static/audio_files/' + filename for filename in filenames]
+    return jsonify({"audio_filename": full_filenames[int(audio_id) - 1]})
+
+
+@login_required
 @main.route('/get_user_info', methods=["GET"])
 def get_user_info():
     user = current_user
@@ -369,15 +372,6 @@ def get_user_info():
     })
 
 
-def get_attribute_name(index):
-    # Define the order of attributes in your feature vectors
-    attributes = ['Rock','Hip Hop','Pop Ballad','Electronic','Korean Ballad','Jazz','R&B/Soul', 
-                  'Tense', 'Bright', 'Emotional', 'Relaxed', 
-                  'Smooth', 'Dreamy', 'Raspy', 'Voiceless']
-    
-    # Return the attribute name corresponding to the given index
-    return attributes[index]
-
 @main.route("/test_results", methods=['GET'])
 @login_required
 def test_results():
@@ -387,272 +381,168 @@ def test_results():
     user = current_user
     print(user)
     test = Test.query.filter_by(id=test_id).first()
-    print(test)
+    answers = UserAnswer.query.filter_by(test_id=test_id).all()
     if test.subject != current_user: 
         return jsonify({'error': 'User does not match test owner'}), 403
 
-    display_messages = []
+def prepare_structured_data(test_answers):
+    """Extracts and structures data from test answers."""
+    structured_data = []
+    for answer in test_answers:
+        audio = AudioFile.query.filter_by(id=answer.audio_id).first()
+        if audio:
+            data_row = {
+                "overall_rating": answer.overall_rating,
+                "genre_rating": answer.genre_rating,
+                "mood_rating": answer.mood_rating,
+                "vocal_timbre_rating": answer.vocal_timbre_rating,
+                **audio.genre,
+                **audio.mood,
+                **audio.vocal
+            }
+            structured_data.append(data_row)
+    return structured_data
+
+def create_user_ratings_df(test_answers):
+    """Creates a DataFrame from test answers containing user ratings."""
+    user_ratings = pd.DataFrame([
+        {'user_id': answer.user_id, 'song_id': answer.audio_id, 'rating': answer.overall_rating}
+        for answer in test_answers
+    ])
+    return user_ratings
+
+def perform_kmeans_clustering(df, feature_columns, n_clusters=5):
+    """Performs KMeans clustering on the given DataFrame."""
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(df[feature_columns])
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    df['cluster'] = kmeans.fit_predict(scaled_features)
+    return df, kmeans
+
+def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
+    """Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked."""
+    avg_ratings_by_cluster = user_ratings_clustered.groupby(['user_id', 'cluster'])['rating'].mean().reset_index()
+
+    print("\nAverage Ratings by Cluster:")
+    print(avg_ratings_by_cluster.head())
+
+    # Analyze which clusters are rated more positively on average
+    for cluster_num in range(n_clusters):
+        cluster_avg_rating = avg_ratings_by_cluster[avg_ratings_by_cluster['cluster'] == cluster_num]['rating'].mean()
+        print(f"Cluster {cluster_num} Average Rating: {cluster_avg_rating}")
+
+    # Further analysis can be done based on the findings
+    liked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] > 0].groupby('cluster')['rating'].mean()
+    disliked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] < 0].groupby('cluster')['rating'].mean()
     
-    #Update Preference each Song
-    genre_score = {'Rock': 0,'Hip Hop': 0,'Pop Ballad': 0,'Electronic': 0,'Korean Ballad': 0,'Jazz': 0,'R&B/Soul': 0}
-    mood_score = {'Tense': 0, 'Bright': 0, 'Emotional': 0, 'Relaxed': 0}
-    vocal_score = {'Smooth': 0,'Dreamy': 0,'Raspy': 0,'Voiceless': 0}
-
-    # High Rating song tracker
-    high_rated_songs = []
-
-    test_answer = UserAnswer.query.filter_by(user=user).all()
-    print("test_answer", test_answer)
-
-    answers = UserAnswer.query.filter_by(test_id=test_id).all()
-    print ("answers:", answers)
-    for answer in answers:
-        audio = AudioFile.query.get(answer.audio_id)
-
-        #from audioFile model
-        genre_pred = audio.genre   #assuming audioFile is populated with scores using dictionaries with same keys
-        mood_pred = audio.mood
-        vocal_pred = audio.vocal
-
-        print("genre prediciton input:", genre_pred)
-        print("mood prediciton input:", mood_pred)
-
-        #from Questions Form
-        overall_rating = answer.overall_rating   # need to use this
-        genre_rating = answer.genre_rating
-        mood_rating = answer.mood_rating
-        vocal_rating = answer.vocal_timbre_rating
-
-        #Calculate overall score
-        #Calculate each genre score
-        genre_weighted = {}
-        if genre_pred and not isinstance(audio.genre, float):
-            genre_scores = audio.genre
-            try:
-                genre_data = json.loads(genre_scores)
-            except json.JSONDecodeError:
-                print("Error decoding genre_data JSON.")
-                return jsonify({'error: Error decoding genre_data JSON'}), 404 
-
-            #if user is not sure about the genre, calculate the genre_score based on overall rating
-            if genre_rating == 0:
-                for genre_name, proportion in genre_data.items():
-                    genre_weighted[genre_name] = proportion * overall_rating
-            
-            #in other case, calculate the genre_score based on (0.3 portion of overall_rating) and (0.7 portion of genre_rating)
-            else:
-                for genre_name, proportion in genre_data.items():
-                    genre_weighted[genre_name] = (proportion * overall_rating * 0.3) + (proportion * genre_rating * 0.7)
-
-            for genre in genre_weighted:
-                genre_score[genre] += genre_weighted[genre]
-
-        else:
-            print("Genre data is not available or is in an unexpected format.")
-            return jsonify({'error: Genre data is not available or is in an unexpected format'}), 404 
-
-        #Calculate each mood score
-        mood_weighted = {}
-        if mood_pred and not isinstance(audio.mood, float):
-            mood_scores = audio.mood
-            try:
-                mood_data = json.loads(mood_scores)
-            except json.JSONDecodeError:
-                print("Error decoding mood_data JSON.")
-                return jsonify({'error: Error decoding mood_data JSON'}), 404 
-
-            #if user is not sure about the mood, calculate the mood_score based on overall rating
-            if mood_rating == 0:
-                for mood_name, proportion in mood_data.items():
-                    mood_weighted[mood_name] = proportion * overall_rating
-            
-            #in other case, calculate the mood_score based on (0.3 portion of overall_rating) and (0.7 portion of mood_rating)
-            else:
-                for mood_name, proportion in mood_data.items():
-                    mood_weighted[mood_name] = (proportion * overall_rating * 0.3) + (proportion * mood_rating * 0.7)
-
-            for mood in mood_weighted:
-                mood_score[mood] += mood_weighted[mood]
-
-        else:
-            print("Mood data is not available or is in an unexpected format.")
-            return jsonify({'error: Mood data is not available or is in an unexpected format'}), 404 
-
-        #Calculate each vocal timbre score
-        vocal_weighted = {}
-        if vocal_pred and not isinstance(audio.vocal, float):
-            vocal_scores = audio.vocal
-            try:
-                vocal_data = json.loads(vocal_scores)
-            except json.JSONDecodeError:
-                print("Error decoding vocal_data JSON.")
-                return jsonify({'error: Error decoding vocal_data JSON'}), 404 
-
-            #if user is not sure about the vocal, calculate the vocal_score based on overall rating
-            if vocal_rating == 0:
-                for vocal_name, proportion in vocal_data.items():
-                    vocal_weighted[vocal_name] = proportion * overall_rating
-            
-            #in other case, calculate the vocal_score based on (0.3 portion of overall_rating) and (0.7 portion of vocal_rating)
-            else:
-                for vocal_name, proportion in vocal_data.items():
-                    vocal_weighted[vocal_name] = (proportion * overall_rating * 0.3) + (proportion * vocal_rating * 0.7)
-
-            for vocal in vocal_weighted:
-                vocal_score[vocal] += vocal_weighted[vocal]
-
-        else:
-            print("Vocal data is not available or is in an unexpected format.")
-            return jsonify({'error: Vocal data is not available or is in an unexpected format'}), 404 
-        
-    # store highly rated songs into high_rated songs list
-        if (overall_rating >= 2):
-            high_rated_songs.append(answer.audio_id)
-
-    # array of arrays to store each feature vector of highly rated songs
-    high_rated_feature_vectors = []
-    for high_rated_song in high_rated_songs:
-        audio = AudioFile.query.get(high_rated_song)
-        genre_data = json.loads(audio.genre)
-        mood_data = json.loads(audio.mood)
-        vocal_data = json.loads(audio.vocal)
-
-        # Flatten the dictionaries into a single array
-        feature_vector = list(genre_data.values()) + list(mood_data.values()) + list(vocal_data.values())
-
-        # Normalize the feature vector
-        normalized_vector = normalize([feature_vector])[0]
-        high_rated_feature_vectors.append(normalized_vector)
-
+    print("\nLiked Clusters (Positive Average Rating):")
+    print(liked_clusters)
     
-    ## ALGORITHM FOR CUSTOM BINNING HISTORGRAM ##
+    print("\nDisliked Clusters (Negative Average Rating):")
+    print(disliked_clusters)
 
-    # Initialize a dictionary to store all values for each attribute
-    attribute_values = defaultdict(list)
+def find_significant_correlations(correlation_matrix, threshold, columns):
+    significant_pairs = []
+    for column in columns:
+        for index, value in correlation_matrix[column].items():
+            if abs(value) >= threshold and value != 1.0 and index != column:
+                # Avoid self-correlation and ensure correlation meets threshold
+                significant_pairs.append({"Attribute 1": column, "Attribute 2": index, "Correlation": value})
 
-    # Collect values for each attribute across all high-rated songs
-    for vector in high_rated_feature_vectors:
-        for attr_index, value in enumerate(vector):
-            attribute_name = get_attribute_name(attr_index)
-            attribute_values[attribute_name].append(value)
+    significant_correlations = pd.DataFrame(significant_pairs)
+    return significant_correlations
 
-    # Determine the most populated range for each attribute
-    attribute_ranges = {}
-    range_size = 0.2  # Define the size of each range
-
-    for attr, values in attribute_values.items():
-        # Filter out values less than or equal to 0.2
-        filtered_values = [value for value in values if value > 0.2]
-
-        # Bin values into ranges starting from 0.2
-        bins = np.arange(0.2, 1 + range_size, range_size)
-        hist, bin_edges = np.histogram(filtered_values, bins=bins)
-
-        # Find the range with the maximum count
-        max_count_index = np.argmax(hist)
-        common_range = (bin_edges[max_count_index], bin_edges[max_count_index + 1])
-        
-        attribute_ranges[attr] = common_range
-
-
-    # Prepare the display message
-    display_messages.append("Most common ranges for attributes in your top-rated songs (excluding 0 to 0.2):")
-    for attr, common_range in attribute_ranges.items():
-        display_messages.append(f"- {attr}: Most Common Range {common_range}")
-
-
-    # PLOTTING DENSITY PLOT
-
-    # Initialize a dictionary to store all values for each attribute
-    attribute_values = defaultdict(list)
-
-    # Collect values for each attribute across all high-rated songs
-    for vector in high_rated_feature_vectors:
-        for attr_index, value in enumerate(vector):
-            attribute_name = get_attribute_name(attr_index)
-            if value > 0.2:  # Exclude values between 0.0 and 0.2
-                attribute_values[attribute_name].append(value)
-
-    # Define color palettes for each category
-    genre_colors = sns.color_palette('Set1', len(genre_score))
-    mood_colors = sns.color_palette('Set2', len(mood_score))
-    vocal_colors = sns.color_palette('Set3', len(vocal_score))
-
+def calculate_significant_correlations_for_ratings(df, rating_columns, genre_columns, mood_columns, vocal_columns, threshold=0.7):
+    """Calculates and prints significant correlations for each rating type with relevant song attributes,
+    ensuring there's sufficient variability in attributes for meaningful analysis."""
+    correlation_matrix = df.corr()
     
-    # Create a combined density plot for each category
+    # Exclude rating columns to focus on song attributes
+    non_rating_columns = [col for col in df.columns if col not in rating_columns]
+    
+    # Ensure there's sufficient variability in attributes for meaningful analysis
+    if len(non_rating_columns) <= len(rating_columns):
+        print("Not enough variability in attributes for meaningful correlation analysis.")
+        return
+    
+    # Mapping of rating types to their relevant attributes
+    rating_to_attributes = {
+        'overall_rating': genre_columns + mood_columns + vocal_columns,
+        'genre_rating': genre_columns,
+        'mood_rating': mood_columns,
+        'vocal_timbre_rating': vocal_columns
+    }
 
-    # Plot for Genres
-    plt.figure(figsize=(5, 3))
-    for (genre, _), color in zip(genre_score.items(), genre_colors):
-        sns.kdeplot(attribute_values[genre], label=genre, color=color, fill=True, bw_adjust=0.5)
-    plt.title('Density Plots for Genres', fontsize=14)
-    plt.xlabel('Attribute Values', fontsize=12)
-    plt.ylabel('Density', fontsize=12)
-    plt.legend()
-    plt.tight_layout()
-    # Save the first plot
-    genre_png = io.BytesIO()
-    plt.savefig(genre_png, format='png')
-    genre_png.seek(0)
-    genre_encoded = base64.b64encode(genre_png.getvalue()).decode('utf-8')
-    plt.close()
+    for score in rating_columns:  # Iterate through each specific rating type
+        relevant_attributes = rating_to_attributes.get(score, [])
 
-    # Plot for Moods
-    plt.figure(figsize=(5, 3))
-    for (mood, _), color in zip(mood_score.items(), mood_colors):
-        sns.kdeplot(attribute_values[mood], label=mood, color=color, fill=True, bw_adjust=0.5)
-    plt.title('Density Plots for Moods', fontsize=14)
-    plt.xlabel('Attribute Values', fontsize=12)
-    plt.ylabel('Density', fontsize=12)
-    plt.legend()
-    plt.tight_layout()
-    # Save the second plot
-    mood_png = io.BytesIO()
-    plt.savefig(mood_png, format='png')
-    mood_png.seek(0)
-    mood_encoded = base64.b64encode(mood_png.getvalue()).decode('utf-8')
-    plt.close()
+        # Ensure attributes related to the score are in the correlation matrix
+        valid_attributes = [attr for attr in relevant_attributes if attr in correlation_matrix.columns]
 
-    # Plot for Vocals
-    plt.figure(figsize=(5, 3))
-    for (vocal, _), color in zip(vocal_score.items(), vocal_colors):
-        sns.kdeplot(attribute_values[vocal], label=vocal, color=color, fill=True, bw_adjust=0.5)
-    plt.title('Density Plots for Vocals', fontsize=14)
-    plt.xlabel('Attribute Values', fontsize=12)
-    plt.ylabel('Density', fontsize=12)
-    plt.legend()
-    plt.tight_layout()
-    # Save the third plot
-    vocal_png = io.BytesIO()
-    plt.savefig(vocal_png, format='png')
-    vocal_png.seek(0)
-    vocal_encoded = base64.b64encode(vocal_png.getvalue()).decode('utf-8')
-    plt.close()
+        for attribute in valid_attributes:
+            # Calculate and print significant correlations for the attribute
+            significant_correlations = find_significant_correlations(correlation_matrix, threshold, columns=[score, attribute])
 
-    print("user.id:", user.id)
-    print("test.id:", test.id)
-    print("test_type:", test.test_type)
-    print("genre_score:", genre_score)
-    print("mood_score:", mood_score)
-    print("vocal_score:", vocal_score)
-    """
-    print("genre_encoded:", genre_encoded)
-    print("mood_encoded:", mood_encoded)
-    print("vocal_encoded:", vocal_encoded)
-    """
-    print("display_messages:", display_messages)
+            if not significant_correlations.empty:
+                print(f"\nSignificant Correlations for {score} with {attribute} (|correlation| >= {threshold}):\n", significant_correlations)
+            else:
+                print(f"\nNo significant correlations found for {score} with {attribute} at the threshold of {threshold}.")
 
-    # Pass the encoded images and other necessary information to the template
+def perform_regression_analysis(df, genre_columns, mood_columns):
+    """Performs regression analysis to model the impact of genre and mood on overall rating."""
+    # Creating interaction terms
+    for genre_col in genre_columns:
+        for mood_col in mood_columns:
+            interaction_col_name = f'{genre_col}_{mood_col}_interaction'
+            df[interaction_col_name] = df[genre_col] * df[mood_col]
+            
+    X_columns = genre_columns + mood_columns + [f'{g}_{m}_interaction' for g in genre_columns for m in mood_columns]
+    X = sm.add_constant(df[X_columns])  # Add a constant term for the intercept
+    
+    y_overall = df['overall_rating']
+    
+    model_overall = sm.OLS(y_overall, X).fit()
+    print("\nRegression Analysis Summary for Overall Rating:")
+    print(model_overall.summary())
+
+
+@main.route("/test_results", methods=['GET'])
+@login_required
+def test_results():
+    test_id = request.args.get('testId')
+    user = current_user
+    test = Test.query.filter_by(id=test_id).first()
+
+    if test.subject != current_user: 
+        return jsonify({'error': 'User does not match test owner'}), 403
+
+    test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
+    structured_data = prepare_structured_data(test_answers)
+    df = pd.DataFrame(structured_data)
+
+    rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
+    genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
+    mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
+    vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
+    # Note: 'Voiceless' is intentionally excluded based on your requirement
+
+    ### CORRELATION COEFFICIENT ###
+    calculate_significant_correlations_for_ratings(df, rating_columns, genre_columns, mood_columns, vocal_columns)
+    
+    ### REGRESSION ANALYSIS ###
+    perform_regression_analysis(df, genre_columns, mood_columns)
+    
+    ### REGRESSION ### 
+    user_ratings = create_user_ratings_df(test_answers)
+    feature_columns = genre_columns + mood_columns
+    df, kmeans = perform_kmeans_clustering(df, feature_columns)
+    user_ratings_clustered = pd.merge(user_ratings, df[['song_id', 'cluster']], on='song_id')
+    analyze_cluster_ratings(user_ratings_clustered, kmeans.n_clusters)
+
     response_data = {
         'user_id': user.id,
         'test_id': test.id,
         'test_type': test.test_type,
-        'genre_score': genre_score,
-        'mood_score': mood_score,
-        'vocal_score': vocal_score,
-        'genre_image': genre_encoded,
-        'mood_image': mood_encoded,
-        'vocal_image': vocal_encoded,
-        'display_messages': display_messages
+        'structured_data': structured_data
     }
     return jsonify(response_data)
