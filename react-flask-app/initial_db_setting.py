@@ -69,10 +69,19 @@ with app.app_context():
         audio_file = AudioFile(
             audio_name=full_mix_file_name,
             file_path=full_mix_file_path,
-            genre=genre_data_json,
-            mood=mood_data_json,
-            vocal=timbre_data_json
         )
+        # Set the genre, mood, and vocal properties using their setter methods
+        audio_file.genre = relevant_genre_data
+        audio_file.mood = relevant_mood_data
+
+        # If relevant_timbre_data is available, set the vocal property accordingly
+        if relevant_timbre_data:
+            audio_file.vocal = relevant_timbre_data
+        else:
+            # If relevant_timbre_data is not available, set default timbre values
+            audio_file.vocal = default_timbre_data
+
+        # Add the audio file to the database session
         db.session.add(audio_file)
 
     # Commit the changes to the database
