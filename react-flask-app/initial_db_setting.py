@@ -50,7 +50,8 @@ with app.app_context():
         relevant_genre_data = next((data for key, data in genre_data.items() if key.startswith(audio_name_prefix)), {})
         relevant_mood_data = next((data for key, data in mood_data.items() if key.startswith(audio_name_prefix)), {})
         relevant_timbre_data = next((data for key, data in timbre_data.items() if key.startswith(audio_name_prefix)), {})
-
+        print(full_mix_file_path)
+        print("relevant_genre_data:", relevant_genre_data)
         # Convert data to JSON format
         genre_data_json = json.dumps(relevant_genre_data)
         mood_data_json = json.dumps(relevant_mood_data)
