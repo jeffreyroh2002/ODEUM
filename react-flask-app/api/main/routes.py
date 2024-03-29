@@ -22,6 +22,7 @@ from collections import defaultdict
 import statistics
 import matplotlib.pyplot as plt
 from sklearn.linear_model import Lasso
+from mlxtend.frequent_patterns import apriori, association_rules
 
 
 
@@ -515,12 +516,20 @@ def perform_regression_analysis(df, genre_columns, mood_columns):
     except Exception as e:
         print("\nError occurred during regression analysis:")
         print(e)  # Print the error message for debugging
-        
+
+
+def perform_association_rule_mining(df, min_support=0.01, metric="confidence", min_threshold=0.8):
     """
-    model_overall = sm.OLS(y_overall, X).fit()
-    print("\nRegression Analysis Summary for Overall Rating:")
-    print(model_overall.summary())
+    Performs association rule mining on given DataFrame.
+    
+    Parameters:
+    - df: DataFrame where each row represents a song with discretized attributes as columns.
+          Columns are expected to be one-hot encoded for presence of each discretized attribute level.
+    - min_support: Minimum support for the apriori algorithm.
+    - metric: Metric to evaluate if a rule is significant (default: "confidence").
+    - min_threshold: Minimum threshold for the metric to consider a rule significant.
     """
+
 
 @main.route("/test_results", methods=['GET'])
 @login_required
