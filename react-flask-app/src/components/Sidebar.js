@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Sidebar.css';
 import axios from 'axios';
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
 export default function Sidebar({ isOpen, onClose, isLoggedIn, onLogout}) {
   
   const sidebarStyle = isOpen ? "sidebar open" : "sidebar";
-  
+  const MySwal = withReactContent(Swal)
+
   useEffect(() => {
     axios.get('/csrf-token').then(response => {
       setCsrfToken(response.data.csrf_token);
@@ -34,6 +37,16 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn, onLogout}) {
       });
   };
   
+  function handleHomeClick() {
+    MySwal.fire({
+      title: "Navigating to home...",
+      timer: 500,
+      timerProgressBar: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    })
+  }
   return (
     <div className={sidebarStyle}>
       <div className="sidebar-content">
@@ -42,7 +55,7 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn, onLogout}) {
         </button>
         <ul>
           <li>
-            <Link to="/" className="sidebar-button">Home</Link>
+            <Link to="/" className="sidebar-button" onClick={handleHomeClick}>Home</Link>
           </li>
           {isLoggedIn && (
             <li>

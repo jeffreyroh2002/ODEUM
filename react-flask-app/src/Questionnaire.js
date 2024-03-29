@@ -15,7 +15,7 @@ export default function Questionnaire() {
     const location = useLocation();
     const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
-
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
     const [audioFilePath, setAudioFilePath] = useState('');
     const currentAudioFileId = parseInt(searchParams.get('audio_file_id'));
@@ -27,10 +27,14 @@ export default function Questionnaire() {
 
     const MySwal = withReactContent(Swal)
 
+    function handleLogout() { setIsLoggedIn(false); };
+
     //getting the number of audio files
     useEffect(() => {
         axios.get('/get_audio_num')
              .then(response => { setAudiosNum(parseInt(response.data.num_audio)) });
+        axios.get('/isLoggedIn')
+             .then(response => { setIsLoggedIn(response.data.isLoggedIn) })
     }, [])
 
     useEffect(() => {
@@ -91,14 +95,14 @@ export default function Questionnaire() {
                 Swal.showLoading();
               }
             });
+            navigate('/');
           };
-          navigate('/');
         })
       }
     
     return (
         <div>
-            <Header />
+            <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
             <div className="questionnaire-container">
                 <div>{audioFilePath}</div>
                 {/*
