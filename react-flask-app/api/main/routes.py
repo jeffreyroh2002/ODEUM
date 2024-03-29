@@ -529,6 +529,15 @@ def perform_association_rule_mining(df, min_support=0.01, metric="confidence", m
     - metric: Metric to evaluate if a rule is significant (default: "confidence").
     - min_threshold: Minimum threshold for the metric to consider a rule significant.
     """
+    frequent_itemsets = apriori(df, min_support=min_support, use_colnames=True)
+    
+    # Generate association rules
+    rules = association_rules(frequent_itemsets, metric=metric, min_threshold=min_threshold)
+    
+    # Filter rules based on some criteria, e.g., high lift and confidence
+    significant_rules = rules[(rules['lift'] >= 1) & (rules['confidence'] >= 0.8)]
+    
+    return significant_rules
 
 
 @main.route("/test_results", methods=['GET'])
@@ -581,6 +590,12 @@ def test_results():
         print("KeyError occurred during merging:", e)
         # Handle the error or return an appropriate response
 
+    ### ASSOCIATE RULE MINING ###
+    """ need to create df_transformed beforehand.
+    significant_rules = perform_association_rule_mining(df_transformed, min_support=0.05, metric="lift", min_threshold=1.2)
+    print("Significant Association Rules:")
+    print(significant_rules)
+    """
     response_data = {
         'user_id': user.id,
         'test_id': test.id,
