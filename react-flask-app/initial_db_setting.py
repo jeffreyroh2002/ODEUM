@@ -10,14 +10,9 @@ from api.models import AudioFile
 
 # path for predicting genre, mood, timbre
 
-"""
 genre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', 'full_mix_mfcc.json')
 mood_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', 'instrumental_mfcc.json')
 timbre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', 'vocal_mfcc.json')
-"""
-genre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', '3sample_mfcc.json')
-mood_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', '3sample_mfcc.json')
-timbre_saved_mfcc = os.path.join(os.getcwd(), 'api', 'static', 'mfccs', '3sample_mfcc.json')
 
 genre_model_path = os.path.join(os.getcwd(), 'api', 'mlModels', '0109_PCRNN_Genre7_final_100each_100ep_0.00001lr', 'best_model.h5')
 mood_model_path = os.path.join(os.getcwd(), 'api', 'mlModels', 'pred_mood', 'saved_model')
@@ -31,9 +26,9 @@ with app.app_context():
     db.create_all()
     from api.models import AudioFile
 
-    full_mix_dir = '../data_preprocessing/audio_split'
-    instrumentals_dir = '../data_preprocessing/audio_split'
-    vocals_dir = '../data_preprocessing/audio_split'
+    full_mix_dir = '../data_preprocessing/audio_split/audio_full_mix_split'
+    instrumentals_dir = '../data_preprocessing/audio_split/audio_instrumental_split'
+    vocals_dir = '../data_preprocessing/audio_split/audio_vocal_split'
 
     # Predict and save genre, mood, and timbre data
     genre_data = predict_genre(genre_model_path, genre_saved_mfcc)
@@ -55,7 +50,8 @@ with app.app_context():
         relevant_genre_data = next((data for key, data in genre_data.items() if key.startswith(audio_name_prefix)), {})
         relevant_mood_data = next((data for key, data in mood_data.items() if key.startswith(audio_name_prefix)), {})
         relevant_timbre_data = next((data for key, data in timbre_data.items() if key.startswith(audio_name_prefix)), {})
-
+        print(full_mix_file_path)
+        print("relevant_genre_data:", relevant_genre_data)
         # Convert data to JSON format
         genre_data_json = json.dumps(relevant_genre_data)
         mood_data_json = json.dumps(relevant_mood_data)

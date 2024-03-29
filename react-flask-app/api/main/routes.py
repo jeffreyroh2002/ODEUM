@@ -9,6 +9,7 @@ from datetime import datetime
 import logging
 import json
 import pandas as pd
+pd.set_option('display.max_columns', None)
 
 from sklearn.preprocessing import normalize
 from sklearn.metrics.pairwise import cosine_similarity
@@ -21,6 +22,7 @@ from collections import defaultdict
 import statistics
 import matplotlib.pyplot as plt
 from sklearn.linear_model import Lasso
+from mlxtend.frequent_patterns import apriori, association_rules
 
 
 
@@ -37,7 +39,7 @@ import os
 
 main = Blueprint('main', __name__)
 
-NUM_AUDIO = 3
+NUM_AUDIO = 22
 NUM_QUESTIONS_PER_AUDIO = 4
 EXTRA_QUESTIONS = 0
 TOTAL_QUESTIONS = NUM_AUDIO * NUM_QUESTIONS_PER_AUDIO + EXTRA_QUESTIONS
@@ -214,7 +216,7 @@ def submit_answer():
 @login_required
 def before_test_info():
     user = current_user
-    num_audio = 3
+    num_audio = 21
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
 
     if not test or test.test_end_time:        
@@ -476,6 +478,23 @@ def calculate_significant_correlations_for_ratings(df, rating_columns, genre_col
 
 def perform_regression_analysis(df, genre_columns, mood_columns):
     """Performs regression analysis to model the impact of genre and mood on overall rating."""
+
+    # Print all columns
+    print("Columns in DataFrame:")
+    print(df.columns)
+    
+    # Print all rows
+    print("Rows in DataFrame:")
+    print(df)
+    
+    # Check for NaN values in the DataFrame
+    nan_indices = df[df.isna().any(axis=1)]
+    if not nan_indices.empty:
+        print("Rows with NaN values:")
+        print(nan_indices)
+        print("Please handle missing values appropriately before proceeding with regression analysis.")
+        return
+
     # Creating interaction terms
     for genre_col in genre_columns:
         for mood_col in mood_columns:
@@ -486,10 +505,39 @@ def perform_regression_analysis(df, genre_columns, mood_columns):
     X = sm.add_constant(df[X_columns])  # Add a constant term for the intercept
     
     y_overall = df['overall_rating']
+
+    print("\nX Matrix:")
+    print(X.head())  # Print the first few rows of the X matrix for debugging
     
-    model_overall = sm.OLS(y_overall, X).fit()
-    print("\nRegression Analysis Summary for Overall Rating:")
-    print(model_overall.summary())
+    try:
+        model_overall = sm.OLS(y_overall, X).fit()
+        print("\nRegression Analysis Summary for Overall Rating:")
+        print(model_overall.summary())
+    except Exception as e:
+        print("\nError occurred during regression analysis:")
+        print(e)  # Print the error message for debugging
+
+
+def perform_association_rule_mining(df, min_support=0.01, metric="confidence", min_threshold=0.8):
+    """
+    Performs association rule mining on given DataFrame.
+    
+    Parameters:
+    - df: DataFrame where each row represents a song with discretized attributes as columns.
+          Columns are expected to be one-hot encoded for presence of each discretized attribute level.
+    - min_support: Minimum support for the apriori algorithm.
+    - metric: Metric to evaluate if a rule is significant (default: "confidence").
+    - min_threshold: Minimum threshold for the metric to consider a rule significant.
+    """
+    frequent_itemsets = apriori(df, min_support=min_support, use_colnames=True)
+    
+    # Generate association rules
+    rules = association_rules(frequent_itemsets, metric=metric, min_threshold=min_threshold)
+    
+    # Filter rules based on some criteria, e.g., high lift and confidence
+    significant_rules = rules[(rules['lift'] >= 1) & (rules['confidence'] >= 0.8)]
+    
+    return significant_rules
 
 
 @main.route("/test_results", methods=['GET'])
@@ -518,13 +566,36 @@ def test_results():
     ### REGRESSION ANALYSIS ###
     perform_regression_analysis(df, genre_columns, mood_columns)
     
-    ### REGRESSION ### 
+    ### CLUSTERING ### 
     user_ratings = create_user_ratings_df(test_answers)
     feature_columns = genre_columns + mood_columns
     df, kmeans = perform_kmeans_clustering(df, feature_columns)
-    user_ratings_clustered = pd.merge(user_ratings, df[['song_id', 'cluster']], on='song_id')
-    analyze_cluster_ratings(user_ratings_clustered, kmeans.n_clusters)
 
+    # Print statements to debug
+    print("Columns in user_ratings dataframe:")
+    print(user_ratings.columns)
+    print("Columns in df dataframe:")
+    print(df.columns)
+
+    # Check the first few rows of both dataframes
+    print("First few rows of user_ratings dataframe:")
+    print(user_ratings.head())
+    print("First few rows of df dataframe:")
+    print(df.head())
+
+    try:
+        user_ratings_clustered = pd.merge(user_ratings, df[['cluster']], left_on='song_id', right_index=True)
+        analyze_cluster_ratings(user_ratings_clustered, kmeans.n_clusters)
+    except KeyError as e:
+        print("KeyError occurred during merging:", e)
+        # Handle the error or return an appropriate response
+
+    ### ASSOCIATE RULE MINING ###
+    """ need to create df_transformed beforehand.
+    significant_rules = perform_association_rule_mining(df_transformed, min_support=0.05, metric="lift", min_threshold=1.2)
+    print("Significant Association Rules:")
+    print(significant_rules)
+    """
     response_data = {
         'user_id': user.id,
         'test_id': test.id,
