@@ -9,6 +9,7 @@ from datetime import datetime
 import logging
 import json
 import pandas as pd
+from sklearn.decomposition import PCA
 pd.set_option('display.max_columns', None)
 
 from sklearn.preprocessing import normalize
@@ -29,7 +30,6 @@ from mlxtend.frequent_patterns import apriori, association_rules
 #imports for saving png files
 import io
 import base64
-import matplotlib.pyplot as plt
 from flask import render_template
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import MaxNLocator
@@ -407,8 +407,9 @@ def perform_kmeans_clustering(df, feature_columns, n_clusters=5):
     df['cluster'] = kmeans.fit_predict(scaled_features)
     return df, kmeans
 
+# FOR PRINT STATEMENT (CHECKING)
 def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
-    """Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked."""
+    #Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked.
     avg_ratings_by_cluster = user_ratings_clustered.groupby(['user_id', 'cluster'])['rating'].mean().reset_index()
 
     print("\nAverage Ratings by Cluster:")
@@ -428,6 +429,66 @@ def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
     
     print("\nDisliked Clusters (Negative Average Rating):")
     print(disliked_clusters)
+
+"""
+def analyze_cluster_ratings(user_ratings_clustered, n_clusters, feature_columns, save_plot=True):
+    ###Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked.
+    ###Also includes feature analysis, visualization, and interpretation of the clusters.
+    # Step 1: Feature Analysis
+    cluster_means = user_ratings_clustered.groupby('cluster')[feature_columns].mean()
+    print("\nCluster Feature Means:")
+    print(cluster_means)
+
+    # Step 2: Visualization
+    pca = PCA(n_components=2)
+    cluster_centers_2D = pca.fit_transform(cluster_means)
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(cluster_centers_2D[:, 0], cluster_centers_2D[:, 1], c='red', marker='o', s=100)
+    for i, txt in enumerate(cluster_means.index):
+        plt.annotate(txt, (cluster_centers_2D[i, 0], cluster_centers_2D[i, 1]))
+    plt.xlabel('PC1')
+    plt.ylabel('PC2')
+    plt.title('Cluster Centers in 2D PCA Space')
+    plt.grid(True)
+
+    # Save plot as an image file
+    if save_plot:
+        plot_filename = 'cluster_centers_plot.png'
+        plt.savefig(plot_filename)
+        print(f"Plot saved as {plot_filename} in the current directory.")
+
+    plt.show()
+
+    # Step 3: Cluster Profiles
+    cluster_profiles = cluster_means.transpose()
+    print("\nCluster Profiles:")
+    print(cluster_profiles)
+
+    # Step 4: Interpretation
+    print("\nInterpretation of Clusters:")
+    for cluster_num in range(n_clusters):
+        # Analyze which clusters are rated more positively on average
+        cluster_avg_rating = user_ratings_clustered[user_ratings_clustered['cluster'] == cluster_num]['rating'].mean()
+        print(f"\nCluster {cluster_num}:")
+        print(f"Average Rating: {cluster_avg_rating}")
+        if cluster_avg_rating > 0:
+            print("This cluster is generally liked.")
+        elif cluster_avg_rating < 0:
+            print("This cluster is generally disliked.")
+        else:
+            print("This cluster has neutral sentiment.")
+    
+    # Further analysis can be done based on the findings
+    liked_clusters = user_ratings_clustered[user_ratings_clustered['rating'] > 0].groupby('cluster')['rating'].mean()
+    disliked_clusters = user_ratings_clustered[user_ratings_clustered['rating'] < 0].groupby('cluster')['rating'].mean()
+    
+    print("\nLiked Clusters (Positive Average Rating):")
+    print(liked_clusters)
+    
+    print("\nDisliked Clusters (Negative Average Rating):")
+    print(disliked_clusters)
+"""
 
 def find_significant_correlations(correlation_matrix, threshold, columns):
     significant_pairs = []
