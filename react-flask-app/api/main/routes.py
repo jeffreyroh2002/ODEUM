@@ -216,7 +216,7 @@ def submit_answer():
 @login_required
 def before_test_info():
     user = current_user
-    num_audio = 21
+    num_audio = 22
     test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
 
     if not test or test.test_end_time:        
