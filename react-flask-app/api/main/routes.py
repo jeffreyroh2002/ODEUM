@@ -680,8 +680,36 @@ def test_results():
     print("HERE IS DF:", df)
     data_columns = genre_columns + mood_columns + vocal_columns
     df_music_features = df[data_columns]
-    elbow_cluster_printing(df_music_features, df)
+    #elbow_cluster_printing(df_music_features, df)
 
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(df_music_features)
+
+    # Fit the KMeans algorithm to the scaled features
+    kmeans = KMeans(n_clusters=7, random_state=42)
+    kmeans.fit(scaled_features)
+
+    # Predict the cluster for each song
+    df['Cluster_Label'] = kmeans.predict(scaled_features)
+
+    cluster_avg_rating = df.groupby('Cluster_Label')['overall_rating'].mean()
+
+    # Determine if the user likes the songs in each cluster
+    # Setting the threshold for 'like' as a positive average rating
+    clusters_liked = cluster_avg_rating[cluster_avg_rating > 0]
+
+    print("Clusters liked by the user (based on positive average rating):")
+    print(clusters_liked)
+
+    """
+    # Now, each song in df has a cluster label in 'Cluster_Label' column
+    # Let's print out the first few entries to see their cluster assignments
+    print(df[['overall_rating', 'Cluster_Label']].head())
+
+    # Get the count of songs in each cluster
+    cluster_distribution = df['Cluster_Label'].value_counts()
+    print(cluster_distribution)
+    """
     ### ASSOCIATE RULE MINING ###
     """ need to create df_transformed beforehand.
     significant_rules = perform_association_rule_mining(df_transformed, min_support=0.05, metric="lift", min_threshold=1.2)
