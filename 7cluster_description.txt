@@ -11,3 +11,6 @@ Cluster 4: Euphoric Pulse - With a predominant Electronic influence and the high
 Cluster 5: Diverse Fusion - This cluster exhibits a mix of Rock, Hip Hop, and a notable influence of R&B/Soul, combined with the highest overall Brightness and a substantial amount of Smoothness and Dreaminess. The variety in attributes suggests an eclectic fusion of sounds, capturing an upbeat vibe with rhythmic hooks and grooves, likely interspersed with moments of soulful depth and melodic expressiveness.
 
 Cluster 6: Expressive Rhythmics - Here, there's a strong Hip Hop influence balanced with Tense, Bright, and Emotional nuances. This cluster may gravitate towards rhythmically expressive tracks that blend a strong beat with lyrical depth, often carrying emotional weight and a certain boldness in their execution, making them resonate both rhythmically and emotionally.
+
+
+NOTE: NEED TO ONLY CONSIDER OVERALL RATING WHEN LOOKING AT CLUSTER PREFERENCE!!!

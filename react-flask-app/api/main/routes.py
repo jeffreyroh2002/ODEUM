@@ -610,7 +610,7 @@ def elbow_cluster_printing(df_music_features, df):
     # Save the plot to a file
     plt.savefig('ratings_included_elbow_method_plot.png')
 
-    optimal_clusters = 10  # Update this based on the Elbow plot
+    optimal_clusters = 7  # Update this based on the Elbow plot
 
     # Apply K-means Clustering
     kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
