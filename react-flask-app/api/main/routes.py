@@ -644,33 +644,41 @@ def test_results():
     ### CLUSTERING ### 
     df = pd.DataFrame(structured_data)
     print("HERE IS DF:", df)
-    user_ratings = create_user_ratings_df(test_answers)
-    feature_columns = genre_columns + mood_columns + vocal_columns
-    df, kmeans = perform_kmeans_clustering(df, feature_columns)
+    data_columns = genre_columns + mood_columns + vocal_columns
+    df_music_features = df[data_columns]
 
-    # Print statements to debug
-    print("Columns in user_ratings dataframe:")
-    print(user_ratings.columns)
-    print("Columns in df dataframe:")
-    print(df.columns)
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(df_music_features)
 
-    # Check the first few rows of both dataframes
-    print("First few rows of user_ratings dataframe:")
-    print(user_ratings.head())
-    print("First few rows of df dataframe:")
-    print(df.head())
+    # Finding the optimal number of clusters using the Elbow Method
+    inertia = []
+    for i in range(1, 22):
+        kmeans = KMeans(n_clusters=i, random_state=42)
+        kmeans.fit(df_scaled)
+        inertia.append(kmeans.inertia_)
 
-    try:
-        user_ratings_clustered = pd.merge(user_ratings, df[['cluster']], left_on='song_id', right_index=True)
-        analyze_cluster_ratings(user_ratings_clustered, kmeans.n_clusters)
-        cluster_characteristics = analyze_cluster_characteristics(user_ratings_clustered, kmeans.n_clusters)
-        print("Cluster Characteristics:")
-        print(cluster_characteristics)
-    except KeyError as e:
-        print("KeyError occurred during merging:", e)
-        # Handle the error or return an appropriate response
+    plt.figure(figsize=(12, 6))
+    plt.plot(range(1, 22), inertia, marker='o', linestyle='--')
+    plt.title('Elbow Method')
+    plt.xlabel('Number of Clusters')
+    plt.ylabel('Inertia')
 
-    
+    # Save the plot to a file
+    plt.savefig('elbow_method_plot.png')
+
+    optimal_clusters = 7  # Update this based on the Elbow plot
+
+    # Apply K-means Clustering
+    kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
+    df['Cluster'] = kmeans.fit_predict(df_scaled)
+
+    # Explore the cluster assignments
+    print(df['Cluster'].value_counts())
+
+    centroids = kmeans.cluster_centers_
+    centroids_original_scale = scaler.inverse_transform(centroids)
+    df_centroids = pd.DataFrame(centroids_original_scale, columns=df_music_features.columns)
+    print(df_centroids)
 
     ### ASSOCIATE RULE MINING ###
     """ need to create df_transformed beforehand.
