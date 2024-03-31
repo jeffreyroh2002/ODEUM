@@ -608,9 +608,9 @@ def elbow_cluster_printing(df_music_features, df):
     plt.ylabel('Inertia')
 
     # Save the plot to a file
-    plt.savefig('elbow_method_plot.png')
+    plt.savefig('ratings_included_elbow_method_plot.png')
 
-    optimal_clusters = 7  # Update this based on the Elbow plot
+    optimal_clusters = 10  # Update this based on the Elbow plot
 
     # Apply K-means Clustering
     kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
@@ -701,15 +701,23 @@ def test_results():
     print("Clusters liked by the user (based on positive average rating):")
     print(clusters_liked)
 
+    df = pd.DataFrame(structured_data)
+    features_and_ratings_columns = rating_columns + genre_columns + mood_columns + vocal_columns
+    df_features_and_ratings = df[features_and_ratings_columns]
+    elbow_cluster_printing(df_features_and_ratings, df)
+    
     """
-    # Now, each song in df has a cluster label in 'Cluster_Label' column
-    # Let's print out the first few entries to see their cluster assignments
-    print(df[['overall_rating', 'Cluster_Label']].head())
+    scaler = StandardScaler()
+    scaled_features_and_ratings = scaler.fit_transform(df_features_and_ratings)
+    kmeans_with_ratings = KMeans(n_clusters=7, random_state=42)
+    kmeans_with_ratings.fit(scaled_features_and_ratings)
 
-    # Get the count of songs in each cluster
-    cluster_distribution = df['Cluster_Label'].value_counts()
-    print(cluster_distribution)
+    df['Cluster_With_Ratings'] = kmeans_with_ratings.predict(scaled_features_and_ratings)
+
+    # Print out the first few entries to see the new cluster assignments
+    print(df[['overall_rating', 'Cluster_With_Ratings']].head())
     """
+
     ### ASSOCIATE RULE MINING ###
     """ need to create df_transformed beforehand.
     significant_rules = perform_association_rule_mining(df_transformed, min_support=0.05, metric="lift", min_threshold=1.2)
