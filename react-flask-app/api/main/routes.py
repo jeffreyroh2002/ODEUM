@@ -430,6 +430,17 @@ def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
     print("\nDisliked Clusters (Negative Average Rating):")
     print(disliked_clusters)
 
+def analyze_cluster_characteristics(df_clustered, n_clusters):
+    """Analyzes the characteristics of each cluster."""
+    cluster_characteristics = {}
+    
+    for cluster_label in range(n_clusters):
+        cluster_data = df_clustered[df_clustered['cluster'] == cluster_label]
+        cluster_centroid = cluster_data.mean()
+        cluster_characteristics[cluster_label] = cluster_centroid
+    
+    return cluster_characteristics
+
 """
 def analyze_cluster_ratings(user_ratings_clustered, n_clusters, feature_columns, save_plot=True):
     ###Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked.
@@ -613,7 +624,9 @@ def test_results():
 
     test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
     structured_data = prepare_structured_data(test_answers)
+    print("structured_data: ", structured_data)
     df = pd.DataFrame(structured_data)
+    print("df: ", df)
 
     rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
     genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
@@ -625,11 +638,14 @@ def test_results():
     calculate_significant_correlations_for_ratings(df, rating_columns, genre_columns, mood_columns, vocal_columns)
     
     ### REGRESSION ANALYSIS ###
+    df = pd.DataFrame(structured_data)
     perform_regression_analysis(df, genre_columns, mood_columns)
     
     ### CLUSTERING ### 
+    df = pd.DataFrame(structured_data)
+    print("HERE IS DF:", df)
     user_ratings = create_user_ratings_df(test_answers)
-    feature_columns = genre_columns + mood_columns
+    feature_columns = genre_columns + mood_columns + vocal_columns
     df, kmeans = perform_kmeans_clustering(df, feature_columns)
 
     # Print statements to debug
@@ -647,9 +663,14 @@ def test_results():
     try:
         user_ratings_clustered = pd.merge(user_ratings, df[['cluster']], left_on='song_id', right_index=True)
         analyze_cluster_ratings(user_ratings_clustered, kmeans.n_clusters)
+        cluster_characteristics = analyze_cluster_characteristics(user_ratings_clustered, kmeans.n_clusters)
+        print("Cluster Characteristics:")
+        print(cluster_characteristics)
     except KeyError as e:
         print("KeyError occurred during merging:", e)
         # Handle the error or return an appropriate response
+
+    
 
     ### ASSOCIATE RULE MINING ###
     """ need to create df_transformed beforehand.
