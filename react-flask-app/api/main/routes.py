@@ -608,9 +608,9 @@ def elbow_cluster_printing(df_music_features, df):
     plt.ylabel('Inertia')
 
     # Save the plot to a file
-    plt.savefig('ratings_included_elbow_method_plot.png')
+    # plt.savefig('elbow_ratings_dropped_plot.png')
 
-    optimal_clusters = 7  # Update this based on the Elbow plot
+    optimal_clusters = 16  # Update this based on the Elbow plot
 
     # Apply K-means Clustering
     kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
@@ -662,7 +662,8 @@ def test_results():
     df = pd.DataFrame(structured_data)
     print("df: ", df)
 
-    rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
+    #rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
+    rating_columns = ['overall_rating']
     genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
     mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
     vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
@@ -677,9 +678,13 @@ def test_results():
     
     ### CLUSTERING ### 
     df = pd.DataFrame(structured_data)
+    columns_to_drop = ['genre_rating', 'mood_rating', 'vocal_timbre_rating']  # Temporary
+    df.drop(columns=columns_to_drop, inplace=True)
     print("HERE IS DF:", df)
+
     data_columns = genre_columns + mood_columns + vocal_columns
     df_music_features = df[data_columns]
+    
     #elbow_cluster_printing(df_music_features, df)
 
     scaler = StandardScaler()
