@@ -624,6 +624,9 @@ def elbow_cluster_printing(df_music_features, df):
     df_centroids = pd.DataFrame(centroids_original_scale, columns=df_music_features.columns)
     print(df_centroids)
 
+    filtered_centroids = df_centroids[df_centroids['overall_rating'] >= 2.0]
+    return filtered_centroids
+
 def perform_association_rule_mining(df, min_support=0.01, metric="confidence", min_threshold=0.8):
     """
     Performs association rule mining on given DataFrame.
@@ -709,8 +712,28 @@ def test_results():
     df = pd.DataFrame(structured_data)
     features_and_ratings_columns = rating_columns + genre_columns + mood_columns + vocal_columns
     df_features_and_ratings = df[features_and_ratings_columns]
-    elbow_cluster_printing(df_features_and_ratings, df)
+    high_rated_clusters = elbow_cluster_printing(df_features_and_ratings, df)
+    rating_rm_rows = high_rated_clusters.iloc[:, 1:]
+    print("rating_rm_rows:", rating_rm_rows)
     
+    # creating dicitonary (key -> attribute column, value -> rating value)
+    row_dicts = []
+    # Iterate through each row in the DataFrame
+    for index, row in rating_rm_rows.iterrows():
+        # Create a dictionary for the current row
+        row_dict = {}
+        # Iterate through each column in the row
+        for column, value in row.items():
+            # Check if the value is above 0.05
+            if value > 0.05:
+                row_dict[column] = value
+        # Append the dictionary to the list
+        row_dicts.append(row_dict)
+
+    # Print the list of dictionaries
+    for row_dict in row_dicts:
+        print(row_dict)
+
     """
     scaler = StandardScaler()
     scaled_features_and_ratings = scaler.fit_transform(df_features_and_ratings)
