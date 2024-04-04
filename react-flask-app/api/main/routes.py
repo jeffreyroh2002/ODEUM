@@ -37,6 +37,12 @@ from collections import defaultdict
 import seaborn as sns
 import os
 
+#openAI, langchain modules
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import HumanMessage
+
+
+
 main = Blueprint('main', __name__)
 
 NUM_AUDIO = 22
@@ -736,6 +742,8 @@ def test_results():
     # Print the list of dictionaries
     for row_dict in row_dicts:
         print(row_dict)
+
+    #take me to query_open_ai route that inputs dictionary through open ai
 
     """
     scaler = StandardScaler()
