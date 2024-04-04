@@ -403,7 +403,7 @@ def perform_kmeans_clustering(df, feature_columns, n_clusters=5):
     """Performs KMeans clustering on the given DataFrame."""
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(df[feature_columns])
-    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    kmeans = KMeans(n_clusters=n_clusters, n_init=10, random_state=42)
     df['cluster'] = kmeans.fit_predict(scaled_features)
     return df, kmeans
 
@@ -424,11 +424,13 @@ def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
     liked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] > 0].groupby('cluster')['rating'].mean()
     disliked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] < 0].groupby('cluster')['rating'].mean()
     
+    """
     print("\nLiked Clusters (Positive Average Rating):")
     print(liked_clusters)
     
     print("\nDisliked Clusters (Negative Average Rating):")
     print(disliked_clusters)
+    """
 
 def analyze_cluster_characteristics(df_clustered, n_clusters):
     """Analyzes the characteristics of each cluster."""
@@ -543,14 +545,17 @@ def calculate_significant_correlations_for_ratings(df, rating_columns, genre_col
             # Calculate and print significant correlations for the attribute
             significant_correlations = find_significant_correlations(correlation_matrix, threshold, columns=[score, attribute])
 
+            """
             if not significant_correlations.empty:
                 print(f"\nSignificant Correlations for {score} with {attribute} (|correlation| >= {threshold}):\n", significant_correlations)
             else:
                 print(f"\nNo significant correlations found for {score} with {attribute} at the threshold of {threshold}.")
+            """
 
 def perform_regression_analysis(df, genre_columns, mood_columns):
     """Performs regression analysis to model the impact of genre and mood on overall rating."""
 
+    """
     # Print all columns
     print("Columns in DataFrame:")
     print(df.columns)
@@ -558,7 +563,8 @@ def perform_regression_analysis(df, genre_columns, mood_columns):
     # Print all rows
     print("Rows in DataFrame:")
     print(df)
-    
+    """
+
     # Check for NaN values in the DataFrame
     nan_indices = df[df.isna().any(axis=1)]
     if not nan_indices.empty:
@@ -578,9 +584,11 @@ def perform_regression_analysis(df, genre_columns, mood_columns):
     
     y_overall = df['overall_rating']
 
+    """
     print("\nX Matrix:")
     print(X.head())  # Print the first few rows of the X matrix for debugging
-    
+    """
+
     try:
         model_overall = sm.OLS(y_overall, X).fit()
         print("\nRegression Analysis Summary for Overall Rating:")
@@ -597,7 +605,7 @@ def elbow_cluster_printing(df_music_features, df):
     # Finding the optimal number of clusters using the Elbow Method
     inertia = []
     for i in range(1, 22):
-        kmeans = KMeans(n_clusters=i, random_state=42)
+        kmeans = KMeans(n_clusters=i,n_init=10, random_state=42)
         kmeans.fit(df_scaled)
         inertia.append(kmeans.inertia_)
 
@@ -613,7 +621,7 @@ def elbow_cluster_printing(df_music_features, df):
     optimal_clusters = 17  # Update this based on the Elbow plot
 
     # Apply K-means Clustering
-    kmeans = KMeans(n_clusters=optimal_clusters, random_state=42)
+    kmeans = KMeans(n_clusters=optimal_clusters, n_init=10, random_state=42)
     df['Cluster'] = kmeans.fit_predict(df_scaled)
 
     # Explore the cluster assignments
@@ -622,7 +630,6 @@ def elbow_cluster_printing(df_music_features, df):
     centroids = kmeans.cluster_centers_
     centroids_original_scale = scaler.inverse_transform(centroids)
     df_centroids = pd.DataFrame(centroids_original_scale, columns=df_music_features.columns)
-    print(df_centroids)
 
     filtered_centroids = df_centroids[df_centroids['overall_rating'] >= 2.0]
     return filtered_centroids
@@ -661,9 +668,7 @@ def test_results():
 
     test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
     structured_data = prepare_structured_data(test_answers)
-    print("structured_data: ", structured_data)
     df = pd.DataFrame(structured_data)
-    print("df: ", df)
 
     #rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
     rating_columns = ['overall_rating']
@@ -683,7 +688,6 @@ def test_results():
     df = pd.DataFrame(structured_data)
     columns_to_drop = ['genre_rating', 'mood_rating', 'vocal_timbre_rating']  # Temporary
     df.drop(columns=columns_to_drop, inplace=True)
-    print("HERE IS DF:", df)
 
     data_columns = genre_columns + mood_columns + vocal_columns
     df_music_features = df[data_columns]
@@ -694,7 +698,7 @@ def test_results():
     scaled_features = scaler.fit_transform(df_music_features)
 
     # Fit the KMeans algorithm to the scaled features
-    kmeans = KMeans(n_clusters=7, random_state=42)
+    kmeans = KMeans(n_clusters=7, n_init=10, random_state=42)
     kmeans.fit(scaled_features)
 
     # Predict the cluster for each song
@@ -714,7 +718,6 @@ def test_results():
     df_features_and_ratings = df[features_and_ratings_columns]
     high_rated_clusters = elbow_cluster_printing(df_features_and_ratings, df)
     rating_rm_rows = high_rated_clusters.iloc[:, 1:]
-    print("rating_rm_rows:", rating_rm_rows)
     
     # creating dicitonary (key -> attribute column, value -> rating value)
     row_dicts = []
