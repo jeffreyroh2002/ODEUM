@@ -6,14 +6,14 @@ import playIcon from './images/blob.png'
 
 export default function BeforeTest() {
     const navigate = useNavigate()
-    const [audioFileId, setAudioFileId] = useState(1);
+    const [questionIndex, setQuestionIndex] = useState(1);
     const [testId, setTestId] = useState(1);
 
     useEffect(() => {
         fetch(`/before_test_info`)
         .then(res => res.json())
         .then(data => {
-            setAudioFileId(data.audio_file_id);
+            setQuestionIndex(data.question_index);
             setTestId(data.test_id);
         })
         .catch(error => console.error('Error fetching audio file info:', error));
@@ -21,8 +21,7 @@ export default function BeforeTest() {
 
     const navigateToQuestionnaire = () => {
         const testType = 1;
-        console.log(audioFileId, testType, testId)
-        navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`)
+        navigate(`/Questionnaire?question_index=${questionIndex}&test_type=${testType}&test_id=${testId}`)
     };
 
     return (

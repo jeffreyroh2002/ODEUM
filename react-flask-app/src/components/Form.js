@@ -4,13 +4,11 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import axios from 'axios'
 
-export default function Form({testId, questionIndex, goPrevQuestion, goNextQuestion, audiosNum, questionsNum, onQuit }) {
+export default function Form({testId, questionIndex, audioId, onPrevQuestion, onNextQuestion, numQ, onQuit, questionType}) {
   const [csrfToken, setCsrfToken] = useState('');
   const MySwal = withReactContent(Swal);
   const ratingsButtons = {'3' : 'button1', '2' : 'button2', '1': 'button3', '-1' : 'button4', '-2' : 'button5', '-3' : 'button6'};
   const selectedClass = 'yellow-background';
-  const selectionTypes = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
-  const [selectionType, setSelectionType] = useState(selectionTypes[questionIndex % questionsNum])
   const [savedRating, setSavedRating] = useState();
 
   useEffect(() => {
@@ -19,6 +17,19 @@ export default function Form({testId, questionIndex, goPrevQuestion, goNextQuest
     }).then(data => {
       setCsrfToken(data.csrf_token);
     });
+    console.log("please: ", audioId, questionType, testId)
+    axios.get(`/get_useranswer?audio_id=${audioId}&question_type=${questionType}&test_id=${testId}`)
+    .then(response => {
+       const rating = response.data.rating;
+       let button;
+       if (rating) {
+         button = document.getElementById(ratingsButtons[rating.toString()]);
+         setSavedRating(rating);
+       }
+       else setSavedRating(0);
+       if (button) button.classList.add(selectedClass); 
+     })
+    .catch(error => {console.log("error in fetching useranswer data: ", error)});
   }, []);
 
 
@@ -36,7 +47,7 @@ export default function Form({testId, questionIndex, goPrevQuestion, goNextQuest
   };
 
   function submitAnswer(questionIndex, rating) {
-    if (questionIndex % questionsNum === 1 && !rating) {
+    if (questionType === 'overall_rating' && !rating) {
       MySwal.fire({
         icon: "error",
         title: "This question is required!",
@@ -52,36 +63,22 @@ export default function Form({testId, questionIndex, goPrevQuestion, goNextQuest
         body: JSON.stringify({
           test_id: testId,
           question_index: questionIndex,
-          type: selectionType,
+          type: questionType,
+          audio_id: audioId,
           rating: rating
         })
       });
-      goNextQuestion();
+      onNextQuestion();
     };
   };
 
 
-  useEffect(() => {
-    axios.get(`/get_useranswer?question_index=${questionIndex}&test_id=${testId}`)
-         .then(response => {
-            const rating = response.data.rating;
-            let button;
-            if (rating) {
-              button = document.getElementById(ratingsButtons[rating.toString()]);
-              setSavedRating(rating);
-            }
-            else setSavedRating(0);
-            if (button) button.classList.add(selectedClass); 
-          })
-         .catch(error => {console.log("error in fetching useranswer data: ", error)});
-    setSelectionType(selectionTypes[questionIndex % questionsNum]);
-  }, [questionIndex])
 
   return (
     <div>
       <div className="rating--container">
         {/* Render questions based on currentQOKuestionIndex */}
-        {questionIndex % questionsNum === 1 && (
+        {questionType === 'overall_rating' && (
           <div className="rating-group">
             <h4 className="rating--label">Rate the Song.</h4>
             <button id="button1" className="rating--button" onClick={() => {onSelectionClick(3); }}>could listen to it all day &#128293;</button>
@@ -93,7 +90,7 @@ export default function Form({testId, questionIndex, goPrevQuestion, goNextQuest
           </div>
         )}
 
-        {questionIndex % questionsNum === 2 && (
+        {questionType === 'genre_rating' && (
           <div className="rating-group">
             <h4 className="rating--label">How is the Genre?</h4>
             <button id="button1" className="rating--button" onClick={() => {onSelectionClick(3); }}>Fire</button>
@@ -105,7 +102,7 @@ export default function Form({testId, questionIndex, goPrevQuestion, goNextQuest
           </div>
         )}
   
-        {questionIndex % questionsNum === 3 && (
+        {questionType === 'mood_rating' && (
           <div className="rating-group">
             <h4 className="rating--label">Describe the vibe or feeling of this song.</h4>
             <button id="button1" className="rating--button" onClick={() => {onSelectionClick(3); }}>Fire</button>
@@ -117,7 +114,7 @@ export default function Form({testId, questionIndex, goPrevQuestion, goNextQuest
           </div>
         )}
 
-        {questionIndex % questionsNum === 0 && (
+        {questionType === 'vocal_timbre_rating' && (
           <div className="rating-group">
             <h4 className="rating--label">Thoughts on the vocals?</h4>
             <button id="button1" className="rating--button" onClick={() => {onSelectionClick(3); }}>Fire</button>
@@ -132,9 +129,9 @@ export default function Form({testId, questionIndex, goPrevQuestion, goNextQuest
       
       {questionIndex === 1 ? 
         <button className="quit--button" onClick={onQuit}>Quit Test</button> :
-        <button className="prev--button" onClick={goPrevQuestion}>Previous Button</button>}
+        <button className="prev--button" onClick={onPrevQuestion}>Previous Button</button>}
 
-      {questionIndex ===  audiosNum * questionsNum ?  
+      {questionIndex ===  numQ ?  
         <button className="submit--button" onClick={() => {submitAnswer(questionIndex, savedRating); } }>Submit Test</button> :
         <button className="next--button" onClick={() => {submitAnswer(questionIndex, savedRating); } }>Next Button</button>}
     </div>

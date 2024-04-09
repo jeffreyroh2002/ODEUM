@@ -48,6 +48,7 @@ main = Blueprint('main', __name__)
 NUM_AUDIO = 22
 NUM_QUESTIONS_PER_AUDIO = 4
 EXTRA_QUESTIONS = 0
+EXTRA_QUESTIONS_INDEX = []
 TOTAL_QUESTIONS = NUM_AUDIO * NUM_QUESTIONS_PER_AUDIO + EXTRA_QUESTIONS
 
 @main.route('/')
@@ -151,7 +152,7 @@ def logout():
     logout_user()
     return jsonify({"message": "Logout successful"})
 
-@main.route('/isLoggedIn')
+@main.route('/is_logged_in')
 def is_logged_in():
     if current_user.is_authenticated:
         return jsonify({"isLoggedIn": True})
@@ -171,35 +172,54 @@ def get_prev_audio_file_id(current_audio_file_id):
 @login_required
 @main.route('/get_useranswer', methods=['GET'])
 def get_useranswer():
-    question_index = int(request.args.get('question_index'))
+    audio_id = int(request.args.get('audio_id'))
     test_id = int(request.args.get('test_id'))
-    selection_types = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
-    audio_id = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
-    selection_type = selection_types[question_index % NUM_QUESTIONS_PER_AUDIO]
-    print("audio_id, selection_type: ", audio_id, selection_type)
+    question_type = request.args.get('question_type')
+    print(audio_id, test_id, question_type)
     answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_id).first()
     if answer == None:
         rating = None
     else:
-        rating = getattr(answer, selection_type)
-    print("rating: ", rating)
+        rating = getattr(answer, question_type)
+    print("saved rating: ", rating)
     return jsonify({"rating" : rating})
+
+@main.route('/get_question_metadata', methods=['GET'])
+@login_required
+def get_question_metadata():
+    question_index = request.args.get('question_index', type=int)
+    question_types = ['vocal_timbre_rating', 'overall_rating', 'genre_rating', 'mood_rating']
+    
+    if question_index in EXTRA_QUESTIONS_INDEX:
+        question_type = 'additional'
+    
+    else:
+        additional_q_before = [index for index in EXTRA_QUESTIONS_INDEX if index < question_index]
+        num_additional_q_before = len(additional_q_before)
+        question_index_except_additional = question_index - num_additional_q_before      
+        question_type = question_types[question_index % NUM_QUESTIONS_PER_AUDIO]
+        audio_id = (question_index_except_additional - 1) // NUM_QUESTIONS_PER_AUDIO + 1
+
+        dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+        filenames = os.listdir(dir_path)
+        full_filenames = ['static/audio_files/' + filename for filename in filenames]
+        print("askjaskf: ", question_type, audio_id, full_filenames[int(audio_id) - 1])
+    return jsonify({"question_type" : question_type, "audio_id" : audio_id,
+                    "audio_filename": full_filenames[int(audio_id) - 1]})
 
 @main.route('/submit_answer', methods=['POST'])
 @login_required
 def submit_answer():
     data = request.data.decode('utf-8')
     data = json.loads(data)
-    question_index = data['question_index']
+    question_index = int(data['question_index'])
     answer_type = data['type']
-    print("answer_type: ", answer_type)
-    print("rating: ", data['rating'])
+    audio_index = int(data['audio_id'])
     rating = data['rating']
     test_id = int(data['test_id'])
-    audio_index = (question_index - 1) // NUM_QUESTIONS_PER_AUDIO + 1
+    print("get data: ", question_index, answer_type, audio_index, rating, test_id)
     answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
-
-    if question_index % NUM_QUESTIONS_PER_AUDIO == 1 and not answer:
+    if answer_type == 'overall_rating' and not answer:
         print("new answer added")
         new_answer = UserAnswer(audio_id=audio_index, test_id=test_id, user_id=current_user.id)
         db.session.add(new_answer)
@@ -209,6 +229,7 @@ def submit_answer():
     setattr(answer, answer_type, rating)
     db.session.commit()
     answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_index).first()
+
     print(answer.overall_rating, answer.genre_rating, answer.mood_rating, answer.vocal_timbre_rating)
 
     if question_index == TOTAL_QUESTIONS:
@@ -234,32 +255,28 @@ def before_test_info():
         db.session.add(test_val)
         db.session.commit()
         is_new_test = True
-        audio_file_id = 1
-        audio_file = AudioFile.query.get_or_404(audio_file_id)
+        question_index = 1
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-        # for audio_index in range(1, num_audio + 1):
-        #     tmp = UserAnswer(user_id=user.id, audio_id=audio_index, test_id=test.id)
-        #     db.session.add(tmp)
-        #     db.session.commit()
 
     else:
         is_new_test = False
         last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.overall_rating != None) \
                                       .order_by(UserAnswer.audio_id.desc()).first()
-        if last_answer == None:
-            audio_file_id = 1
-            audio_file = AudioFile.query.get_or_404(audio_file_id)
-        else:
-            audio_file_id = last_answer.audio_id
-            audio_file = AudioFile.query.get_or_404(audio_file_id)
+        question_index = 1
 
-        print(audio_file_id, audio_file.audio_name)
-    
+        if last_answer != None:
+            #finding the question index
+            allocated_number = 1
+            while True:
+                if question_index not in EXTRA_QUESTIONS_INDEX:
+                    if allocated_number == (last_answer.audio_id - 1) * NUM_QUESTIONS_PER_AUDIO + 1:
+                        break
+                    allocated_number += 1
+                question_index += 1
     return jsonify({
                 'status': 'in_progress',
                 'new_test': is_new_test,
-                'audio_file_id': audio_file_id,
-                'audio_file_name': audio_file.audio_name,
+                'question_index': question_index,
                 'test_id': test.id
     })
 
@@ -344,7 +361,6 @@ def get_prev_questions():
 def get_audio_num():
     dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
     filenames = os.listdir(dir_path)
-    print(len(filenames))
     return jsonify({"num_audio": len(filenames)})
 
 @login_required
@@ -675,7 +691,6 @@ def test_results():
     test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
     structured_data = prepare_structured_data(test_answers)
     df = pd.DataFrame(structured_data)
-
     #rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
     rating_columns = ['overall_rating']
     genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']

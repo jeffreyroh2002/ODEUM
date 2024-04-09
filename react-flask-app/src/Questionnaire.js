@@ -15,50 +15,43 @@ export default function Questionnaire() {
     const location = useLocation();
     const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [audioFileId, setAudioFileId] = useState(searchParams.get('audio_file_id'));
-    const [audioFilePath, setAudioFilePath] = useState('');
-    const currentAudioFileId = parseInt(searchParams.get('audio_file_id'));
     const testType = parseInt(searchParams.get('test_type'));
     const testId = parseInt(searchParams.get('test_id'));
-    const questionsNum = 4;
-    const [questionIndex, setQuestionIndex] = useState(questionsNum * (audioFileId - 1) + 1);
-    const [audiosNum, setAudiosNum] = useState(2);
 
-    const MySwal = withReactContent(Swal)
+    const numQuestionPerAudio = 4;
+    const numAudios = 22;
+    const numAdditionalQ = 0;
+    const numQ = numAdditionalQ + numQuestionPerAudio * numAudios;
+
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [questionIndex, setQuestionIndex] = useState(parseInt(searchParams.get('question_index')));
+    const [questionType, setQuestionType] = useState('');
+    const [audioId, setAudioId] = useState(1);
+    const [audioName, setAudioName] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     function handleLogout() { setIsLoggedIn(false); };
 
-    //getting the number of audio files
     useEffect(() => {
-        axios.get('/get_audio_num')
-             .then(response => { setAudiosNum(parseInt(response.data.num_audio)) });
-        axios.get('/isLoggedIn')
-             .then(response => { setIsLoggedIn(response.data.isLoggedIn) })
-    }, [])
-
-    useEffect(() => {
-        if (Math.ceil(questionIndex / questionsNum) !== audioFileId) {
-            setAudioFileId(Math.ceil(questionIndex / questionsNum))
-        }
-    }, [questionIndex, audiosNum])
-
-    useEffect(() => {
-        axios.get(`/get_audio_filename?audio_id=${audioFileId}`)
-             .then((response) => { setAudioFilePath(response.data.audio_filename); })
-    }, [audioFileId])
-
-    useEffect(() => {
-        if (currentAudioFileId !== audioFileId) {
-            navigate(`/Questionnaire?audio_file_id=${audioFileId}&test_type=${testType}&test_id=${testId}`)
-        }
-    }, [audioFilePath])
+      navigate(`/Questionnaire?question_index=${questionIndex}&test_type=${testType}&test_id=${testId}`);
+      setIsLoading(true);
+      axios.get(`/get_question_metadata?question_index=${questionIndex}`)
+           .then(response => { setQuestionType(response.data.question_type); 
+                               setAudioId(response.data.audio_id); 
+                               setAudioName(response.data.audio_filename); 
+                               setIsLoading(false); })
+           .catch((error) => { console.log("error getting question metadata", error); 
+                               setIsLoading(false);});
+    }, [questionIndex]);
     
-    const handleNextButton = () => { 
-        if (questionIndex !== audiosNum * questionsNum) setQuestionIndex(prev => prev + 1);
+    const goNextQ = () => {
+        if (questionIndex !== numQ) setQuestionIndex(prev => prev + 1);
         else handleTestSubmit();
     };
-    
+
+    const goPrevQ = () => { setQuestionIndex(prev => prev - 1); };
+
+    const MySwal = withReactContent(Swal);
     function handleTestSubmit() {
         MySwal.fire({
             title: "Do you want to submit the test in progress?",
@@ -72,12 +65,6 @@ export default function Questionnaire() {
             };
         })
     }
-    const goPrevQuestion = () => { setQuestionIndex(prevIndex => prevIndex - 1); };
-    const goNextQuestion = () => {
-        if (questionIndex === audiosNum * questionsNum) handleNextButton();
-        else setQuestionIndex(prevIndex => prevIndex + 1);
-    };
-
     function handleQuit() {
         MySwal.fire({
           title: "Do you want to quit the test in progress?",
@@ -99,35 +86,37 @@ export default function Questionnaire() {
           };
         })
       }
-    
+
     return (
         <div>
             <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
             <div className="questionnaire-container">
-                <div>{audioFilePath}</div>
-                {/*
-                <AudioVisualizerSphere className="play--pause--button"
-                    key={audioFileId}
-                    src={audioFilePath}
-                    isPlaying={isPlaying}
-                    togglePlayPause={handlePlayPause}
-                />
-                */}
-                <AudioPlayer className="play--pause--button"
-                    key={audioFileId}
-                    src={audioFilePath}
-                    playIconPath = {playIcon}
-                    pauseIconPath = {pauseIcon}
-                />
-                <Form 
-                    testId={testId} 
-                    questionIndex={questionIndex}
-                    goPrevQuestion={goPrevQuestion}
-                    goNextQuestion={goNextQuestion}
-                    audiosNum={audiosNum}
-                    questionsNum={questionsNum}
-                    onQuit={handleQuit}/>
+              <div>{audioName}</div>
+              {/*
+              <AudioVisualizerSphere className="play--pause--button"
+                  key={audioId}
+                  src={audioName}
+                  isPlaying={isPlaying}
+                  togglePlayPause={handlePlayPause}
+              />
+              */}
+              <AudioPlayer className="play--pause--button"
+                  key={audioId}
+                  src={audioName}
+                  playIconPath = {playIcon}
+                  pauseIconPath = {pauseIcon}
+              />
+              {isLoading? <div></div> :
+              <Form 
+                  testId={testId} 
+                  questionIndex={questionIndex}
+                  audioId={audioId}
+                  onPrevQuestion={goPrevQ}
+                  onNextQuestion={goNextQ}
+                  numQ={numQ}
+                  onQuit={handleQuit}
+                  questionType={questionType}/> }
             </div>
         </div>
     )
-}
+};
