@@ -33,12 +33,12 @@ def create_app(config_class=Config):
 
     # section for importing blueprints
     #from api.users.routes import users
-    from api.main.routes import main
     #from api.questions.routes import questions
     #from api.results.routes import results
-
-    #app.register_blueprint(users)
+    from api.main.routes import main
+    from api.users.routes import users
     app.register_blueprint(main)
+    app.register_blueprint(users)
     #app.register_blueprint(questions)
     #app.register_blueprint(results)
 

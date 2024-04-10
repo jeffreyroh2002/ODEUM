@@ -1,10 +1,10 @@
-// Signup.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
 import Header from './components/Header';
 import './Signup.css';
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
 export default function Signup(){
 
@@ -21,6 +21,7 @@ export default function Signup(){
   const [csrfToken, setCsrfToken] = useState('');
 
   const navigate = useNavigate();
+  const MySwal = withReactContent(Swal);
 
   const registerUser = () => {
     axios.post('/signup', {
@@ -34,23 +35,22 @@ export default function Signup(){
       }
     })
     .then(function (response) {
-      console.log(response);
-      navigate("/Login");
-    })
-    .catch(function (error) {
-      console.log(error); // Log the error to see its structure
-      if (error.response && error.response.status === 400) {
-        alert(error.response.data.error); // Alert the error message from the response
-      } else if (error.response && error.response.status === 401) {
-        alert("Invalid credentials");
-      } else if (error.response && error.response.status === 409) {
-        alert("Email already exists.");
-      } else {
-        alert("An unexpected error occurred. Please try again later."); // Handle other errors
+      console.log(response)
+      if (response.data['error']) {
+        MySwal.fire({
+          title: response.data['error'],
+          showConfirmButton: false,
+          showDenyButton: false,
+          showCancelButton: true,
+          cancelButtonText: `OK`
+        })
       }
-    });
-  }
+      else if (response.data['id']) navigate("/Login");
+    })
+    .catch((error) => alert("An unexpected error occurred. Please try again later."))
+  };
 
+  
   return (
     <div>
       <Header />

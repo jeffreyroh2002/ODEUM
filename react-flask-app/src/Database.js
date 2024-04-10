@@ -4,7 +4,7 @@ function Database() {
   const [audioFiles, setAudioFiles] = useState([]);
 
   useEffect(() => {
-    fetch('/printdb')
+    fetch('/print_db')
       .then(res => res.json())
       .then(data => {
         setAudioFiles(data); // Assuming the response contains an array of audio files

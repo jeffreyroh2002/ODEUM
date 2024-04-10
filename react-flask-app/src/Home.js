@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import './Home.css';
 import axios from 'axios';
 
-
 export default function Home() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -24,8 +23,6 @@ export default function Home() {
     // Perform logout logic, e.g., clear tokens, reset state, etc.
     setIsLoggedIn(false); // Update the logged-in state to false
   };
-
-  
 
   return (
     <div>
