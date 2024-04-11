@@ -224,15 +224,11 @@ def before_test_info():
         db.session.commit()
         audio_file_id = 1
         audio_file = AudioFile.query.get_or_404(audio_file_id)
-
-        newTest = True
+        
         test = Test.query.filter_by(user_id=user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-        print("new test id:", test.id)
-        print("IM ABOUT TO GO BACK TO FRONTEND")
         print("audio_file", audio_file)
         return jsonify({
                     'status': 'in_progress',
-                    'new_test': newTest,
                     'audio_file_id': audio_file_id,
                     'audio_file_name': audio_file.audio_name,
                     'test_id': test.id

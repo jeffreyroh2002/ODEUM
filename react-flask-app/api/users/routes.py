@@ -86,3 +86,26 @@ def is_logged_in():
         return jsonify({"isLoggedIn": True})
     else:
         return jsonify({"isLoggedIn": False})
+    
+
+@login_required
+@users.route('/get_user_info', methods=["GET"])
+def get_user_info():
+    user = current_user
+    user_name = user.first_name
+    tests = Test.query.filter_by(subject=current_user).order_by(Test.id.asc()).all()
+    tests_data = []
+    
+    for test in tests:
+        test_data = {
+            'id': test.id,
+            'test_type': test.test_type,
+            'test_start_time': test.test_start_time.strftime('%Y-%m-%d %H:%M:%S'),  # Convert datetime to string
+        }
+        if (test.test_end_time):
+            tests_data.append(test_data)
+
+    return jsonify({
+        'user_name': user_name,
+        'tests_data': tests_data
+    })

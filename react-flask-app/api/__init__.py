@@ -32,14 +32,16 @@ def create_app(config_class=Config):
     csrf.init_app(app)
 
     # section for importing blueprints
-    #from api.users.routes import users
-    #from api.questions.routes import questions
-    #from api.results.routes import results
     from api.main.routes import main
     from api.users.routes import users
+    from api.tests.routes import tests
+    from api.questions.routes import questions
+    from api.results.routes import results
+    
     app.register_blueprint(main)
     app.register_blueprint(users)
-    #app.register_blueprint(questions)
-    #app.register_blueprint(results)
+    app.register_blueprint(tests)
+    app.register_blueprint(questions)
+    app.register_blueprint(results)
 
     return app
