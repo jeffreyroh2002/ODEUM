@@ -5,14 +5,16 @@ import './ArtistSelector.css';
 import axios from 'axios';
 
 
+// need to add fetchArtist (default function)
+
 async function fetchRelatedArtists(artistId, token) {
   const response = await axios.get(`https://api.spotify.com/v1/artists/${artistId}/related-artists`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
-  return response.data.artists.map(artist => ({
+  return response.data.artists.slice(0, 5).map(artist => ({ // Fetch only 5 related artists
     id: artist.id,
     name: artist.name,
-    imageUrl: artist.images[0].url
+    imageUrl: artist.images[0] ? artist.images[0].url : undefined
   }));
 }
 
@@ -36,6 +38,12 @@ function ArtistSelector() {
       })
       .catch(error => console.error('Error fetching artists:', error));
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      fetchArtists(token).then(setArtists);
+    }
+  }, [token]);
 
   const handleSelectArtist = artistId => {
     fetchRelatedArtists(artistId, token).then(setArtists);
