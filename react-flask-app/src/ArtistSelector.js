@@ -14,7 +14,6 @@ function ArtistCard({ artist, onSelectArtist }) {
 }
 
 async function fetchArtists(token) {
-  // Assuming you have the API endpoint and token
   const response = await axios.get('https://api.spotify.com/v1/browse/new-releases', {
     headers: { 'Authorization': `Bearer ${token}` }
   });
@@ -36,7 +35,7 @@ async function fetchRelatedArtists(artistId, token) {
   }));
 }
 
-function ArtistsContainer() {
+function ArtistSelector() {
   const [artists, setArtists] = useState([]);
   const [token, setToken] = useState('');
 
@@ -61,7 +60,7 @@ function ArtistsContainer() {
 
   return (
     <div>
-      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <Header />
       {artists.map(artist => (
         <ArtistCard key={artist.id} artist={artist} onSelectArtist={handleSelectArtist} />
       ))}
@@ -69,4 +68,4 @@ function ArtistsContainer() {
   );
 }
 
-export default ArtistsContainer;
+export default ArtistSelector;
