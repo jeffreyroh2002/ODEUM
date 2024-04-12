@@ -4,15 +4,6 @@ import { Link } from 'react-router-dom';
 import './ArtistSelector.css';
 import axios from 'axios';
 
-function ArtistCard({ artist, onSelectArtist }) {
-  return (
-    <div className="artist-card" onClick={() => onSelectArtist(artist.id)}>
-      <img src={artist.imageUrl} alt={artist.name} style={{ width: 100, height: 100 }} />
-      <h3>{artist.name}</h3>
-    </div>
-  );
-}
-
 async function fetchArtists(token) {
   const response = await axios.get('https://api.spotify.com/v1/browse/new-releases', {
     headers: { 'Authorization': `Bearer ${token}` }
@@ -61,9 +52,14 @@ function ArtistSelector() {
   return (
     <div>
       <Header />
-      {artists.map(artist => (
-        <ArtistCard key={artist.id} artist={artist} onSelectArtist={handleSelectArtist} />
-      ))}
+      <div className="artist-container">
+        {artists.map(artist => (
+            <div className="artist-card" key={artist.id} onClick={() => handleSelectArtist(artist.id)}>
+                <img src={artist.imageUrl} alt={artist.name} />
+                <h3>{artist.name}</h3>
+            </div>
+        ))}
+      </div>
     </div>
   );
 }
