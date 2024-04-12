@@ -39,11 +39,13 @@ function ArtistSelector() {
       .catch(error => console.error('Error fetching artists:', error));
   }, []);
 
+  /*
   useEffect(() => {
     if (token) {
       fetchArtists(token).then(setArtists);
     }
   }, [token]);
+  */
 
   const handleSelectArtist = artistId => {
     fetchRelatedArtists(artistId, token).then(setArtists);
