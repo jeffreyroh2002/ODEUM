@@ -36,7 +36,7 @@ import seaborn as sns
 import os
 
 #openAI, langchain modules
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 
 results = Blueprint('results', __name__)
