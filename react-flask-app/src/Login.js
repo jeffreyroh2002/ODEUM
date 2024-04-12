@@ -1,10 +1,10 @@
-// Signup.js
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
 import Header from './components/Header';
 import './Login.css';
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
 export default function Signup(){
 
@@ -18,6 +18,7 @@ export default function Signup(){
   const [password,setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [csrfToken, setCsrfToken] = useState('');
+  const MySwal = withReactContent(Swal);
 
   // For Routing back to prev page
   const navigate = useNavigate();
@@ -34,17 +35,19 @@ export default function Signup(){
     })
     .then(function (response) {
       console.log(response);
-      navigate('/');
-    })
-    .catch(function (error) {
-      console.log(error);
-      if (error.response && error.response.status === 400 || error.response.status === 401) {
-        alert(error.response.data.error);
-      } else {
-        alert("An unexpected error occurred. Please try again later."); // Handle other errors
+      if (response.data['error']) {
+        MySwal.fire({
+          title: response.data['error'],
+          showConfirmButton: false,
+          showDenyButton: false,
+          showCancelButton: true,
+          cancelButtonText: `OK`
+        })
       }
-    });
-  }
+      else navigate('/');
+    })
+    .catch((error) => alert("An unexpected error occurred. Please try again later."));
+  };
 
   return (
     <div>

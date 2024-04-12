@@ -17,7 +17,7 @@ export default function Form({testId, questionIndex, audioId, onPrevQuestion, on
     }).then(data => {
       setCsrfToken(data.csrf_token);
     });
-    console.log("please: ", audioId, questionType, testId)
+    
     axios.get(`/get_useranswer?audio_id=${audioId}&question_type=${questionType}&test_id=${testId}`)
     .then(response => {
        const rating = response.data.rating;
