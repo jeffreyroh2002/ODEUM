@@ -5,6 +5,20 @@ import base64
 
 spotify = Blueprint('spotify', __name__)
 
+@spotify.route('/get-token')
+def get_token():
+    client_id = current_app.config['SPOTIFY_CLIENT_ID']
+    client_secret = current_app.config['SPOTIFY_CLIENT_SECRET']
+    auth_response = requests.post(
+        'https://accounts.spotify.com/api/token',
+        data={
+            'grant_type': 'client_credentials'
+        },
+        auth=(client_id, client_secret)  # Basic auth auto encodes client credentials
+    )
+    auth_response_data = auth_response.json()
+    return {'access_token': auth_response_data.get('access_token')}
+
 @spotify.route('/login_spotify')
 def login_spotify():
     scope = "user-read-private user-read-email"
