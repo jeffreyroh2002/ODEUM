@@ -4,16 +4,6 @@ import { Link } from 'react-router-dom';
 import './ArtistSelector.css';
 import axios from 'axios';
 
-async function fetchArtists(token) {
-  const response = await axios.get('https://api.spotify.com/v1/browse/new-releases', {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  return response.data.albums.items.map(album => ({
-    id: album.artists[0].id,
-    name: album.artists[0].name,
-    imageUrl: album.images[0].url
-  }));
-}
 
 async function fetchRelatedArtists(artistId, token) {
   const response = await axios.get(`https://api.spotify.com/v1/artists/${artistId}/related-artists`, {
@@ -40,10 +30,12 @@ function ArtistSelector() {
   }, []);
 
   useEffect(() => {
-    if (token) {
-      fetchArtists(token).then(setArtists);
-    }
-  }, [token]);
+    axios.get('/fetch-popular-artists')
+      .then(response => {
+        setArtists(response.data);
+      })
+      .catch(error => console.error('Error fetching artists:', error));
+  }, []);
 
   const handleSelectArtist = artistId => {
     fetchRelatedArtists(artistId, token).then(setArtists);
@@ -54,10 +46,11 @@ function ArtistSelector() {
       <Header />
       <div className="artist-container">
         {artists.map(artist => (
-            <div className="artist-card" key={artist.id} onClick={() => handleSelectArtist(artist.id)}>
-                <img src={artist.imageUrl} alt={artist.name} />
-                <h3>{artist.name}</h3>
-            </div>
+          <div className="artist-card" key={artist.id} onClick={() => handleSelectArtist(artist.id)} >
+            <img src={artist.imageUrl} alt={artist.name} />
+            <h3>{artist.name}</h3>
+            <p>Popularity: {artist.popularity}</p>
+          </div>
         ))}
       </div>
     </div>
