@@ -126,6 +126,7 @@ class UserAnswer(db.Model):
             f"UserAnswer('rating:{self.id}')"
         )
 
+#currently am not using the presurveyanswer model. Better to use this than plain text in Test model#
 class PreSurveyAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, nullable=False)
