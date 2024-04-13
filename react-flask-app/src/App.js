@@ -8,6 +8,7 @@ import Questionnaire from './Questionnaire';
 import BeforeTest from './BeforeTest';
 import TestCompleted from './TestCompleted';
 import ArtistSelector from './ArtistSelector';
+import Presurvey from './Presurvey';
 
 import Database from './Database';
 
@@ -21,6 +22,7 @@ function App() {
         <Route path="/Profile" element={<Profile />} />
         <Route path="/BeforeTest" element={<BeforeTest />} />
         <Route path="/ArtistSelector" element={<ArtistSelector />} />
+        <Route path="/Presurvey" element={<Presurvey />} />
         <Route path="/questionnaire" element={<Questionnaire />} />
         <Route path="/TestCompleted" element={<TestCompleted />} />
         <Route path="/Database" element={<Database />} />
