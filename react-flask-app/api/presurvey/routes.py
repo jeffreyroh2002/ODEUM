@@ -9,22 +9,26 @@ questions = [
     {
         "id": 1,
         "text": "Are you aware of your musical preferences?",
-        "answers": ["Yes", "No"]
+        "answers": ["Yes", "No"],
+        "allow_multiple": False
     },
     {
         "id": 2,
         "text": "Would you like to discover new music or find tracks similar to what you already enjoy?",
-        "answers": ["Explore new style of music", "Find similar music to my current favorites"]
+        "answers": ["Explore new style of music", "Find similar music to my current favorites"],
+        "allow_multiple": False
     },
     {
         "id": 3,
         "text": "What genres of music do you prefer?",
-        "answers": ["Pop", "Rock", "Hip-Hop", "Jazz", "Electronic", "R&B", "Indie"]
+        "answers": ["Pop", "Rock", "Hip-Hop", "Jazz", "Electronic", "R&B", "Indie"],
+        "allow_multiple": True
     },
     {
         "id": 4,
         "text": "Do you listen to music based on specific contexts or situations, or more casually?",
-        "answers": ["Based on contexts or situations", "More casual"]
+        "answers": ["Based on contexts or situations", "More casual"],
+        "allow_multiple": False
     }
 ]
 
