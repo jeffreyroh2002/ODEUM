@@ -12,7 +12,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100px; /* Fixed width for each card */
+    width: 150px; /* Fixed width for each card */
+    height: 150px;
     padding: 10px;
     background-color: #ffffff; /* White background for the cards */
     border: 1px solid #dedede; /* Light grey border */
@@ -29,8 +30,9 @@
 
 /* Styling for the artist image */
 .artist-card img {
-    width: 100%; /* Full width of the card */
-    height: auto; /* Maintain aspect ratio */
+    width: 100px; /* Set width to 100 pixels */
+    height: 100px; /* Set height to 100 pixels */
+    object-fit: cover; /* Ensures the image covers the area, cropping if necessary */
     border-radius: 4px; /* Rounded corners for the image */
 }
 
@@ -40,4 +42,10 @@
     color: #333; /* Dark grey color for the text */
     font-size: 16px; /* Reasonable font size for readability */
     text-align: center; /* Center-align the artist name */
+    overflow: hidden; /* Hides text that overflows */
+    text-overflow: ellipsis; /* Adds an ellipsis to truncated text */
+}
+
+.artist-card.selected {
+    border: 3px solid red;
 }
