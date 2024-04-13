@@ -8,6 +8,13 @@ function Questionnaire() {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [csrfToken, setCsrfToken] = useState('');
+
+  useEffect(() => {
+    axios.get('/csrf-token').then(response => {
+      setCsrfToken(response.data.csrf_token);
+    });
+  }, []);
 
   useEffect(() => {
     // Fetch questions from the backend at the start
@@ -18,9 +25,17 @@ function Questionnaire() {
 
   const handleAnswerSubmit = answer => {
     // Send answer to backend
-    axios.post('/process_presurvey_questions', { questionId: questions[currentQuestionIndex].id, answer })
-      .then(response => {
+    axios.post('/process_presurvey_questions', { 
+        questionId: questions[currentQuestionIndex].id, 
+        answer 
+    }, {
+        headers: {
+            'X-CSRF-Token': csrfToken // Replace `csrfToken` with the actual token
+          }
+    }).then(response => {
         // Optionally handle response, e.g., for validation
+      }).catch(error => {
+        console.error('Error posting data:', error);
       });
 
     // Save answer locally (optional, depends on needs)
