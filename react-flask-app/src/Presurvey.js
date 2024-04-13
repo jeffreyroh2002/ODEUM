@@ -37,15 +37,16 @@ function Questionnaire() {
 
   return (
     <div>
-      <h2>{currentQuestion.text}</h2>
-      {/* Render buttons based on the current question's answers */}
-      <div>
-        {currentQuestion.answers.map((answer, index) => (
-          <button key={index} onClick={() => handleAnswerSubmit(answer)}>
-            {answer}
-          </button>
-        ))}
-      </div>
+        <Header />
+        <h2>{currentQuestion.text}</h2>
+        {/* Render buttons based on the current question's answers */}
+        <div>
+            {currentQuestion.answers.map((answer, index) => (
+            <button key={index} onClick={() => handleAnswerSubmit(answer)}>
+                {answer}
+            </button>
+            ))}
+        </div>
     </div>
   );
 }
