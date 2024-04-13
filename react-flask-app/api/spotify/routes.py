@@ -1,7 +1,11 @@
 from flask import Flask, Blueprint, request, redirect, session, url_for, current_app, jsonify
+from api import db, login_manager
+from api.models import User, AudioFile, UserAnswer, Test
 import requests
 import os
 import base64
+import json
+from flask_login import login_required, current_user 
 
 spotify = Blueprint('spotify', __name__)
 
@@ -114,3 +118,14 @@ def fetch_popular_artists():
     } for artist in sorted_artists]
 
     return jsonify(formatted_artists)
+
+@spotify.route('/submit_artists', methods=['POST'])
+@login_required
+def submit_artists():
+    try:
+        data = request.get_json()
+        print(data)
+        # Add data to DB (do it soon)
+        return jsonify({"status": "success", "message": "Data received successfully"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
