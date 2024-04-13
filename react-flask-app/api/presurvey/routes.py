@@ -22,7 +22,7 @@ questions = [
 def get_presurvey_questions():
     return jsonify(questions)
 
-@app.route('/process_presurvey_questions', methods=['POST'])
+@presurvey.route('/process_presurvey_questions', methods=['POST'])
 def process_presurvey_questions():
     data = request.get_json()
     print(f"Received answer for question {data['questionId']}: {data['answer']}")
