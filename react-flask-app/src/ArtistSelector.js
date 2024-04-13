@@ -123,7 +123,7 @@ function ArtistSelector() {
                 </div>
             ))}
         </div>
-        <button className="submit-button" onClick={handleSubmit}>
+        <button className="submit--button" onClick={handleSubmit}>
             Finish Selection
       </button>
     </div>
