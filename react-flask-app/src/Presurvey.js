@@ -38,28 +38,36 @@ function Questionnaire() {
   };
 
   const handleAnswerSubmit = () => {
-    selectedAnswers.forEach(answer => {
-      axios.post('/process_presurvey_questions', { 
-        questionId: questions[currentQuestionIndex].id, 
-        answer 
-      }, {
-        headers: {
-            'X-CSRF-Token': csrfToken
-        }
-      }).then(response => {
-          // Optionally handle response
-      }).catch(error => {
+    // Prepare the data to send all answers at once
+    const payload = {
+      questionId: questions[currentQuestionIndex].id,
+      answers: selectedAnswers
+    };
+  
+    axios.post('/process_presurvey_questions', payload, {
+      headers: {
+        'X-CSRF-Token': csrfToken
+      }
+    }).then(response => {
+        // Optionally handle response, such as confirming submission
+        console.log('Answers submitted successfully:', response.data);
+    }).catch(error => {
         console.error('Error posting data:', error);
-      });
+        // Optionally add retry logic or user notification here
     });
-
+  
     // Save answers locally
-    setAnswers(prevAnswers => [...prevAnswers, ...selectedAnswers.map(answer => ({questionId: questions[currentQuestionIndex].id, answer}))]);
-
-    // Move to next question
-    setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-    // Reset selected answers
-    setSelectedAnswers([]);
+    setAnswers(prevAnswers => [...prevAnswers, ...selectedAnswers.map(answer => ({ questionId: questions[currentQuestionIndex].id, answer }))]);
+  
+    // Move to next question if not the last one
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      // Reset selected answers for the next question
+      setSelectedAnswers([]);
+    } else {
+      console.log('Completed all questions.');
+      // Optionally, redirect or change state to show completion
+    }
   };
 
   if (questions.length === 0) return <div>Loading...</div>;
