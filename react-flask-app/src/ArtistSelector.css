@@ -40,7 +40,7 @@
 .artist-card h3 {
     margin: 10px 0 0; /* Margin on top only */
     color: #333; /* Dark grey color for the text */
-    font-size: 16px; /* Reasonable font size for readability */
+    font-size: 14px; /* Reasonable font size for readability */
     text-align: center; /* Center-align the artist name */
     overflow: hidden; /* Hides text that overflows */
     text-overflow: ellipsis; /* Adds an ellipsis to truncated text */
