@@ -53,13 +53,15 @@ function Questionnaire() {
   return (
     <div>
         <Header />
-        <h2>{currentQuestion.text}</h2>
+        <h2 className="question--label">{currentQuestion.text}</h2>
         {/* Render buttons based on the current question's answers */}
         <div>
             {currentQuestion.answers.map((answer, index) => (
-            <button key={index} onClick={() => handleAnswerSubmit(answer)}>
-                {answer}
-            </button>
+            <div className="question--group">
+                <button className="question--button" key={index} onClick={() => handleAnswerSubmit(answer)}>
+                    {answer}
+                </button>
+            </div>
             ))}
         </div>
     </div>
