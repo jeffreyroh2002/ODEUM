@@ -91,7 +91,7 @@ export default function Questionnaire() {
         <div>
             <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
             <div className="questionnaire-container">
-              <div>{audioName}</div>
+              <div className="song--title">Song {audioId}</div>
               {/*
               <AudioVisualizerSphere className="play--pause--button"
                   key={audioId}
