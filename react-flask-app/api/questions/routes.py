@@ -3,18 +3,28 @@ from flask_login import login_required
 
 from ..models import UserAnswer, Test, AudioFile
 
+import os
+
 questions = Blueprint("questions", __name__)
+
+@questions.route('/get_question_metadata', methods=['GET'])
+@login_required
+def get_question_metadata():
+    audio_id = request.args.get('audio_id', type=int)
+    dir_path = "/workspace/ODEUM/react-flask-app/api/static/audio_files"
+    filenames = os.listdir(dir_path)
+    full_filenames = ['static/audio_files/' + filename for filename in filenames]
+    return jsonify({"audio_filename": full_filenames[int(audio_id) - 1]})
+
 
 @login_required
 @questions.route('/get_useranswer', methods=['GET'])
 def get_useranswer():
     audio_id = int(request.args.get('audio_id'))
     test_id = int(request.args.get('test_id'))
-    question_type = request.args.get('question_type')
-
+    
     answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_id).first()
-    rating = (getattr(answer, question_type) if answer else None)
-
+    rating = (getattr(answer, 'overall_rating') if answer else None)
     return jsonify({"rating" : rating})
 
 
