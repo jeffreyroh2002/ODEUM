@@ -12,6 +12,8 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
 export default function Questionnaire() {
+    const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+    
     const location = useLocation();
     const navigate = useNavigate(); // Correctly moved to the top level of your component
     const searchParams = new URLSearchParams(location.search);
@@ -33,9 +35,9 @@ export default function Questionnaire() {
     function handleLogout() { setIsLoggedIn(false); };
 
     useEffect(() => {
-      navigate(`/Questionnaire?question_index=${questionIndex}&test_type=${testType}&test_id=${testId}`);
+      navigate(`${BASE_URL}/Questionnaire?question_index=${questionIndex}&test_type=${testType}&test_id=${testId}`);
       setIsLoading(true);
-      axios.get(`/get_question_metadata?question_index=${questionIndex}`)
+      axios.get(`${BASE_URL}/get_question_metadata?question_index=${questionIndex}`)
            .then(response => { setQuestionType(response.data.question_type); 
                                setAudioId(response.data.audio_id); 
                                setAudioName(response.data.audio_filename); 

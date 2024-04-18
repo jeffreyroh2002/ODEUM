@@ -5,12 +5,13 @@ import './Home.css';
 import axios from 'axios';
 
 export default function Home() {
-
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  console.log(BASE_URL)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     // Fetch isLoggedIn status from backend when component mounts
-    axios.get('/is_logged_in')
+    axios.get(`${BASE_URL}/is_logged_in`)
       .then(response => {
         setIsLoggedIn(response.data.isLoggedIn);
       })

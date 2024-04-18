@@ -5,6 +5,8 @@ import './Presurvey.css';
 import axios from 'axios';
 
 function Questionnaire() {
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
@@ -12,14 +14,14 @@ function Questionnaire() {
   const [csrfToken, setCsrfToken] = useState('');
 
   useEffect(() => {
-    axios.get('/csrf-token').then(response => {
+    axios.get(`${BASE_URL}/csrf-token`).then(response => {
       setCsrfToken(response.data.csrf_token);
     });
   }, []);
 
   useEffect(() => {
     // Fetch questions from the backend at the start
-    axios.get('/get_presurvey_questions').then(response => {
+    axios.get(`${BASE_URL}/get_presurvey_questions`).then(response => {
       setQuestions(response.data);
     });
   }, []);
@@ -44,7 +46,7 @@ function Questionnaire() {
       answers: selectedAnswers
     };
   
-    axios.post('/process_presurvey_questions', payload, {
+    axios.post(`${BASE_URL}/process_presurvey_questions`, payload, {
       headers: {
         'X-CSRF-Token': csrfToken
       }

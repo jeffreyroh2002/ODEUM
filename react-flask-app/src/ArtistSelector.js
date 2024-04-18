@@ -52,19 +52,21 @@ async function fetchRelatedArtists(artistId, token) {
 }
 
 function ArtistSelector() {
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
   const [artists, setArtists] = useState([]);
   const [token, setToken] = useState('');
   const [selectedArtistIds, setSelectedArtistIds] = useState([]);
   const [csrfToken, setCsrfToken] = useState('');
 
   useEffect(() => {
-    axios.get('/csrf-token').then(response => {
+    axios.get(`${BASE_URL}/csrf-token`).then(response => {
       setCsrfToken(response.data.csrf_token);
     });
   }, []);
 
   useEffect(() => {
-      axios.get('/get-token')  // Adjust the URL to where your Flask app is hosted
+      axios.get(`${BASE_URL}/get-token`)  // Adjust the URL to where your Flask app is hosted
           .then(response => {
               setToken(response.data.access_token);
           })
@@ -100,7 +102,7 @@ function ArtistSelector() {
   };
 
   const handleSubmit = () => {
-    axios.post('/submit_artists', { selectedArtistIds },
+    axios.post(`${BASE_URL}/submit_artists`, { selectedArtistIds },
         {headers: {
             'X-CSRF-Token': csrfToken
           }
