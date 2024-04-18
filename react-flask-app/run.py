@@ -1,4 +1,8 @@
 from api import create_app, db
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = create_app()
 
