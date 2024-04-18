@@ -33,7 +33,7 @@ export default function Home() {
           <h2 className="sub-title">Unlock your True <br/> Musical Taste with <span className="gradient-text">AI</span></h2>
           <h2 className="sub-text">Take a free test and receive a detailed analysis on your one-of-a-kind musical personality</h2>
           <Link
-            to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
+            to={isLoggedIn ? "/Presurvey" : "/Login"} // Conditional routing based on isLoggedIn
             className="cta-button"
           >
             Take Test
