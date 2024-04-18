@@ -21,7 +21,7 @@ def get_spotify_token():
     if response.status_code == 200:
         return response.json().get('access_token')
     else:
-        app.logger.error(f"Failed to retrieve Spotify access token: {response.json()}")
+        spotify.logger.error(f"Failed to retrieve Spotify access token: {response.json()}")
         return None
 
 @spotify.route('/get-token')
