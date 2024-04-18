@@ -37,11 +37,15 @@ def create_app(config_class=Config):
     from api.tests.routes import tests
     from api.questions.routes import questions
     from api.results.routes import results
+    from api.spotify.routes import spotify
+    from api.presurvey.routes import presurvey
     
     app.register_blueprint(main)
     app.register_blueprint(users)
     app.register_blueprint(tests)
     app.register_blueprint(questions)
     app.register_blueprint(results)
+    app.register_blueprint(spotify)
+    app.register_blueprint(presurvey)
 
     return app

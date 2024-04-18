@@ -1,0 +1,49 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 70px;
+}
+
+.question--label{
+    text-align: center;
+    font-size: 30px;
+}
+
+.question--group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    margin-top: 20px;
+}
+
+.question--button {
+    display: block;
+    width: 90%; /* Make the button take up 90% of the width */
+    padding: 10px; /* Adjust padding as needed */
+    margin-bottom: 15px; /* Add some space between buttons */
+    border: none;
+    background-color: white; /* Set button background color */
+    color: black; /* Set text color */
+    font-size: 25px; /* Set font size */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    border-radius: 20px; /* Add rounded corners */
+}
+
+.question--button.selected {
+    border: 2px solid red;
+  }
+
+  .button--container{
+    display: flex;
+    flex-direction: row;
+  }
+
+  @media (max-width: 768px) {
+    .question--button {
+        font-size: 25px; /* Increase font size for better visibility on smaller screens */
+    }
+}
