@@ -26,19 +26,24 @@ export default function Questionnaire() {
     const [isLoggedIn, setIsLoggedIn] = useState(true);
     const [questionIndex, setQuestionIndex] = useState(parseInt(searchParams.get('question_index')));
     const [questionType, setQuestionType] = useState('');
-    let audioId, audioName;
+    const [audioId, setAudioId] = useState(1);
+    const [audioName, setAudioName] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     function handleLogout() { setIsLoggedIn(false); };
 
     useEffect(() => {
-        //Getting the type of the question by the question index
-        axios.get(`/get_question_metadata?question_index=${questionIndex}`)
-             .then(response => { setQuestionType(response.data.question_type); 
-                                 audioId = response.data.audio_id; 
-                                 audioName = response.data.audio_filename; })
-             .catch((error) => { console.log("error getting question metadata", error); });
-    }, []);
-
+      navigate(`/Questionnaire?question_index=${questionIndex}&test_type=${testType}&test_id=${testId}`);
+      setIsLoading(true);
+      axios.get(`/get_question_metadata?question_index=${questionIndex}`)
+           .then(response => { setQuestionType(response.data.question_type); 
+                               setAudioId(response.data.audio_id); 
+                               setAudioName(response.data.audio_filename); 
+                               setIsLoading(false); })
+           .catch((error) => { console.log("error getting question metadata", error); 
+                               setIsLoading(false);});
+    }, [questionIndex]);
+    
     const goNextQ = () => {
         if (questionIndex !== numQ) setQuestionIndex(prev => prev + 1);
         else handleTestSubmit();
@@ -60,59 +65,37 @@ export default function Questionnaire() {
             };
         })
     }
-    function handleQuit() {
-        MySwal.fire({
-          title: "Do you want to quit the test in progress?",
-          showConfirmButton: false,
-          showDenyButton: true,
-          showCancelButton: true,
-          denyButtonText: `Quit`
-        }).then((result) => {
-          if (result.isDenied) {
-            MySwal.fire({
-              title: "Navigating to home...",
-              timer: 500,
-              timerProgressBar: false,
-              didOpen: () => {
-                Swal.showLoading();
-              }
-            });
-            navigate('/');
-          };
-        })
-      }
-    useEffect(() => {
-        navigate(`/Questionnaire?question_index=${questionIndex}&test_type=${testType}&test_id=${testId}`)
-    }, [questionIndex])
+
     
     return (
         <div>
             <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
             <div className="questionnaire-container">
-                <div>{audioName}</div>
-                {/*
-                <AudioVisualizerSphere className="play--pause--button"
-                    key={audioId}
-                    src={audioName}
-                    isPlaying={isPlaying}
-                    togglePlayPause={handlePlayPause}
-                />
-                */}
-                <AudioPlayer className="play--pause--button"
-                    key={audioId}
-                    src={audioName}
-                    playIconPath = {playIcon}
-                    pauseIconPath = {pauseIcon}
-                />
-                <Form 
-                    testId={testId} 
-                    questionIndex={questionIndex}
-                    audioId={audioId}
-                    onPrevQuestion={goPrevQ}
-                    onNextQuestion={goNextQ}
-                    totalQ={totalQ}
-                    onQuit={handleQuit}
-                    questionType={questionType}/>
+              <div>{audioName}</div>
+              {/*
+              <AudioVisualizerSphere className="play--pause--button"
+                  key={audioId}
+                  src={audioName}
+                  isPlaying={isPlaying}
+                  togglePlayPause={handlePlayPause}
+              />
+              */}
+              <AudioPlayer className="play--pause--button"
+                  key={audioId}
+                  src={audioName}
+                  playIconPath = {playIcon}
+                  pauseIconPath = {pauseIcon}
+              />
+              {isLoading? <div></div> :
+              <Form 
+                  testId={testId} 
+                  questionIndex={questionIndex}
+                  audioId={audioId}
+                  onPrevQuestion={goPrevQ}
+                  onNextQuestion={goNextQ}
+                  numQ={numQ}
+                  onQuit={handleQuit}
+                  questionType={questionType}/> }
             </div>
         </div>
     )
