@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from "./components/Header"
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import './Presurvey.css';
 import axios from 'axios';
@@ -7,6 +8,7 @@ import axios from 'axios';
 function Questionnaire() {
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
@@ -68,7 +70,7 @@ function Questionnaire() {
       setSelectedAnswers([]);
     } else {
       console.log('Completed all questions.');
-      // Optionally, redirect or change state to show completion
+      navigate(`/ArtistSelector`)
     }
   };
 
