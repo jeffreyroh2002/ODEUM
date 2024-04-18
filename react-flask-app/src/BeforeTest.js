@@ -8,12 +8,13 @@ export default function BeforeTest() {
     const navigate = useNavigate()
     const [questionIndex, setQuestionIndex] = useState(1);
     const [testId, setTestId] = useState(1);
+    const [audioId, setAudioId] = useState(1);
 
     useEffect(() => {
         fetch(`/before_test_info`)
         .then(res => res.json())
         .then(data => {
-            setQuestionIndex(data.question_index);
+            setAudioId(1);
             setTestId(data.test_id);
         })
         .catch(error => console.error('Error fetching audio file info:', error));
@@ -21,7 +22,7 @@ export default function BeforeTest() {
 
     const navigateToQuestionnaire = () => {
         const testType = 1;
-        navigate(`/Questionnaire?question_index=${questionIndex}&test_type=${testType}&test_id=${testId}`)
+        navigate(`/Questionnaire?audio_id=${audioId}&test_type=${testType}&test_id=${testId}`)
     };
 
     return (
