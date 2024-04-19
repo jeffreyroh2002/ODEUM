@@ -22,7 +22,7 @@ app = create_app()
 
 # Save audio files into DB
 with app.app_context():
-    #db.drop_all()
+    db.drop_all()
     db.create_all()
     from api.models import AudioFile
 

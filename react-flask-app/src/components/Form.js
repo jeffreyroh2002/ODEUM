@@ -5,7 +5,6 @@ import withReactContent from 'sweetalert2-react-content'
 import axios from 'axios'
 
 export default function Form({testId, questionIndex, audioId, onPrevQuestion, onNextQuestion, numQ, onQuit, questionType}) {
-  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [csrfToken, setCsrfToken] = useState('');
   const MySwal = withReactContent(Swal);
   const ratingsButtons = {'3' : 'button1', '2' : 'button2', '1': 'button3', '-1' : 'button4', '-2' : 'button5', '-3' : 'button6'};
@@ -13,13 +12,13 @@ export default function Form({testId, questionIndex, audioId, onPrevQuestion, on
   const [savedRating, setSavedRating] = useState();
 
   useEffect(() => {
-    fetch(`${BASE_URL}/csrf-token`).then(response => {
+    fetch('/csrf-token').then(response => {
       return response.json();
     }).then(data => {
       setCsrfToken(data.csrf_token);
     });
     
-    axios.get(`${BASE_URL}/get_useranswer?audio_id=${audioId}&question_type=${questionType}&test_id=${testId}`)
+    axios.get(`/get_useranswer?audio_id=${audioId}&question_type=${questionType}&test_id=${testId}`)
     .then(response => {
        const rating = response.data.rating;
        let button;
@@ -55,7 +54,7 @@ export default function Form({testId, questionIndex, audioId, onPrevQuestion, on
       });
     }
     else {
-      fetch(`${BASE_URL}/submit_answer`, {
+      fetch('/submit_answer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
