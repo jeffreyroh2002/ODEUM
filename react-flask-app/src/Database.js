@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 function Database() {
-  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [audioFiles, setAudioFiles] = useState([]);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/print_db`)
+    fetch('/print_db')
       .then(res => res.json())
       .then(data => {
         setAudioFiles(data); // Assuming the response contains an array of audio files

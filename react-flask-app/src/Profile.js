@@ -5,13 +5,13 @@ import './Profile.css';
 import axios from 'axios';
 
 export default function Profile() {
-    const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
     const [userName, setUserName] = useState('');
     const [testsData, setTestsData] = useState([]);
 
     useEffect(() => {
         // Fetch isLoggedIn status from backend when component mounts
-        axios.get(`${BASE_URL}/get_user_info`)
+        axios.get('/get_user_info')
         .then(response => {
             setUserName(response.data.user_name);
             setTestsData(response.data.tests_data)

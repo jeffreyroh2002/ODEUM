@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from "./components/Header";
 import { Chart, registerables } from 'chart.js';
-import './TestCompleted.css';
 
 Chart.register(...registerables);
 
@@ -10,7 +9,7 @@ export default function TestCompleted() {
     const location = useLocation();
     const testId = new URLSearchParams(location.search).get('testId');
     const [testResults, setTestResults] = useState(null);
-    /*
+
     useEffect(() => {
         if (!testId) {
             console.error('Test ID is missing.');
@@ -29,17 +28,13 @@ export default function TestCompleted() {
             })
             .catch(error => console.error('Error fetching test results:', error));
     }, [testId]);
-    */
 
     return (
         <div>
             <Header />
-            <h1 className="result--header">Test Completed!</h1>
-            <h2 className="result--subheader">Results Feature Coming Soon...</h2>
-            {/* 
+            <h1>Test Completed</h1>
             <p>Test ID: {testId}</p>
             <p>testResults{testResults}</p>
-            */}
         </div>
     );
 }

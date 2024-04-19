@@ -47,22 +47,12 @@ class Test(db.Model):
     test_start_time = db.Column(db.DateTime, nullable=False, default=datetime.now)
     test_end_time = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    pre_survey_data = db.Column(db.Text)  # Using Text to store JSON-formatted string
-    liked_artists = db.Column(db.Text)
     answers = db.relationship("UserAnswer", backref="test", lazy=True)
 
 
     def __repr__(self):
-        return f"Test(user_id={self.user_id}, id={self.id}, test_type={self.test_type}, start_time={self.test_start_time}, end_time={self.test_end_time})"
+        return f"Test('user:{self.user_id}', 'id: {self.id}','test:{self.test_type}', '{self.test_start_time}', '{self.test_end_time}')"
 
-
-    @property
-    def decoded_pre_survey_answers(self):
-        return json.loads(self.pre_survey_answers)
-
-    @decoded_pre_survey_answers.setter
-    def decoded_pre_survey_answers(self, value):
-        self.pre_survey_answers = json.dumps(value)
 
 ### NEED TO CHANGE genre, mood, vocal to non-text,  adding serialization and deserialization 
 ### methods to ease the process of working with these fields in Python as dictionaries
@@ -124,25 +114,3 @@ class UserAnswer(db.Model):
         return (
             f"UserAnswer('rating:{self.overall_rating}')"
         )
-
-#currently am not using the presurveyanswer model. Better to use this than plain text in Test model#
-class PreSurveyAnswer(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    question_id = db.Column(db.Integer, nullable=False)
-    _answers = db.Column('answers', db.Text, nullable=False)  # Using Text for flexibility; JSON for PostgreSQL
-    test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    test = db.relationship('Test', backref=db.backref('pre_survey_associations', lazy='dynamic'))
-    user = db.relationship('User', backref=db.backref('user_pre_survey_answers', lazy='dynamic'))
-
-    @property
-    def answers(self):
-        return json.loads(self._answers)
-
-    @answers.setter
-    def answers(self, value):
-        self._answers = json.dumps(value)
-
-    def __repr__(self):
-        return f"<PreSurveyAnswer(test_id={self.test_id}, user_id={self.user_id}, question_id={self.question_id}, answers={self._answers})>"

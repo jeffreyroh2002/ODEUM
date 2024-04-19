@@ -10,8 +10,6 @@ import playIcon from './images/blob.png'
 import pauseIcon from './images/dark_blob.png'
 
 export default function Questionnaire() {
-    const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
     const [isLoggedIn, setIsLoggedIn] = useState(true);
     function handleLogout() { setIsLoggedIn(false); };
 
@@ -30,10 +28,10 @@ export default function Questionnaire() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-      fetch(`${BASE_URL}/csrf-token`).then(response => {
+      fetch('/csrf-token').then(response => {
         return response.json();
       }).then(data => { setCsrfToken(data.csrf_token); }); 
-      axios.get(`${BASE_URL}/get_question_metadata?audio_id=${audioId}`)
+      axios.get(`/get_question_metadata?audio_id=${audioId}`)
            .then(response => { setAudioName(response.data.audio_filename); setIsLoading(false); });
     }, []);
 
@@ -62,7 +60,7 @@ export default function Questionnaire() {
     };
 
     function submitAnswer(rating, questionIndex, audioId) {
-        return axios.post(`${BASE_URL}/submit_answer`, {
+        return axios.post('/submit_answer', {
             rating: rating,
             audio_id: audioId,
             question_index: questionIndex,
@@ -77,7 +75,7 @@ export default function Questionnaire() {
     const MySwal = withReactContent(Swal);
 
     function getNextAudioData() {
-      return axios.get(`${BASE_URL}/get_next_audio_id?test_id=${testId}&question_index=${questionIndex}`)
+      return axios.get(`/get_next_audio_id?test_id=${testId}&question_index=${questionIndex}`)
                   .then(response => {
                       const nextAudioId = response.data.next_audio_id;
                       if (nextAudioId) {
@@ -102,7 +100,7 @@ export default function Questionnaire() {
       };
 
     function loadRating(audioId) {
-      axios.get(`${BASE_URL}/get_useranswer?audio_id=${audioId}&test_id=${testId}`)
+      axios.get(`/get_useranswer?audio_id=${audioId}&test_id=${testId}`)
       .then(response => {
          const rating = response.data.rating;
          setSavedRating(rating); 
@@ -166,7 +164,7 @@ export default function Questionnaire() {
 
     function getPrevAudioData() {
       setIsLoading(true);
-      axios.get(`${BASE_URL}/get_prev_audio_id?test_id=${testId}&question_index=${questionIndex}`)
+      axios.get(`/get_prev_audio_id?test_id=${testId}&question_index=${questionIndex}`)
            .then(response => {
               setQuestionIndex(prev => prev - 1);
               setAudioId(response.data.prev_audio_id);

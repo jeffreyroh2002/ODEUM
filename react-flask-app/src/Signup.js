@@ -7,10 +7,9 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
 export default function Signup(){
-  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-  
+
   useEffect(() => {
-    axios.get(`${BASE_URL}/csrf-token`).then(response => {
+    axios.get('/csrf-token').then(response => {
       setCsrfToken(response.data.csrf_token);
     });
   }, []);
@@ -25,7 +24,7 @@ export default function Signup(){
   const MySwal = withReactContent(Swal);
 
   const registerUser = () => {
-    axios.post(`${BASE_URL}/signup`, {
+    axios.post('/signup', {
       first_name: firstName,
       email: email,
       password: password,
