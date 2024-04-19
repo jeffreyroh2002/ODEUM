@@ -6,7 +6,6 @@ import axios from 'axios';
 
 export default function Home() {
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-  console.log(BASE_URL)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
