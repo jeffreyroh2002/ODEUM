@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from "./components/Header"
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './ArtistSelector.css';
 import axios from 'axios';
 
@@ -54,6 +55,7 @@ async function fetchRelatedArtists(artistId, token) {
 function ArtistSelector() {
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+  const navigate = useNavigate();
   const [artists, setArtists] = useState([]);
   const [token, setToken] = useState('');
   const [selectedArtistIds, setSelectedArtistIds] = useState([]);
@@ -106,8 +108,10 @@ function ArtistSelector() {
         {headers: {
             'X-CSRF-Token': csrfToken
           }
-        }).then(response => alert('Artists submitted successfully!'))
-        .catch(error => console.error('Error submitting artists:', error));
+        }).then(response => {
+            console.log('Answers selected successfully:', response.data);
+      }).catch(error => console.error('Error submitting artists:', error));
+    navigate(`/BeforeTest`)
   };
 
   return (
