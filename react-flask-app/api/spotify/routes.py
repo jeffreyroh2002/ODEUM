@@ -124,8 +124,16 @@ def fetch_popular_artists():
 def submit_artists():
     try:
         data = request.get_json()
-        print(data)
-        # Add data to DB (do it soon)
-        return jsonify({"status": "success", "message": "Data received successfully"}), 200
+        artist_ids = data.get('selectedArtistIds', [])
+        test = Test.query.filter_by(user_id=current_user.id).order_by(Test.test_start_time.desc()).first()
+        if test is not None:
+            test.liked_artists = json.dumps(artist_ids)
+            # Serialize and save back to the test
+            db.session.commit()
+            print("Here is what is commited to DB!!!:", test.liked_artists)
+            return jsonify({"message": "Liked Artists updated successfully!", "test_id": test.id}), 200
+        else:
+            return jsonify({"error": "No test found for the user"}), 404
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 400
