@@ -18,7 +18,7 @@ export default function BeforeTest() {
             setTestId(data.test_id);
         })
         .catch(error => console.error('Error fetching audio file info:', error));
-    }, []); // .
+    }, []);
 
     const navigateToQuestionnaire = () => {
         const testType = 1;
