@@ -48,6 +48,7 @@ class Test(db.Model):
     test_end_time = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     pre_survey_data = db.Column(db.Text)  # Using Text to store JSON-formatted string
+    liked_artists = db.Column(db.Text)
     answers = db.relationship("UserAnswer", backref="test", lazy=True)
 
 
