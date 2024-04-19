@@ -6,12 +6,12 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 
 export default function Sidebar({ isOpen, onClose, isLoggedIn, onLogout}) {
-  
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const sidebarStyle = isOpen ? "sidebar open" : "sidebar";
   const MySwal = withReactContent(Swal)
 
   useEffect(() => {
-    axios.get('/csrf-token').then(response => {
+    axios.get(`${BASE_URL}/csrf-token`).then(response => {
       setCsrfToken(response.data.csrf_token);
     });
   }, []);
@@ -20,7 +20,7 @@ export default function Sidebar({ isOpen, onClose, isLoggedIn, onLogout}) {
 
   // Function to handle logout
   const handleLogout = () => {
-    axios.post('/logout', {}, {
+    axios.post(`${BASE_URL}/logout`, {}, {
       headers: {
         'X-CSRF-TOKEN': csrfToken
       }

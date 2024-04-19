@@ -5,20 +5,20 @@ import { useNavigate } from 'react-router-dom';
 import playIcon from './images/blob.png'
 
 export default function BeforeTest() {
+    const BASE_URL = process.env.REACT_APP_API_BASE_URL;
     const navigate = useNavigate()
-    const [questionIndex, setQuestionIndex] = useState(1);
     const [testId, setTestId] = useState(1);
     const [audioId, setAudioId] = useState(1);
 
     useEffect(() => {
-        fetch(`/before_test_info`)
+        fetch(`${BASE_URL}/before_test_info`)
         .then(res => res.json())
         .then(data => {
             setAudioId(1);
             setTestId(data.test_id);
         })
         .catch(error => console.error('Error fetching audio file info:', error));
-    }, []); // .
+    }, []);
 
     const navigateToQuestionnaire = () => {
         const testType = 1;

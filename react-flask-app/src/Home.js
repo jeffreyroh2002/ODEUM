@@ -5,12 +5,12 @@ import './Home.css';
 import axios from 'axios';
 
 export default function Home() {
-
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     // Fetch isLoggedIn status from backend when component mounts
-    axios.get('/is_logged_in')
+    axios.get(`${BASE_URL}/is_logged_in`)
       .then(response => {
         setIsLoggedIn(response.data.isLoggedIn);
       })
@@ -32,7 +32,7 @@ export default function Home() {
           <h2 className="sub-title">Unlock your True <br/> Musical Taste with <span className="gradient-text">AI</span></h2>
           <h2 className="sub-text">Take a free test and receive a detailed analysis on your one-of-a-kind musical personality</h2>
           <Link
-            to={isLoggedIn ? "/beforeTest" : "/login"} // Conditional routing based on isLoggedIn
+            to={isLoggedIn ? "/Presurvey" : "/Login"} // Conditional routing based on isLoggedIn
             className="cta-button"
           >
             Take Test
