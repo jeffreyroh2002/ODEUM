@@ -50,6 +50,7 @@ class Test(db.Model):
     pre_survey_data = db.Column(db.Text)  # Using Text to store JSON-formatted string
     liked_artists = db.Column(db.Text)
     answers = db.relationship("UserAnswer", backref="test", lazy=True)
+    progress = db.Column(db.Text, nullable=True)
 
 
     def __repr__(self):
@@ -83,6 +84,10 @@ class AudioFile(db.Model):
     _mood = db.Column('mood', db.Text, nullable=False)
     _vocal = db.Column('vocal', db.Text, nullable=False)
     answers = db.relationship("UserAnswer", backref="audio", lazy=True)
+
+    dominant_genre = db.Column('dominant_genre', db.Text, nullable=True)
+    dominant_mood = db.Column('dominant_mood', db.Text, nullable=True)
+    dominant_vocal = db.Column('dominant_vocal', db.Text, nullable=True)
 
     @hybrid_property
     def genre(self):
