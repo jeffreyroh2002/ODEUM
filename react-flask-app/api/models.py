@@ -48,10 +48,10 @@ class Test(db.Model):
     test_end_time = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     answers = db.relationship("UserAnswer", backref="test", lazy=True)
-
+    progress = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
-        return f"Test('user:{self.user_id}', 'id: {self.id}','test:{self.test_type}', '{self.test_start_time}', '{self.test_end_time}')"
+        return f"Test('user:{self.user_id}', 'id: {self.id}','test:{self.test_type}', '{self.test_start_time}', '{self.test_end_time}', '{self.progress}')"
 
 
 ### NEED TO CHANGE genre, mood, vocal to non-text,  adding serialization and deserialization 
@@ -74,6 +74,10 @@ class AudioFile(db.Model):
     _vocal = db.Column('vocal', db.Text, nullable=False)
     answers = db.relationship("UserAnswer", backref="audio", lazy=True)
 
+    dominant_genre = db.Column('dominant_genre', db.Text, nullable=True)
+    dominant_mood = db.Column('dominant_mood', db.Text, nullable=True)
+    dominant_vocal = db.Column('dominant_vocal', db.Text, nullable=True)
+    
     @hybrid_property
     def genre(self):
         return json.loads(self._genre)
@@ -109,6 +113,7 @@ class UserAnswer(db.Model):
     audio_id = db.Column(db.Integer, db.ForeignKey("audio_file.id"), nullable=False)
     test_id = db.Column(db.Integer, db.ForeignKey("test.id"), nullable=False)
     question_index = db.Column(db.Integer, nullable=False)
+    progress = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         return (
