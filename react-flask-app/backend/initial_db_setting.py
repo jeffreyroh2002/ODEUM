@@ -26,9 +26,7 @@ with app.app_context():
     db.create_all()
     from api.models import AudioFile
 
-    full_mix_dir = '../data_preprocessing/audio_split/audio_full_mix_split'
-    instrumentals_dir = '../data_preprocessing/audio_split/audio_instrumental_split'
-    vocals_dir = '../data_preprocessing/audio_split/audio_vocal_split'
+    full_mix_dir = '../../data_preprocessing/audio_split/audio_full_mix_split'
 
     # Predict and save genre, mood, and timbre data
     genre_data = predict_genre(genre_model_path, genre_saved_mfcc)
