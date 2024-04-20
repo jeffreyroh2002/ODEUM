@@ -1,0 +1,51 @@
+/* General styling for the artist container */
+.artist-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px; /* Provides space between cards */
+}
+
+/* Styling for individual artist cards */
+.artist-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 150px; /* Fixed width for each card */
+    height: 150px;
+    padding: 10px;
+    background-color: #ffffff; /* White background for the cards */
+    border: 1px solid #dedede; /* Light grey border */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth transitions for hover effects */
+    cursor: pointer;
+}
+
+.artist-card:hover {
+    transform: translateY(-5px); /* Slight raise effect on hover */
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15); /* Enhanced shadow on hover */
+}
+
+/* Styling for the artist image */
+.artist-card img {
+    width: 100px; /* Set width to 100 pixels */
+    height: 100px; /* Set height to 100 pixels */
+    object-fit: cover; /* Ensures the image covers the area, cropping if necessary */
+    border-radius: 4px; /* Rounded corners for the image */
+}
+
+/* Styling for the artist name */
+.artist-card h3 {
+    margin: 10px 0 0; /* Margin on top only */
+    color: #333; /* Dark grey color for the text */
+    font-size: 14px; /* Reasonable font size for readability */
+    text-align: center; /* Center-align the artist name */
+    overflow: hidden; /* Hides text that overflows */
+    text-overflow: ellipsis; /* Adds an ellipsis to truncated text */
+}
+
+.artist-card.selected {
+    border: 3px solid red;
+}

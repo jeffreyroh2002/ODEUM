@@ -1,0 +1,193 @@
+* {
+  box-sizing: border-box;
+}
+
+
+.questionnaire-container {
+  background-color: black;
+  padding: 20px; /* Add padding to the container */
+  box-sizing: border-box; /* Include padding in the total width/height */
+  width: 100%; /* Make sure the container spans the entire width */
+  overflow: auto; /* Add overflow auto to enable scrolling if content exceeds container height */
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.song--title {
+  text-align: center;
+  font-size: 3vw;
+  font-weight: 600;
+}
+
+/* HANDLING HEADER */
+
+.audio--player--container {
+  align-items: center;
+  height: 100px;
+  width: 100%;
+  max-width: 480px; /* Adjust this to suit the width you want for phones */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.audio--timeline--container{
+  display: flex;
+  margin-top: 60px;
+}
+
+.play--pause--button {
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  border: none;
+  background: none;
+}
+
+
+/* HANDLING RADIO ICONS FOR FORM */ 
+
+
+/* Styling Form */
+
+.rating-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100px;
+  max-width: 480px;
+  margin-bottom: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 70px;
+}
+
+
+/* Style for radio buttons within each group */
+.radio-buttons {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.optional--checkbox {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  background: white;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.button--container{
+  display: flex;
+  flex-direction: row;
+}
+
+
+
+/* Styling Form */
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 70px;
+}
+
+
+.content {
+  flex-grow: 1;
+}
+
+.rating--container{
+  margin-top: -30px;
+}
+
+.rating--label{
+  font-size: 30px;
+}
+
+.rating-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
+
+
+/* Styling buttons */
+.rating--button {
+  display: block;
+  width: 90%; /* Make the button take up 90% of the width */
+  padding: 10px; /* Adjust padding as needed */
+  margin-bottom: 15px; /* Add some space between buttons */
+  border: none;
+  background-color: white; /* Set button background color */
+  color: black; /* Set text color */
+  font-size: 25px; /* Set font size */
+  cursor: pointer; /* Change cursor to pointer on hover */
+  border-radius: 20px; /* Add rounded corners */
+}
+
+.yellow--background {
+  background-color: yellow;
+}
+
+.prev--button,
+.next--button,
+.quit--button,
+.submit--button {
+  width: 48%; /* Set the width of each button to take up half of the container */
+  padding: 15px; /* Adjust padding as needed */
+  border: none;
+  color: white; /* Set text color */
+  font-size: 16px; /* Set font size */
+  cursor: pointer; /* Change cursor to pointer on hover */
+  border-radius: 10px; /* Add rounded corners */
+  position: fixed;
+  bottom: 20px; /* Adjust this value to your preference */
+}
+
+.prev--button {
+  background-color: #81acda; /* Set button background color */
+  left: 10px; /* Adjust this value to your preference */
+}
+
+.next--button {
+  background-color: #81acda; /* Set button background color */
+  right: 10px; /* Adjust this value to your preference */
+}
+
+.quit--button {
+  background-color: #DC143C;
+  left: 10px;
+}
+
+.submit--button {
+  background-color: #FFD700;
+  right: 10px;
+}
+
+/* Media query for smaller screens (phones) */
+@media (max-width: 768px) {
+  .rating--button {
+      font-size: 25px; /* Increase font size for better visibility on smaller screens */
+  }
+
+  .prev--button,
+  .next--button,
+  .submit--button,
+  .quit--button {
+      width: 40%; /* Make buttons take up 90% of the width */
+      margin-bottom: 10px; /* Add some space between buttons */
+  }
+}

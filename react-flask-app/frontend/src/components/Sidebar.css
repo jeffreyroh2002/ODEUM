@@ -1,0 +1,77 @@
+/* Sidebar.css */
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Position it off-screen initially */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    transition: right 0.3s ease-in-out;
+    z-index: 1000; /* Ensure it's on top of other content */
+  }
+  
+  .sidebar.open {
+    right: 0; /* Slide it into view */
+  }
+  
+  .sidebar-content {
+    padding: 2vh; /* Adjusted to 2% of the viewport height */
+    color: white;
+  }
+  
+  .close-button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 2vh; /* Adjusted to 2% of the viewport height */
+    position: absolute;
+    top: 1vh; /* Adjusted to 1% of the viewport height */
+    right: 1vw; /* Adjusted to 1% of the viewport width */
+    cursor: pointer;
+}
+  
+  .close-button:focus {
+    outline: none;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar-button {
+    display: block;
+ /* Adjusted to 1% of the viewport height and 2% of the viewport width */
+    color: white;
+    font-size: 50px;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 5px;
+    margin-bottom: 5px; /* Reduce space between buttons */
+    transition: background-color 0.3s ease;
+  }
+  
+  .sidebar-content .sidebar-button {
+    width: 100%; /* Make the buttons full width */
+    margin-top:40px;
+  }
+  
+  /* Added styles to darken the home page */
+  .home-container.open-sidebar {
+    background-color: rgba(0, 0, 0, 0.8); /* Dark background with transparency */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999; /* Ensure it's below the sidebar */
+    pointer-events: none; /* Allow interaction with the sidebar */
+  }
+
+  @media (max-width: 768px) {
+
+    .sidebar-button{
+      margin-bottom: 10px;
+    }
+}

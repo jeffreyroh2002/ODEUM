@@ -1,0 +1,51 @@
+body {
+    background-color: black;
+}
+
+.before-test-container {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.before-test-title {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    width: 53%;
+    font-size: 40px;
+    
+}
+
+.instruction--container {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+    font-size: 30px;
+    font-weight: 200;
+}
+
+.before-test-span {
+    margin-top: 35px;
+    margin-bottom: 35px;
+}
+
+.begin-test-button{
+    display: block;
+    width: 40%;
+    margin-top: 30px;
+    padding: 20px; /* Adjust padding as needed */
+    border: none;
+    background-color: #81acda; /* Set button background color */
+    color: white; /* Set text color */
+    font-size: 40px;
+    font-weight: 300;
+    border-radius: 50px; /* Add rounded corners */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 70px; /* Adjust this value to your preference */
+}

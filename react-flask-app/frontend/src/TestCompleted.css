@@ -1,0 +1,78 @@
+/* General Styling */
+
+
+.result--header{
+    text-align: center;
+    font-size: 5vw;
+    font-weight: 600;
+}
+.result--subheader{
+    text-align: center;
+    font-size: 3vw;
+    font-weight: 300;
+}
+
+/* Styling for the radar charts */
+.radar-chart-container {
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+canvas {
+    display: block;
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Preference Scales */
+.preference-scales {
+    margin: 20px auto;
+    max-width: 600px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.preference-scales h3 {
+    margin-top: 0;
+}
+
+.preference-scales ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.preference-scales li {
+    border-bottom: 1px solid #eee;
+    padding: 8px 0;
+}
+
+/* Display Messages */
+.display-messages {
+    margin: 20px auto;
+    max-width: 600px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.display-messages p {
+    margin: 10px 0;
+    padding-left: 10px;
+    border-left: 3px solid #31708f;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .radar-chart-container, .preference-scales, .display-messages {
+        margin: 20px 10px;
+    }
+
+    canvas {
+        margin-top: 10px;
+    }
+}

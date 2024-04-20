@@ -1,0 +1,46 @@
+/* Header.css */
+.header {
+    display: flex;
+    align-items: center;
+    height: 10vh; /* Adjusted to 10% of the viewport height */
+    background-color: black;
+    padding: 0 5vw; /* Adjusted to 5% of the viewport width */
+    width: 100%;
+}
+
+.header--image {
+    height: 4vh; /* Adjusted to 4% of the viewport height */
+    margin-left: 1vw; /* Adjusted to 1% of the viewport width */
+    margin-right: 2vw; /* Adjusted to 2% of the viewport width */
+}
+  
+.header--account--image,
+.header--menu--image {
+    height: 4vh; /* Adjusted to 4% of the viewport height */
+    width: 4vh; /* Adjusted to 4% of the viewport height */
+    margin-left: auto; /* Adjusted to 1% of the viewport width */
+    margin-right: 1vh;
+}
+
+@media (max-width: 768px) {
+    .header {
+        height: 8vh; /* Adjusted for mobile */
+        padding: 0 3vw; /* Slightly reduced padding on smaller screens */
+    }
+
+    .header--image {
+      height: 3vh;
+    }
+    .header--account--image,
+    .header--menu--image {
+        height: 3vh; /* Adjust size for mobile */
+        width: 3vh;
+        margin-left: auto; /* Adjusted to 1% of the viewport width */
+        margin-right: 1vh;
+    }
+
+    .sidebar {
+        right: -50vw; /* Adjusted to 50% of the viewport width */
+        width: 50vw; /* Adjusted to 50% of the viewport width */
+    }
+}

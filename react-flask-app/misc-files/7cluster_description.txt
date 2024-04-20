@@ -1,0 +1,16 @@
+Cluster 0: Lyrical Serenity - With moderate levels of Jazz-influenced attributes and a slight tendency towards Rock and Electronic, this cluster seems to embody serenity and contemplation. The numbers suggest a preference for compositions that combine a tranquil and reflective ambiance with narrative depth, possibly featuring mellow instrumentals and a thoughtful tempo.
+
+Cluster 1: Driving Force - This cluster stands out with strong Rock-influenced energy combined with higher Tension and moderate Brightness. The data suggests a draw towards powerful, driving tracks that have a noticeable edge and intensity, possibly featuring robust and compelling rhythms with a bold sonic palette that offers a potent listening experience.
+
+Cluster 2: Intimate Narratives - Significantly high in Emotional and Dreamy attributes, with a considerable presence of Korean Ballad elements, this cluster indicates a preference for deeply intimate and narrative-driven pieces. These tracks likely have a personal touch, delivering heartfelt stories that are both touching and evocative, wrapped in delicate and immersive soundscapes.
+
+Cluster 3: Velvety Resonance - Dominated by high R&B/Soul elements, Smoothness, and Dreaminess, these songs seem to be characterized by their velvety textures and reflective resonance. The numeric data paints a picture of music that's rich in vocal expressiveness and smooth melodies, providing a warm, enveloping listening experience that's both comforting and soul-stirring.
+
+Cluster 4: Euphoric Pulse - With a predominant Electronic influence and the highest levels of Brightness, this cluster is likely to represent songs with a pulsating, euphoric energy. The significant Electronic presence suggests compositions with synthesized textures and an upbeat tempo, producing a bright, invigorating feel that's designed to uplift and energize.
+
+Cluster 5: Diverse Fusion - This cluster exhibits a mix of Rock, Hip Hop, and a notable influence of R&B/Soul, combined with the highest overall Brightness and a substantial amount of Smoothness and Dreaminess. The variety in attributes suggests an eclectic fusion of sounds, capturing an upbeat vibe with rhythmic hooks and grooves, likely interspersed with moments of soulful depth and melodic expressiveness.
+
+Cluster 6: Expressive Rhythmics - Here, there's a strong Hip Hop influence balanced with Tense, Bright, and Emotional nuances. This cluster may gravitate towards rhythmically expressive tracks that blend a strong beat with lyrical depth, often carrying emotional weight and a certain boldness in their execution, making them resonate both rhythmically and emotionally.
+
+
+NOTE: NEED TO ONLY CONSIDER OVERALL RATING WHEN LOOKING AT CLUSTER PREFERENCE!!!

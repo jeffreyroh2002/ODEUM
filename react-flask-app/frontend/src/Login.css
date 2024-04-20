@@ -1,0 +1,166 @@
+/* Login.css */
+
+* {
+  color: white
+}
+
+.signup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.signup-form {
+    max-width: 300px; /* Fixed width */
+    width: 100%;
+    text-align: center;
+    background-color:transparent;
+}
+
+.signup-form h2 {
+    margin-bottom: 20px; /* Fixed margin */
+    color: white;
+    font-size: 4vh;
+    margin-bottom: 50px;
+}
+
+.signup-form form {
+    display: flex;
+    flex-direction: column;
+    font-size: 3vh;
+}
+
+.signup-form .form-group {
+    margin-bottom: 15px; /* Fixed margin */
+}
+
+.signup-form .form-group label {
+    margin-bottom: 15px; /* Fixed margin */
+}
+
+.signup-form .remember-me-text {
+    margin-bottom: 15px; /* Fixed margin */
+}
+.signup-form .remember-me-text label {
+  margin-bottom: 15px; /* Fixed margin */
+}
+
+.signup-form input[type="text"],
+.signup-form input[type="email"],
+.signup-form input[type="password"] {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%; /* Ensure input fields take up the full container width */
+    padding: 10px; /* Fixed padding */
+    font-size: 16px; /* Fixed font size */
+    margin-bottom: 30px;
+    color: black;
+}
+
+.signup-form button {
+  background: linear-gradient(90deg, #ee446e, #baaaec, #0056b3); /* Gradient color */
+  color: white;
+  border: none;
+  border-radius: 20px; /* Rounded edges */
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* subtle shadow */
+}
+
+.signup-form p {
+    margin-top: 20px; /* Fixed margin */
+}
+
+.error-messages {
+    color: #ff0000; /* Red color for error messages */
+    text-align: left; /* Align error messages to the left */
+    margin-top: 5px; /* Fixed margin */
+}
+
+.signup-form .form-group {
+    margin-bottom: 15px; /* Fixed margin */
+    position: relative;
+}
+
+.signup-form .remember-me-text {
+  margin-top: -10px;
+  margin-bottom: 30px; /* Fixed margin */
+  position: relative;
+  font-size: 20px;
+}
+
+
+.signup-form .error-messages {
+    position: absolute;
+    bottom: -20px; /* Adjusted position to place error messages below input fields */
+    left: 0;
+}
+
+.signup-link {
+    margin-top: 20px; /* Fixed margin */
+    text-align: center;
+}
+
+.signup-link p {
+    margin: 0;
+    color: rgb(204, 204, 204)1b1;
+    font-size: 20px; /* Fixed font size */
+}
+
+.signup-link a {
+    display: inline-block;
+    margin-top: 5px;
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16px; /* Fixed font size */
+    transition: color 0.3s ease;
+}
+
+.signup-link a:hover,
+.signup-link a:focus {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .signup-container {
+    height: 100%; /* Full viewport height */
+    padding: 20px; /* Add some padding */
+    justify-content: flex-start; /* Align to the top */
+  }
+
+  .signup-form {
+    max-width: none; /* Full width of the container */
+    margin: 0 auto; /* Centering the form in the container */
+    padding: 20px; /* Add some padding */
+  }
+
+  .signup-form h2 {
+    font-size: 6vw; /* Larger font size for better visibility */
+  }
+
+  .signup-form form {
+    font-size: 4vw; /* Adjust font size for smaller screens */
+  }
+
+  .signup-form .form-group label {
+    margin-bottom: 10px; /* Adjusted margin */
+  }
+
+  .signup-form input[type="text"],
+  .signup-form input[type="email"],
+  .signup-form input[type="password"] {
+    padding: 15px; /* Larger padding for easier interaction */
+    font-size: 5vw; /* Larger font size for better visibility */
+  }
+
+  /* Adjust button sizes and text if needed */
+  .signup-form button {
+    padding: 15px 0; /* Larger padding for a bigger tap target */
+  }
+
+  /* Adjust link and error message styling if needed */
+}
