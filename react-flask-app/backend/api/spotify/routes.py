@@ -104,9 +104,9 @@ def fetch_popular_artists():
                             artist_ids.add(artist['id'])
                             all_artists.append(artist)
                 else:
-                    app.logger.error(f"Error fetching artists for {genre} in {market}: {response.json()}")
+                    spotify.logger.error(f"Error fetching artists for {genre} in {market}: {response.json()}")
     except Exception as e:
-        app.logger.error(f"Exception during artist fetch: {str(e)}")
+        spotify.logger.error(f"Exception during artist fetch: {str(e)}")
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
     sorted_artists = sorted(all_artists, key=lambda x: x['popularity'], reverse=True)[:20]
