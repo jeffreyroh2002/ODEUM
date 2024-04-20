@@ -37,6 +37,7 @@ export default function Home() {
           >
             Take Test
           </Link>
+          {/*
           {!isLoggedIn && (
             <Link to="/Signup" className="cta-button">
               Learn More
@@ -46,7 +47,7 @@ export default function Home() {
           <h2 className='sub-header'>text-text-text</h2>
           <h2 className='sub-header'>Our Technology</h2>
           <h2 className='sub-header'>text-text-text</h2>
-
+          */}
         </div>
       </div>
     </div>
