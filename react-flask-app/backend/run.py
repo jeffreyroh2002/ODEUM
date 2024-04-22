@@ -7,6 +7,7 @@ load_dotenv()
 
 app = create_app()
 
+"""
 if __name__ == "__main__":
     if os.environ.get("FLASK_ENV") == "production":
         # Determine the number of worker processes based on available CPU cores
@@ -20,3 +21,8 @@ if __name__ == "__main__":
         debug = True
         port = int(os.environ.get("PORT", 5000))
         app.run(host='0.0.0.0', port=port, debug=debug)
+"""
+
+if __name__ == "__main__":
+    # For local development, use the Flask development server
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), debug=os.environ.get("FLASK_ENV") == "development")
