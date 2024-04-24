@@ -1,3 +1,0 @@
-Aimyon.wav,20,80
-FKJ_something.wav,20,80
-KendrickLamar.wav,20,80
