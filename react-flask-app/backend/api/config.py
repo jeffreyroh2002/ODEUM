@@ -12,6 +12,8 @@ class Config:
     SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
     REDIRECT_URI = os.getenv('REDIRECT_URI', 'https://jeffreyroh2002-odeum-ol6y5xcofwj.ws-us110.gitpod.io/callback')
 
+    GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+
     @staticmethod
     def init_app(app):
         if not Config.SPOTIFY_CLIENT_ID or not Config.SPOTIFY_CLIENT_SECRET:

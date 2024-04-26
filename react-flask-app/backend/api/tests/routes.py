@@ -11,6 +11,8 @@ from datetime import datetime
 import os
 import json
 
+from google.cloud import storage
+
 tests = Blueprint("tests", __name__)
 
 @tests.route('/before_test_info', methods=['GET'])
@@ -116,3 +118,19 @@ def get_prev_audio_id():
     prev_audio_name = full_filenames[int(prev_audio_id) - 1]
 
     return jsonify({"prev_audio_id": prev_audio_id, "prev_audio_name": prev_audio_name})    
+
+
+@tests.route('/get_audio', methods=['GET', 'POST'])
+def get_audio():
+    audio_name = str(request.args.get('audio_name'))
+
+    storage_client = storage.Client(project="ODEUM-421210")
+    bucket = storage_client.get_bucket("odeum-musics")
+    print("audios/" + audio_name)
+    blob = bucket.blob("audios/" + audio_name)
+
+    blobs = list(bucket.list_blobs())
+    print(blob.exists())
+    url = blob.generate_signed_url(version="v4", expiration=3600, method="GET")
+    
+    return jsonify({"url":url})

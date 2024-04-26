@@ -78,38 +78,29 @@ GPT4 -> advice READ!
 class AudioFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     audio_name = db.Column(db.String(50), nullable=False)
-    file_path = db.Column(db.String(100), nullable=False)
-    _genre = db.Column('genre', db.Text, nullable=False)
-    _mood = db.Column('mood', db.Text, nullable=False)
-    _vocal = db.Column('vocal', db.Text, nullable=False)
+    genre = db.Column('genre', db.Text, nullable=False)
+    mood = db.Column('mood', db.Text, nullable=False)
+    vocal = db.Column('vocal', db.Text, nullable=False)
+    dominant_genre = db.Column(db.String(15), nullable=False)
+    dominant_mood = db.Column(db.String(15), nullable=False)
+    dominant_vocal = db.Column(db.String(15), nullable=False)
+
     answers = db.relationship("UserAnswer", backref="audio", lazy=True)
 
     @hybrid_property
     def genre(self):
         return json.loads(self._genre)
 
-    @genre.setter
-    def genre(self, value):
-        self._genre = json.dumps(value)
-
     @hybrid_property
     def mood(self):
         return json.loads(self._mood)
-
-    @mood.setter
-    def mood(self, value):
-        self._mood = json.dumps(value)
 
     @hybrid_property
     def vocal(self):
         return json.loads(self._vocal)
 
-    @vocal.setter
-    def vocal(self, value):
-        self._vocal = json.dumps(value)
-
     def __repr__(self):
-        #return f"AudioFile('{self.audio_name}', '{self.file_path}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
+        return f"AudioFile('{self.audio_name}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
         return f"AudioFile('{self.audio_name}')"
 
 class UserAnswer(db.Model):

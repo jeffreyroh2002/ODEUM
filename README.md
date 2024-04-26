@@ -1,9 +1,5 @@
 # For easy maintenance
 
-If you want to change the info(number, filename, audio data) of audios or questions, 
-modify '/workspace/ODEUM/react-flask-app/api/static'(only for audios)
-and change api/main/__init__.py
-
 currently, metadata is 
 
 NUM_AUDIO = 22
