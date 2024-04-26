@@ -5,7 +5,7 @@ import './Questionnaire.css';
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import Header from "./components/Header"
-import AudioPlayer from './components/AudioPlayer';
+import Streaming_AudioPlayer from './components/streaming_AudioPlayer';
 import playIcon from './images/blob.png'
 import pauseIcon from './images/dark_blob.png'
 
@@ -181,9 +181,8 @@ export default function Questionnaire() {
             <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
             <div className="questionnaire-container">
               <div>{audioName}</div>
-              <AudioPlayer className="play--pause--button"
-                  key={audioId}
-                  src={audioName}
+              <Streaming_AudioPlayer 
+                  audioName={"ES_Another%20Life.wav_1.wav"}
                   playIconPath = {playIcon}
                   pauseIconPath = {pauseIcon} />
               <div className="rating-group">
