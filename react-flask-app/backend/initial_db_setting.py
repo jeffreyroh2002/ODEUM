@@ -31,9 +31,9 @@ def initialize_audio_database():
                 
                 audio_file = AudioFile(
                     audio_name = audio_name,
-                    genre = json.dumps(genre_data),
-                    mood = json.dumps(mood_data),
-                    vocal = json.dumps(vocal_data),
+                    _genre = json.dumps(genre_data),
+                    _mood = json.dumps(mood_data),
+                    _vocal = json.dumps(vocal_data),
                     dominant_genre = max(genre_data, key=genre_data.get),
                     dominant_mood = max(mood_data, key=mood_data.get),
                     dominant_vocal = max(vocal_data, key=vocal_data.get)

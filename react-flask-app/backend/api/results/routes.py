@@ -49,10 +49,7 @@ def prepare_structured_data(test_answers):
         audio = AudioFile.query.filter_by(id=answer.audio_id).first()
         if audio:
             data_row = {
-                "overall_rating": answer.overall_rating,
-                "genre_rating": answer.genre_rating,
-                "mood_rating": answer.mood_rating,
-                "vocal_timbre_rating": answer.vocal_timbre_rating,
+                "rating": answer.rating,
                 **audio.genre,
                 **audio.mood,
                 **audio.vocal
@@ -63,7 +60,7 @@ def prepare_structured_data(test_answers):
 def create_user_ratings_df(test_answers):
     """Creates a DataFrame from test answers containing user ratings."""
     user_ratings = pd.DataFrame([
-        {'user_id': answer.user_id, 'song_id': answer.audio_id, 'rating': answer.overall_rating}
+        {'user_id': answer.user_id, 'song_id': answer.audio_id, 'rating': answer.rating}
         for answer in test_answers
     ])
     return user_ratings

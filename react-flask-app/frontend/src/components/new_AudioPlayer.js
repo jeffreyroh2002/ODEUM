@@ -64,9 +64,9 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
       console.log(data); // Add this line to check the structure of the response data
       
       if (data.status === 'in_progress') {
-        const { overall_rating, genre_rating, mood_rating, vocal_timbre_rating } = data;
+        const { rating, genre_rating, mood_rating, vocal_timbre_rating } = data;
         setSelections({
-          overallRating: overall_rating,
+          rating: rating,
           genreRating: genre_rating,
           moodRating: mood_rating,
           vocalRating: vocal_timbre_rating,
@@ -96,7 +96,7 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
         'X-CSRFToken': csrfToken, // Assuming CSRF protection is enabled
       },
       body: JSON.stringify({
-        overall_rating: selections.overallRating,
+        rating: selections.rating,
         genre_rating: selections.genreRating,
         mood_rating: selections.moodRating,
         vocal_timbre_rating: selections.vocalRating,
@@ -115,9 +115,9 @@ export default function Form({ audioFileId, testId, onAudioFile }) {
         const nextAudioFileId = data.next_audio_file_id; // Extract next audio file id from server response
         const testId = data.test_id;
         if (nextAudioFileId) {
-          const { overall_rating, genre_rating, mood_rating, vocal_timbre_rating } = data;
+          const { rating, genre_rating, mood_rating, vocal_timbre_rating } = data;
           setSelections({
-            overallRating: overall_rating,
+            rating: orating,
             genreRating: genre_rating,
             moodRating: mood_rating,
             vocalRating: vocal_timbre_rating,

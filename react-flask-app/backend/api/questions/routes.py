@@ -11,10 +11,8 @@ questions = Blueprint("questions", __name__)
 @login_required
 def get_question_metadata():
     audio_id = request.args.get('audio_id', type=int)
-    dir_path = os.path.join(os.getcwd(), 'api', 'static', 'audio_files')
-    filenames = os.listdir(dir_path)
-    full_filenames = ['static/audio_files/' + filename for filename in filenames]
-    return jsonify({"audio_filename": full_filenames[int(audio_id) - 1]})
+    audio_filename = AudioFile.query.get(audio_id).audio_name
+    return jsonify({"audio_filename": audio_filename})
 
 
 @login_required
@@ -24,7 +22,7 @@ def get_useranswer():
     test_id = int(request.args.get('test_id'))
     
     answer = UserAnswer.query.filter_by(test_id=test_id, audio_id=audio_id).first()
-    rating = (getattr(answer, 'overall_rating') if answer else None)
+    rating = (getattr(answer, 'rating') if answer else None)
     return jsonify({"rating" : rating})
 
 
@@ -97,10 +95,7 @@ def get_prev_questions():
                     'prev_audio_file_id': prev_audio_file_id,
                     'prev_audio_file_name': prev_audio_file.audio_name,
                     'test_id': test.id,
-                    'overall_rating': db_answer.overall_rating,
-                    'genre_rating': db_answer.genre_rating,
-                    'mood_rating': db_answer.mood_rating,
-                    'vocal_timbre_rating': db_answer.vocal_timbre_rating,
+                    'rating': db_answer.rating,
         })
     else:
         return jsonify({

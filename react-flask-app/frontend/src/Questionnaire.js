@@ -79,6 +79,7 @@ export default function Questionnaire() {
     function getNextAudioData() {
       return axios.get(`${BASE_URL}/get_next_audio_id?test_id=${testId}&question_index=${questionIndex}`)
                   .then(response => {
+                      console.log("response: ", response)
                       const nextAudioId = response.data.next_audio_id;
                       if (nextAudioId) {
                         setQuestionIndex(prev => prev + 1);
@@ -102,11 +103,8 @@ export default function Questionnaire() {
       };
 
     function loadRating(audioId) {
-      axios.get(`${BASE_URL}/get_useranswer?audio_id=${audioId}&test_id=${testId}`)
-      .then(response => {
-         const rating = response.data.rating;
-         setSavedRating(rating); 
-      })
+      axios.get(`${BASE_URL}/get_rating?audio_id=${audioId}&test_id=${testId}`)
+      .then(response => { setSavedRating(response.data.rating); })
       .catch(error => console.log(error));   
     };
 
@@ -181,10 +179,11 @@ export default function Questionnaire() {
             <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
             <div className="questionnaire-container">
               <div>{audioName}</div>
+              {!isLoading && 
               <Streaming_AudioPlayer 
-                  audioName={"ES_Another%20Life.wav_1.wav"}
+                  audioName={audioName}
                   playIconPath = {playIcon}
-                  pauseIconPath = {pauseIcon} />
+                  pauseIconPath = {pauseIcon} />}
               <div className="rating-group">
                 <h4 className="rating--label">Rate the Song.</h4>
                 <button className="rating--button" id="3" onClick={() => handleButtonClick(3)} disabled={isLoading}>

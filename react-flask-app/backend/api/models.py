@@ -78,9 +78,9 @@ GPT4 -> advice READ!
 class AudioFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     audio_name = db.Column(db.String(50), nullable=False)
-    genre = db.Column('genre', db.Text, nullable=False)
-    mood = db.Column('mood', db.Text, nullable=False)
-    vocal = db.Column('vocal', db.Text, nullable=False)
+    _genre = db.Column('genre', db.Text, nullable=False)
+    _mood = db.Column('mood', db.Text, nullable=False)
+    _vocal = db.Column('vocal', db.Text, nullable=False)
     dominant_genre = db.Column(db.String(15), nullable=False)
     dominant_mood = db.Column(db.String(15), nullable=False)
     dominant_vocal = db.Column(db.String(15), nullable=False)
@@ -101,11 +101,10 @@ class AudioFile(db.Model):
 
     def __repr__(self):
         return f"AudioFile('{self.audio_name}', 'genre:{self.genre}', 'mood:{self.mood}', 'timbre:{self.vocal}')"
-        return f"AudioFile('{self.audio_name}')"
 
 class UserAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    overall_rating = db.Column(db.Integer, nullable=True)
+    rating = db.Column(db.Integer, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     audio_id = db.Column(db.Integer, db.ForeignKey("audio_file.id"), nullable=False)
     test_id = db.Column(db.Integer, db.ForeignKey("test.id"), nullable=False)
@@ -113,7 +112,7 @@ class UserAnswer(db.Model):
 
     def __repr__(self):
         return (
-            f"UserAnswer('rating:{self.overall_rating}')"
+            f"UserAnswer('rating:{self.rating}', 'audio_id:{self.audio_id}', 'question_index:{self.question_index}')"
         )
 
 #currently am not using the presurveyanswer model. Better to use this than plain text in Test model#

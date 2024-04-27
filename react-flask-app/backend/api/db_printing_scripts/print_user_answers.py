@@ -11,7 +11,4 @@ with app.app_context():
         audio = AudioFile.query.filter_by(id=audio_id).first()
         if (audio != None):
             print("song: ", audio)
-            print("overall rating:", answer.overall_rating)
-            print("genre rating:", answer.genre_rating)
-            print("mood rating:", answer.mood_rating)
-            print("vocal rating:", answer.vocal_timbre_rating)
+            print("overall rating:", answer.rating)
