@@ -152,7 +152,7 @@ def stream_audio():
 
     storage_client = storage.Client(project="ODEUM-421210")
     bucket = storage_client.get_bucket("odeum-musics")
-    blob = bucket.blob("audios/full-audio/" + audio_name)
+    blob = bucket.blob("split_audio/full-audio/" + audio_name)
     print(blob.exists())
     url = blob.generate_signed_url(version="v4", expiration=3600, method="GET")
     
