@@ -5,4 +5,4 @@ react-flask-app/backend/api/odeum-421210-44f51ed247e8.json
 data_preprocessing/pred_scripts/__pycache__/predict_genre.cpython-39.pyc
 data_preprocessing/pred_scripts/__pycache__/predict_mood.cpython-39.pyc
 data_preprocessing/pred_scripts/__pycache__/predict_timbre.cpython-39.pyc
-
+react-flask-app/frontend/.env.development

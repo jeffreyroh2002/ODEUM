@@ -24,3 +24,4 @@ yarn-error.log*
 
 instance
 .env
+/workspace/ODEUM/react-flask-app/frontend/.env.development
