@@ -50,6 +50,7 @@ class Test(db.Model):
     pre_survey_data = db.Column(db.Text)  # Using Text to store JSON-formatted string
     liked_artists = db.Column(db.Text)
     answers = db.relationship("UserAnswer", backref="test", lazy=True)
+    gpt_analysis = db.Column(db.Text)
 
 
     def __repr__(self):
