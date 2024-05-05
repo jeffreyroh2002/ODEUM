@@ -1,4 +1,4 @@
-from flask import Blueprint, request, session, redirect, url_for
+from flask import Blueprint, request, session, redirect, url_for, jsonify
 from api import db, bcrypt
 from api.models import User, AudioFile, UserAnswer, Test
 #from api.users.forms import RegistrationForm, LoginForm, UpdateAccountForm
@@ -6,6 +6,7 @@ from flask_wtf.csrf import generate_csrf
 from flask_login import login_user, current_user, logout_user, login_required
 import logging
 import json
+
 import pandas as pd
 from sklearn.decomposition import PCA
 pd.set_option('display.max_columns', None)
@@ -273,26 +274,45 @@ def elbow_cluster_printing(df_music_features, df):
     plt.xlabel('Number of Clusters')
     plt.ylabel('Inertia')
 
-    # Save the plot to a file
-    # plt.savefig('elbow_ratings_dropped_plot.png')
-
-    optimal_clusters = 17  # Update this based on the Elbow plot
-
-    # Apply K-means Clustering
-    kmeans = KMeans(n_clusters=optimal_clusters, n_init=10, random_state=42)
+def get_high_rated_clusters(df_music_features, optimal_clusters, df):
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(df_music_features)
+    
+    num_clusters = optimal_clusters
+    kmeans = KMeans(n_clusters=num_clusters, n_init=10, random_state=42)
     df['Cluster'] = kmeans.fit_predict(df_scaled)
 
-    # Explore the cluster assignments
     print(df['Cluster'].value_counts())
 
     centroids = kmeans.cluster_centers_
     centroids_original_scale = scaler.inverse_transform(centroids)
     df_centroids = pd.DataFrame(centroids_original_scale, columns=df_music_features.columns)
 
-    filtered_centroids = df_centroids[df_centroids['overall_rating'] >= 2.0]
-    return filtered_centroids
+    filtered_centroids = df_centroids[df_centroids['rating'] >= 2.0]
+    return df_centroids, filtered_centroids
+
+def get_user_preferred_clusters(df_music_features, optimal_clusters, df):
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(df_music_features)
+
+    # Fit the KMeans algorithm to the scaled features
+    kmeans = KMeans(n_clusters=optimal_clusters, n_init=10, random_state=42)
+    kmeans.fit(scaled_features)
+
+    # Predict the cluster for each song
+    df['Cluster_Label'] = kmeans.predict(scaled_features)
+
+    cluster_avg_rating = df.groupby('Cluster_Label')['rating'].mean()
+
+    # Determine if the user likes the songs in each cluster
+    # Setting the threshold for 'like' as a positive average rating
+    clusters_liked = cluster_avg_rating[cluster_avg_rating > 0]
+
+    print("Clusters liked by the user (based on positive average rating):")
+    print(clusters_liked)
 
 def perform_association_rule_mining(df, min_support=0.01, metric="confidence", min_threshold=0.8):
+    
     """
     Performs association rule mining on given DataFrame.
     
@@ -350,42 +370,22 @@ def test_results():
     
     ### CLUSTERING ### 
     df = pd.DataFrame(structured_data)
-    df.drop(columns=columns_to_drop, inplace=True)
-
     data_columns = genre_columns + mood_columns + vocal_columns
     df_music_features = df[data_columns]
     
-    #elbow_cluster_printing(df_music_features, df)
-
-    scaler = StandardScaler()
-    scaled_features = scaler.fit_transform(df_music_features)
-
-    # Fit the KMeans algorithm to the scaled features
-    kmeans = KMeans(n_clusters=7, n_init=10, random_state=42)
-    kmeans.fit(scaled_features)
-
-    # Predict the cluster for each song
-    df['Cluster_Label'] = kmeans.predict(scaled_features)
-
-    cluster_avg_rating = df.groupby('Cluster_Label')['overall_rating'].mean()
-
-    # Determine if the user likes the songs in each cluster
-    # Setting the threshold for 'like' as a positive average rating
-    clusters_liked = cluster_avg_rating[cluster_avg_rating > 0]
-
-    print("Clusters liked by the user (based on positive average rating):")
-    print(clusters_liked)
+    # elbow_cluster_printing(df_music_features, df)
 
     df = pd.DataFrame(structured_data)
     features_and_ratings_columns = rating_columns + genre_columns + mood_columns + vocal_columns
     df_features_and_ratings = df[features_and_ratings_columns]
-    high_rated_clusters = elbow_cluster_printing(df_features_and_ratings, df)
-    rating_rm_rows = high_rated_clusters.iloc[:, 1:]
+    df_centroids, high_rated_clusters = get_high_rated_clusters(df_features_and_ratings, 7, df)
+    print(df_centroids)
+    get_user_preferred_clusters(df_features_and_ratings, 7, df)
     
     # creating dicitonary (key -> attribute column, value -> rating value)
     row_dicts = []
     # Iterate through each row in the DataFrame
-    for index, row in rating_rm_rows.iterrows():
+    for index, row in high_rated_clusters.iterrows():
         # Create a dictionary for the current row
         row_dict = {}
         # Iterate through each column in the row
@@ -402,17 +402,6 @@ def test_results():
 
     #take me to query_open_ai route that inputs dictionary through open ai
 
-    """
-    scaler = StandardScaler()
-    scaled_features_and_ratings = scaler.fit_transform(df_features_and_ratings)
-    kmeans_with_ratings = KMeans(n_clusters=7, random_state=42)
-    kmeans_with_ratings.fit(scaled_features_and_ratings)
-
-    df['Cluster_With_Ratings'] = kmeans_with_ratings.predict(scaled_features_and_ratings)
-
-    # Print out the first few entries to see the new cluster assignments
-    print(df[['overall_rating', 'Cluster_With_Ratings']].head())
-    """
 
     ### ASSOCIATE RULE MINING ###
     """ need to create df_transformed beforehand.
