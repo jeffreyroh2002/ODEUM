@@ -23,7 +23,7 @@ export default function Questionnaire() {
     const [csrfToken, setCsrfToken] = useState('');    
 
     const [questionIndex, setQuestionIndex] = useState(0);
-    const [audioId, setAudioId] = useState(1);
+    const [audioId, setAudioId] = useState(parseInt(searchParams.get('audio_id')));
     const [audioName, setAudioName] = useState('');
     const [savedRating, setSavedRating] = useState(null);    
 

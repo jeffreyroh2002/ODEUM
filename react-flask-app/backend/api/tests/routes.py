@@ -36,6 +36,7 @@ def before_test_info():
     else:
         last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.rating != None) \
                                       .order_by(UserAnswer.audio_id.desc()).first()
+        print(last_answer)
         audio_id = (1 if last_answer == None else last_answer.audio_id)  
 
         
@@ -59,14 +60,12 @@ def submit_answer():
     rating = data['rating']
     question_index = data['question_index']
     test_id = int(data['test_id'])
-
     # getting existing useranswer
     answer = UserAnswer.query.filter_by(user_id= current_user.id, 
                                         test_id=test_id, 
                                         audio_id=audio_id, 
                                         question_index=question_index)   \
                              .first()
-    
     # for the case when there is not an existing answer 
     if not answer:
         new_answer = UserAnswer(audio_id=audio_id, 
@@ -80,11 +79,13 @@ def submit_answer():
                                             question_index=question_index).first()
 
     # updating overall rating to database
-    answer.overall_rating = rating
+    answer.rating = rating
     db.session.commit()
 
     # for debugging
-    answer = UserAnswer.query.filter_by(question_index=question_index, test_id=test_id, user_id=current_user.id).first()
+    answer = UserAnswer.query.filter_by(question_index=question_index, 
+                                        test_id=test_id, 
+                                        user_id=current_user.id).first()
     print("submitted answer", answer, "of questionIndex", question_index)
 
     #if this is the last question, record the test end time
@@ -121,16 +122,15 @@ def get_next_audio_id():
 @tests.route('/get_prev_audio_id', methods=['GET'])
 @login_required
 def get_prev_audio_id():
+    storage_client = storage.Client(project="ODEUM-421210")
+    bucket = storage_client.get_bucket("odeum-musics")
     test_id = int(request.args.get('test_id'))
     question_index = int(request.args.get('question_index'))
 
     prev_answer = UserAnswer.query.filter_by(test_id=test_id, question_index=question_index-1).first()
     print("prev_info", prev_answer.audio_id, prev_answer.rating, prev_answer.question_index)
     prev_audio_id = prev_answer.audio_id
-    dir_path = os.path.join(os.getcwd(), 'api', 'static', 'audio_files')
-    filenames = os.listdir(dir_path)
-    full_filenames = ['static/audio_files/' + filename for filename in filenames]       
-    prev_audio_name = full_filenames[int(prev_audio_id) - 1]
+    prev_audio_name = AudioFile.query.get(prev_audio_id).audio_name
 
     return jsonify({"prev_audio_id": prev_audio_id, "prev_audio_name": prev_audio_name})    
 

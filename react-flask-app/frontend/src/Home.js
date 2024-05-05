@@ -9,7 +9,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Fetch isLoggedIn status from backend when component mounts
+    // Fetch isLoggedIn status from backend when component mounts    
     axios.get(`${BASE_URL}/is_logged_in`)
       .then(response => {
         setIsLoggedIn(response.data.isLoggedIn);
