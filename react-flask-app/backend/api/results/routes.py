@@ -23,7 +23,8 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import Lasso
 from mlxtend.frequent_patterns import apriori, association_rules
 
-
+from langchain_community.chat_models import ChatOpenAI
+from langchain.schema import HumanMessage
 
 #imports for saving png files
 import io
@@ -34,10 +35,6 @@ from matplotlib.ticker import MaxNLocator
 from collections import defaultdict
 import seaborn as sns
 import os
-
-#openAI, langchain modules
-from langchain_community.chat_models import ChatOpenAI
-from langchain.schema import HumanMessage
 
 results = Blueprint('results', __name__)
 
@@ -173,9 +170,14 @@ def find_significant_correlations(correlation_matrix, threshold, columns):
     significant_pairs = []
     for column in columns:
         for index, value in correlation_matrix[column].items():
-            if abs(value) >= threshold and value != 1.0 and index != column:
-                # Avoid self-correlation and ensure correlation meets threshold
-                significant_pairs.append({"Attribute 1": column, "Attribute 2": index, "Correlation": value})
+            # Check only one side of the diagonal to avoid duplicates
+            if index > column and abs(value) >= threshold:
+                # Ensure correlation meets threshold and is not self-correlation
+                significant_pairs.append({
+                    "Attribute 1": column,
+                    "Attribute 2": index,
+                    "Correlation": value
+                })
 
     significant_correlations = pd.DataFrame(significant_pairs)
     return significant_correlations
@@ -184,6 +186,8 @@ def calculate_significant_correlations_for_ratings(df, rating_columns, genre_col
     """Calculates and prints significant correlations for each rating type with relevant song attributes,
     ensuring there's sufficient variability in attributes for meaningful analysis."""
     correlation_matrix = df.corr()
+
+    print(correlation_matrix)
     
     # Exclude rating columns to focus on song attributes
     non_rating_columns = [col for col in df.columns if col not in rating_columns]
@@ -193,30 +197,18 @@ def calculate_significant_correlations_for_ratings(df, rating_columns, genre_col
         print("Not enough variability in attributes for meaningful correlation analysis.")
         return
     
-    # Mapping of rating types to their relevant attributes
-    rating_to_attributes = {
-        'overall_rating': genre_columns + mood_columns + vocal_columns,
-        'genre_rating': genre_columns,
-        'mood_rating': mood_columns,
-        'vocal_timbre_rating': vocal_columns
-    }
+   # Since only 'overall_score' is used, directly relate it to all attributes
+    overall_attributes = genre_columns + mood_columns + vocal_columns
+    valid_attributes = [attr for attr in overall_attributes if attr in correlation_matrix.columns]
 
-    for score in rating_columns:  # Iterate through each specific rating type
-        relevant_attributes = rating_to_attributes.get(score, [])
+    # Calculate and print significant correlations for the overall rating with each valid attribute
+    for attribute in valid_attributes:
+        significant_correlations = find_significant_correlations(correlation_matrix, threshold, columns=[rating_columns[0], attribute])
 
-        # Ensure attributes related to the score are in the correlation matrix
-        valid_attributes = [attr for attr in relevant_attributes if attr in correlation_matrix.columns]
-
-        for attribute in valid_attributes:
-            # Calculate and print significant correlations for the attribute
-            significant_correlations = find_significant_correlations(correlation_matrix, threshold, columns=[score, attribute])
-
-            """
-            if not significant_correlations.empty:
-                print(f"\nSignificant Correlations for {score} with {attribute} (|correlation| >= {threshold}):\n", significant_correlations)
-            else:
-                print(f"\nNo significant correlations found for {score} with {attribute} at the threshold of {threshold}.")
-            """
+        if not significant_correlations.empty:
+            print(f"\nSignificant Correlations for {rating_columns[0]} with {attribute} (|correlation| >= {threshold}):\n", significant_correlations)
+        else:
+            print(f"\nNo significant correlations found for {rating_columns[0]} with {attribute} at the threshold of {threshold}.")
 
 def perform_regression_analysis(df, genre_columns, mood_columns):
     """Performs regression analysis to model the impact of genre and mood on overall rating."""
@@ -248,7 +240,7 @@ def perform_regression_analysis(df, genre_columns, mood_columns):
     X_columns = genre_columns + mood_columns + [f'{g}_{m}_interaction' for g in genre_columns for m in mood_columns]
     X = sm.add_constant(df[X_columns])  # Add a constant term for the intercept
     
-    y_overall = df['overall_rating']
+    y_overall = df['rating']
 
     """
     print("\nX Matrix:")
@@ -322,6 +314,14 @@ def perform_association_rule_mining(df, min_support=0.01, metric="confidence", m
     return significant_rules
 
 
+def request_open_ai(test):
+    llm = ChatOpenAI(openai_api_key="my-openai-api-key", temperature=0, model_name='gpt-3.5-turbo')
+    my_question= ""
+    ai_response = (llm([HumanMessage(content=my_question)]))
+    print(ai_response)
+    return(ai_response)
+
+
 @results.route("/test_results", methods=['GET'])
 @login_required
 def test_results():
@@ -335,8 +335,7 @@ def test_results():
     test_answers = UserAnswer.query.filter_by(user=user, test_id=test.id).all()
     structured_data = prepare_structured_data(test_answers)
     df = pd.DataFrame(structured_data)
-    #rating_columns = ['overall_rating', 'genre_rating', 'mood_rating', 'vocal_timbre_rating']
-    rating_columns = ['overall_rating']
+    rating_columns = ['rating']
     genre_columns = ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul']
     mood_columns = ['Emotional', 'Tense', 'Bright', 'Relaxed']
     vocal_columns = ['Smooth', 'Dreamy', 'Raspy']
@@ -351,7 +350,6 @@ def test_results():
     
     ### CLUSTERING ### 
     df = pd.DataFrame(structured_data)
-    columns_to_drop = ['genre_rating', 'mood_rating', 'vocal_timbre_rating']  # Temporary
     df.drop(columns=columns_to_drop, inplace=True)
 
     data_columns = genre_columns + mood_columns + vocal_columns
