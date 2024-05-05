@@ -288,28 +288,8 @@ def get_high_rated_clusters(df_music_features, optimal_clusters, df):
     centroids_original_scale = scaler.inverse_transform(centroids)
     df_centroids = pd.DataFrame(centroids_original_scale, columns=df_music_features.columns)
 
-    filtered_centroids = df_centroids[df_centroids['rating'] >= 2.0]
+    filtered_centroids = df_centroids[df_centroids['rating'] >= 1.5]
     return df_centroids, filtered_centroids
-
-def get_user_preferred_clusters(df_music_features, optimal_clusters, df):
-    scaler = StandardScaler()
-    scaled_features = scaler.fit_transform(df_music_features)
-
-    # Fit the KMeans algorithm to the scaled features
-    kmeans = KMeans(n_clusters=optimal_clusters, n_init=10, random_state=42)
-    kmeans.fit(scaled_features)
-
-    # Predict the cluster for each song
-    df['Cluster_Label'] = kmeans.predict(scaled_features)
-
-    cluster_avg_rating = df.groupby('Cluster_Label')['rating'].mean()
-
-    # Determine if the user likes the songs in each cluster
-    # Setting the threshold for 'like' as a positive average rating
-    clusters_liked = cluster_avg_rating[cluster_avg_rating > 0]
-
-    print("Clusters liked by the user (based on positive average rating):")
-    print(clusters_liked)
 
 def perform_association_rule_mining(df, min_support=0.01, metric="confidence", min_threshold=0.8):
     
@@ -378,9 +358,12 @@ def test_results():
     df = pd.DataFrame(structured_data)
     features_and_ratings_columns = rating_columns + genre_columns + mood_columns + vocal_columns
     df_features_and_ratings = df[features_and_ratings_columns]
+
+    # high rated clusters: filtering the centroids of the clusters directly based on a rating threshold. 
+    # It filters the centroids to retain only those with ratings above a certain threshold.
+
     df_centroids, high_rated_clusters = get_high_rated_clusters(df_features_and_ratings, 7, df)
     print(df_centroids)
-    get_user_preferred_clusters(df_features_and_ratings, 7, df)
     
     # creating dicitonary (key -> attribute column, value -> rating value)
     row_dicts = []
