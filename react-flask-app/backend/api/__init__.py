@@ -39,6 +39,7 @@ def create_app(config_class=Config):
     from api.results.routes import results
     from api.spotify.routes import spotify
     from api.presurvey.routes import presurvey
+    from api.openai.routes import openai
     
     app.register_blueprint(main)
     app.register_blueprint(users)
@@ -47,5 +48,6 @@ def create_app(config_class=Config):
     app.register_blueprint(results)
     app.register_blueprint(spotify)
     app.register_blueprint(presurvey)
+    app.register_blueprint(openai)
 
     return app
