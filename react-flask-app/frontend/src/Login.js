@@ -30,7 +30,8 @@ export default function Signup(){
       remember_me: rememberMe
     }, {
       headers: {
-        'X-CSRF-Token': csrfToken // Replace `csrfToken` with the actual token
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
       }
     })
     .then(function (response) {
@@ -46,7 +47,24 @@ export default function Signup(){
       }
       else navigate('/');
     })
-    .catch((error) => alert("An unexpected error occurred. Please try again later."));
+    .catch((error) => {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log(error.response.data);
+        console.log(error.response.status);
+        console.log(error.response.headers);
+        alert("Error: " + error.response.data.message);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log(error.request);
+        alert("Error: No response from server.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error', error.message);
+        alert("Error: " + error.message);
+      }
+    });
   };
 
   return (
