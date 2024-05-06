@@ -87,14 +87,6 @@ def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
     # Further analysis can be done based on the findings
     liked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] > 0].groupby('cluster')['rating'].mean()
     disliked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] < 0].groupby('cluster')['rating'].mean()
-    
-    """
-    print("\nLiked Clusters (Positive Average Rating):")
-    print(liked_clusters)
-    
-    print("\nDisliked Clusters (Negative Average Rating):")
-    print(disliked_clusters)
-    """
 
 def analyze_cluster_characteristics(df_clustered, n_clusters):
     """Analyzes the characteristics of each cluster."""
@@ -106,66 +98,6 @@ def analyze_cluster_characteristics(df_clustered, n_clusters):
         cluster_characteristics[cluster_label] = cluster_centroid
     
     return cluster_characteristics
-
-"""
-def analyze_cluster_ratings(user_ratings_clustered, n_clusters, feature_columns, save_plot=True):
-    ###Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked.
-    ###Also includes feature analysis, visualization, and interpretation of the clusters.
-    # Step 1: Feature Analysis
-    cluster_means = user_ratings_clustered.groupby('cluster')[feature_columns].mean()
-    print("\nCluster Feature Means:")
-    print(cluster_means)
-
-    # Step 2: Visualization
-    pca = PCA(n_components=2)
-    cluster_centers_2D = pca.fit_transform(cluster_means)
-
-    plt.figure(figsize=(10, 6))
-    plt.scatter(cluster_centers_2D[:, 0], cluster_centers_2D[:, 1], c='red', marker='o', s=100)
-    for i, txt in enumerate(cluster_means.index):
-        plt.annotate(txt, (cluster_centers_2D[i, 0], cluster_centers_2D[i, 1]))
-    plt.xlabel('PC1')
-    plt.ylabel('PC2')
-    plt.title('Cluster Centers in 2D PCA Space')
-    plt.grid(True)
-
-    # Save plot as an image file
-    if save_plot:
-        plot_filename = 'cluster_centers_plot.png'
-        plt.savefig(plot_filename)
-        print(f"Plot saved as {plot_filename} in the current directory.")
-
-    plt.show()
-
-    # Step 3: Cluster Profiles
-    cluster_profiles = cluster_means.transpose()
-    print("\nCluster Profiles:")
-    print(cluster_profiles)
-
-    # Step 4: Interpretation
-    print("\nInterpretation of Clusters:")
-    for cluster_num in range(n_clusters):
-        # Analyze which clusters are rated more positively on average
-        cluster_avg_rating = user_ratings_clustered[user_ratings_clustered['cluster'] == cluster_num]['rating'].mean()
-        print(f"\nCluster {cluster_num}:")
-        print(f"Average Rating: {cluster_avg_rating}")
-        if cluster_avg_rating > 0:
-            print("This cluster is generally liked.")
-        elif cluster_avg_rating < 0:
-            print("This cluster is generally disliked.")
-        else:
-            print("This cluster has neutral sentiment.")
-    
-    # Further analysis can be done based on the findings
-    liked_clusters = user_ratings_clustered[user_ratings_clustered['rating'] > 0].groupby('cluster')['rating'].mean()
-    disliked_clusters = user_ratings_clustered[user_ratings_clustered['rating'] < 0].groupby('cluster')['rating'].mean()
-    
-    print("\nLiked Clusters (Positive Average Rating):")
-    print(liked_clusters)
-    
-    print("\nDisliked Clusters (Negative Average Rating):")
-    print(disliked_clusters)
-"""
 
 def find_significant_correlations(correlation_matrix, threshold, columns):
     significant_pairs = []
@@ -214,16 +146,6 @@ def calculate_significant_correlations_for_ratings(df, rating_columns, genre_col
 def perform_regression_analysis(df, genre_columns, mood_columns):
     """Performs regression analysis to model the impact of genre and mood on overall rating."""
 
-    """
-    # Print all columns
-    print("Columns in DataFrame:")
-    print(df.columns)
-    
-    # Print all rows
-    print("Rows in DataFrame:")
-    print(df)
-    """
-
     # Check for NaN values in the DataFrame
     nan_indices = df[df.isna().any(axis=1)]
     if not nan_indices.empty:
@@ -242,11 +164,6 @@ def perform_regression_analysis(df, genre_columns, mood_columns):
     X = sm.add_constant(df[X_columns])  # Add a constant term for the intercept
     
     y_overall = df['rating']
-
-    """
-    print("\nX Matrix:")
-    print(X.head())  # Print the first few rows of the X matrix for debugging
-    """
 
     try:
         model_overall = sm.OLS(y_overall, X).fit()
@@ -383,8 +300,15 @@ def test_results():
     for row_dict in row_dicts:
         print(row_dict)
 
+    df_centroids_rounded = df_centroids.round(2)
+    # df_centroids_rounded.to_csv('df_centroids.txt', sep='\t', index=False, float_format='%.2f')
+
     #take me to query_open_ai route that inputs dictionary through open ai
 
+    user = current_user
+    test.clustering_output = df_centroids_rounded.to_dict()
+
+    print(test.clustering_output)
 
     ### ASSOCIATE RULE MINING ###
     """ need to create df_transformed beforehand.
