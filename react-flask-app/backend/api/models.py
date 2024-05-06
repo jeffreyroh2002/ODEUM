@@ -50,6 +50,7 @@ class Test(db.Model):
     pre_survey_data = db.Column(db.Text)  # Using Text to store JSON-formatted string
     liked_artists = db.Column(db.Text)
     answers = db.relationship("UserAnswer", backref="test", lazy=True)
+    clustering_output = db.Column(db.Text)
     gpt_analysis = db.Column(db.Text)
 
 
