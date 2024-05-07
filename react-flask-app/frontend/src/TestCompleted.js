@@ -43,7 +43,7 @@ export default function TestCompleted() {
                 return res.json();
             })
             .then(data => {
-                setTestResults(data);
+                setTestResults(data.gpt_analysis);
             })
             .catch(error => console.error('Error fetching test results:', error));
     }, [testId]);
@@ -52,9 +52,7 @@ export default function TestCompleted() {
         <div>
             <Header />
             <h1 className="result--header">Test Completed!</h1>
-            <h2 className="result--subheader">Results Feature Coming Soon...</h2>
-            <p>Test ID: {testId}</p>
-            <p>testResults{testResults}</p>
+            <p>{testResults}</p>
             {/* <p>{openAiResponse}</p> */}
         </div>
     );
