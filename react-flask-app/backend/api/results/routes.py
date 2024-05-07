@@ -306,19 +306,19 @@ def test_results():
     user = current_user
     test.clustering_output = df_centroids_rounded.to_dict()
     survey_data = json.loads(test.pre_survey_data)
-    liked_genre = test.survey_data["3"]
+    liked_genre = survey_data["3"]
     print(liked_genre)
 
     #print(test.clustering_output)
 
     # Connect to Open Ai API
     if test.gpt_analysis == None:
-        llm = ChatOpenAI(openai_api_key="openai-api-key", temperature=0, model_name='gpt-3.5-turbo')
+        llm = ChatOpenAI(openai_api_key="tmp", temperature=0, model_name='gpt-3.5-turbo')
         prompt ="""With the following cluster info and genre preference, give anaylsis on music preference.
         REQUIREMENTS:
         - refer as "you"
-        -  nuanced description with examples (limit to 5 sentences)
-        -  high level description with analogies (limit to 5 sentences)
+        - nuanced description with examples (limit to 5 sentences)
+        - high level description with analogies (limit to 5 sentences)
         - 3 song recommendations user would like (only songs in previously liked genres)
         - don't list traits, make the user learn something new, focus on the mixture of labels
         - use the liked genre only as a guideline, don't mention it in description
