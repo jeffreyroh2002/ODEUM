@@ -303,12 +303,34 @@ def test_results():
     df_centroids_rounded = df_centroids.round(2)
     # df_centroids_rounded.to_csv('df_centroids.txt', sep='\t', index=False, float_format='%.2f')
 
-    #take me to query_open_ai route that inputs dictionary through open ai
-
     user = current_user
     test.clustering_output = df_centroids_rounded.to_dict()
+    survey_data = json.loads(test.pre_survey_data)
+    liked_genre = test.survey_data["3"]
+    print(liked_genre)
 
-    print(test.clustering_output)
+    #print(test.clustering_output)
+
+    # Connect to Open Ai API
+    if test.gpt_analysis == None:
+        llm = ChatOpenAI(openai_api_key="openai-api-key", temperature=0, model_name='gpt-3.5-turbo')
+        prompt ="""With the following cluster info and genre preference, give anaylsis on music preference.
+        REQUIREMENTS:
+        - refer as "you"
+        -  nuanced description with examples (limit to 5 sentences)
+        -  high level description with analogies (limit to 5 sentences)
+        - 3 song recommendations user would like (only songs in previously liked genres)
+        - don't list traits, make the user learn something new, focus on the mixture of labels
+        - use the liked genre only as a guideline, don't mention it in description
+        """
+        my_question= f"{prompt}, {liked_genre}, {test.clustering_output}!"
+        ai_response = (llm([HumanMessage(content=my_question)]))
+        test.gpt_analysis = ai_response
+    else: 
+        print(test.gpt_analysis)
+
+    print(test.gpt_analysis)
+
 
     ### ASSOCIATE RULE MINING ###
     """ need to create df_transformed beforehand.
