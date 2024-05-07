@@ -39,6 +39,7 @@ import os
 
 results = Blueprint('results', __name__)
 
+llm = ChatOpenAI(openai_api_key="tmp", temperature=0, model_name='gpt-3.5-turbo')
 
 def prepare_structured_data(test_answers):
     """Extracts and structures data from test answers."""
@@ -301,19 +302,21 @@ def test_results():
         print(row_dict)
 
     df_centroids_rounded = df_centroids.round(2)
+    clustering_data = df_centroids_rounded.to_dict()
     # df_centroids_rounded.to_csv('df_centroids.txt', sep='\t', index=False, float_format='%.2f')
 
     user = current_user
-    test.clustering_output = df_centroids_rounded.to_dict()
+    
+    test.clustering_output = json.dumps(clustering_data)
     survey_data = json.loads(test.pre_survey_data)
-    liked_genre = survey_data["3"]
-    print(liked_genre)
-
-    #print(test.clustering_output)
+    
+    if test.pre_survey_data:
+        survey_data = json.loads(test.pre_survey_data)
+        liked_genre = survey_data.get("3")
 
     # Connect to Open Ai API
-    if test.gpt_analysis == None:
-        llm = ChatOpenAI(openai_api_key="tmp", temperature=0, model_name='gpt-3.5-turbo')
+    
+    if test.gpt_analysis is None:
         prompt ="""With the following cluster info and genre preference, give anaylsis on music preference.
         REQUIREMENTS:
         - refer as "you"
@@ -323,13 +326,26 @@ def test_results():
         - don't list traits, make the user learn something new, focus on the mixture of labels
         - use the liked genre only as a guideline, don't mention it in description
         """
-        my_question= f"{prompt}, {liked_genre}, {test.clustering_output}!"
-        ai_response = (llm([HumanMessage(content=my_question)]))
-        test.gpt_analysis = ai_response
-    else: 
-        print(test.gpt_analysis)
+        clustering_info = json.dumps(json.loads(test.clustering_output), indent=2)
 
-    print(test.gpt_analysis)
+        my_question= f"{prompt}, Liked Genre: {liked_genre}, Clustering Data: {clustering_info}!"
+        
+        try:
+            # Call to the language model (make sure to handle the response correctly based on how llm is implemented)
+            ai_response = llm([HumanMessage(content=my_question)])
+            ai_content = ai_response.content
+            print("HELLO WORLD!!!:", ai_content)
+            test.gpt_analysis = ai_content  # Assuming ai_response is immediately usable as a string
+            db.session.commit()
+        except Exception as e:
+            print(f"An error occurred while generating analysis: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+        return jsonify({"message": "Analysis updated successfully!"}), 200
+
+    else:
+        print("Loading already created info:", test.gpt_analysis)
+        return jsonify({"gpt_analysis": test.gpt_analysis}), 200
 
 
     ### ASSOCIATE RULE MINING ###
@@ -338,6 +354,7 @@ def test_results():
     print("Significant Association Rules:")
     print(significant_rules)
     """
+    """
     response_data = {
         'user_id': user.id,
         'test_id': test.id,
@@ -345,3 +362,4 @@ def test_results():
         'structured_data': structured_data
     }
     return jsonify(response_data)
+    """
