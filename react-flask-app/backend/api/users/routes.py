@@ -4,7 +4,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 import re  #for signup validation
 
 from api import db, bcrypt
-from api.models import User 
+from api.models import User, Test 
 
 users = Blueprint('users', __name__)
 
