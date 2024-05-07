@@ -52,8 +52,8 @@ export default function TestCompleted() {
         <div>
             <Header />
             <h1 className="result--header">Test Completed!</h1>
-            <p>{testResults}</p>
-            {/* <p>{openAiResponse}</p> */}
+            <h2 className="result--subheader">subheader</h2>
+            <p className="result--description">{testResults}</p>
         </div>
     );
 }

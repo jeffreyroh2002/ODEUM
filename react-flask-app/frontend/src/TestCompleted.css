@@ -12,6 +12,12 @@
     font-weight: 300;
 }
 
+.result--description{
+    text-align: center;
+    font-size: 2vw;
+    font-weight: 200;
+}
+
 /* Styling for the radar charts */
 .radar-chart-container {
     margin: 20px auto;
