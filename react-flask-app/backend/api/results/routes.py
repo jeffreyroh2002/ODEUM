@@ -337,15 +337,22 @@ def test_results():
             print("HELLO WORLD!!!:", ai_content)
             test.gpt_analysis = ai_content  # Assuming ai_response is immediately usable as a string
             db.session.commit()
+
+            return jsonify({
+            "message": "Analysis updated successfully!",
+            "gpt_analysis": test.gpt_analysis
+        }), 200
+
         except Exception as e:
             print(f"An error occurred while generating analysis: {str(e)}")
             return jsonify({"error": str(e)}), 500
 
-        return jsonify({"message": "Analysis updated successfully!"}), 200
-
     else:
         print("Loading already created info:", test.gpt_analysis)
-        return jsonify({"gpt_analysis": test.gpt_analysis}), 200
+        return jsonify({
+            "message": "Query already existing analysis",
+            "gpt_analysis": test.gpt_analysis
+        }), 200
 
 
     ### ASSOCIATE RULE MINING ###
