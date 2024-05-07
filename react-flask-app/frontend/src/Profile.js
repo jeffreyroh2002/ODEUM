@@ -28,14 +28,13 @@ export default function Profile() {
                 <div className="main-content">
                     <p className="sub-title">Welcome back, {userName}</p>
                 </div>
+                <div className="prev--tests--title">Previous Tests</div>
                 <div>
                     {testsData.length > 0 ? (
                         testsData.map(test => (
                             <Link key={test.id} to={`/TestCompleted?testId=${test.id}`} className="test-link">
                                 <div className="test-card">
-                                    <p>ID: {test.id}</p>
-                                    <p>Type: {test.test_type}</p>
-                                    <p>Start Time: {test.test_start_time}</p>
+                                    <p>{test.test_start_time}</p>
                                     {/* Add more fields as needed */}
                                 </div>
                             </Link>

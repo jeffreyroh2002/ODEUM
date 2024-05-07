@@ -1,24 +1,35 @@
 /* Profile.css */
   
+
+  .prev--tests--title{
+    text-align: center;
+    font-size: 5vw;
+    font-weight: 500;
+    margin-bottom: 30px;
+  }
+
   /* Style for the test card */
   .test-card {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;
     margin-bottom: 10px;
-    background-color: #f9f9f9;
+    background-color: black;
     transition: all 0.3s ease;
+    text-align: center;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
   }
   
   /* Style for the test card hover effect */
   .test-card:hover {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 30px rgb(124, 124, 124);
   }
   
   /* Style for the test link */
   .test-link {
     text-decoration: none;
-    color: inherit; /* Inherit the color from parent */
   }
   
   /* Style for the no tests message */
