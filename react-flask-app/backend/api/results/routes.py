@@ -26,6 +26,7 @@ from mlxtend.frequent_patterns import apriori, association_rules
 
 from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
+import openai
 
 #imports for saving png files
 import io
@@ -39,7 +40,7 @@ import os
 
 results = Blueprint('results', __name__)
 
-llm = ChatOpenAI(openai_api_key="tmp", temperature=0, model_name='gpt-3.5-turbo')
+llm = ChatOpenAI(openai_api_key="x", max_tokens=2048, temperature=0, model_name='gpt-3.5-turbo')
 
 def prepare_structured_data(test_answers):
     """Extracts and structures data from test answers."""
@@ -77,13 +78,13 @@ def analyze_cluster_ratings(user_ratings_clustered, n_clusters):
     #Analyzes and prints average ratings by cluster, including which clusters are generally liked or disliked.
     avg_ratings_by_cluster = user_ratings_clustered.groupby(['user_id', 'cluster'])['rating'].mean().reset_index()
 
-    print("\nAverage Ratings by Cluster:")
-    print(avg_ratings_by_cluster.head())
+    #print("\nAverage Ratings by Cluster:")
+    #print(avg_ratings_by_cluster.head())
 
     # Analyze which clusters are rated more positively on average
     for cluster_num in range(n_clusters):
         cluster_avg_rating = avg_ratings_by_cluster[avg_ratings_by_cluster['cluster'] == cluster_num]['rating'].mean()
-        print(f"Cluster {cluster_num} Average Rating: {cluster_avg_rating}")
+        #print(f"Cluster {cluster_num} Average Rating: {cluster_avg_rating}")
 
     # Further analysis can be done based on the findings
     liked_clusters = avg_ratings_by_cluster[avg_ratings_by_cluster['rating'] > 0].groupby('cluster')['rating'].mean()
@@ -121,7 +122,7 @@ def calculate_significant_correlations_for_ratings(df, rating_columns, genre_col
     ensuring there's sufficient variability in attributes for meaningful analysis."""
     correlation_matrix = df.corr()
 
-    print(correlation_matrix)
+    #print(correlation_matrix)
     
     # Exclude rating columns to focus on song attributes
     non_rating_columns = [col for col in df.columns if col not in rating_columns]
@@ -168,8 +169,8 @@ def perform_regression_analysis(df, genre_columns, mood_columns):
 
     try:
         model_overall = sm.OLS(y_overall, X).fit()
-        print("\nRegression Analysis Summary for Overall Rating:")
-        print(model_overall.summary())
+        #print("\nRegression Analysis Summary for Overall Rating:")
+        #print(model_overall.summary())
     except Exception as e:
         print("\nError occurred during regression analysis:")
         print(e)  # Print the error message for debugging
@@ -200,7 +201,7 @@ def get_high_rated_clusters(df_music_features, optimal_clusters, df):
     kmeans = KMeans(n_clusters=num_clusters, n_init=10, random_state=42)
     df['Cluster'] = kmeans.fit_predict(df_scaled)
 
-    print(df['Cluster'].value_counts())
+    #print(df['Cluster'].value_counts())
 
     centroids = kmeans.cluster_centers_
     centroids_original_scale = scaler.inverse_transform(centroids)
@@ -230,15 +231,6 @@ def perform_association_rule_mining(df, min_support=0.01, metric="confidence", m
     significant_rules = rules[(rules['lift'] >= 1) & (rules['confidence'] >= 0.8)]
     
     return significant_rules
-
-
-def request_open_ai(test):
-    llm = ChatOpenAI(openai_api_key="my-openai-api-key", temperature=0, model_name='gpt-3.5-turbo')
-    my_question= ""
-    ai_response = (llm([HumanMessage(content=my_question)]))
-    print(ai_response)
-    return(ai_response)
-
 
 @results.route("/test_results", methods=['GET'])
 @login_required
@@ -281,7 +273,7 @@ def test_results():
     # It filters the centroids to retain only those with ratings above a certain threshold.
 
     df_centroids, high_rated_clusters = get_high_rated_clusters(df_features_and_ratings, 7, df)
-    print(df_centroids)
+    #print(df_centroids)
     
     # creating dicitonary (key -> attribute column, value -> rating value)
     row_dicts = []
@@ -313,44 +305,69 @@ def test_results():
     if test.pre_survey_data:
         survey_data = json.loads(test.pre_survey_data)
         liked_genre = survey_data.get("3")
+    else:
+        liked_genre = "No info"
+
+    clustering_info = json.dumps(json.loads(test.clustering_output), indent=2)
 
     # Connect to Open Ai API
     
     if test.gpt_analysis is None:
-        prompt ="""With the following cluster info and genre preference, give anaylsis on music preference.
-        REQUIREMENTS:
-        - refer as "you"
-        - nuanced description with examples (limit to 5 sentences)
-        - high level description with analogies (limit to 5 sentences)
-        - 3 song recommendations user would like (only songs in previously liked genres)
-        - don't list traits, make the user learn something new, focus on the mixture of labels
-        - use the liked genre only as a guideline, don't mention it in description
-        """
-        clustering_info = json.dumps(json.loads(test.clustering_output), indent=2)
+        # Common Requirements
+        common_requirements = "refer to user as 'you', don't list traits, make the user learn something new, focus on the mixture of labels"
+        prompt_intro = "With the following cluster info and genre preference, give analysis on user's music preference."
+        cluster_details = f"Clustering Data: {clustering_info}"
+        data_details = f"Clustering Data: {clustering_info}, liked genre {liked_genre}"
 
-        my_question= f"{prompt}, Liked Genre: {liked_genre}, Clustering Data: {clustering_info}!"
+        sub_prompts = [
+            {
+                "prompt": f"{prompt_intro} {cluster_details}",
+                "requirements": f"sentences with nuanced description. {common_requirements}",
+                "key": "description"
+            },
+            {
+                "prompt": f"{prompt_intro} {cluster_details}",
+                "requirements": f"sentences with high level description with analogies. {common_requirements}",
+                "key": "analogies"
+            },
+            {
+                "prompt": f"Suggest 3 songs that the user might like based on the clustering data and liked genre, {data_details}",
+                "requirements": f"use the liked genre only as a guideline, don't mention it in description",
+                "key": "recommendations"
+            }
+        ]
+
+        complete_response = {}
+
+        for sub_prompt in sub_prompts:
+            try:
+                # Simulate a call to a language model (replace this with actual API call)
+                my_question = sub_prompt["prompt"] + ", " + sub_prompt["requirements"]
+                ai_response = llm([HumanMessage(content=my_question)])
+                ai_content = ai_response.content
+                print("CHECKING HERE!!!", ai_content)
+                complete_response[sub_prompt["key"]] = ai_content
+            except Exception as e:
+                print(f"Error during API call for {sub_prompt['key']}: {e}")
+                complete_response[sub_prompt["key"]] = "Failed to generate response."
+
+        # Combine all responses into a single text
+        final_gpt_analysis = " ".join(complete_response.values())
         
+        test.gpt_analysis = final_gpt_analysis
+
         try:
-            # Call to the language model (make sure to handle the response correctly based on how llm is implemented)
-            ai_response = llm([HumanMessage(content=my_question)])
-            ai_content = ai_response.content
-            print("HELLO WORLD!!!:", ai_content)
-            test.gpt_analysis = ai_content  # Assuming ai_response is immediately usable as a string
             db.session.commit()
-
             return jsonify({
-            "message": "Analysis updated successfully!",
-            "gpt_analysis": test.gpt_analysis
-        }), 200
-
+                "message": "Analysis updated successfully!",
+                "gpt_analysis": test.gpt_analysis
+            }), 200
         except Exception as e:
-            print(f"An error occurred while generating analysis: {str(e)}")
+            db.session.rollback()
             return jsonify({"error": str(e)}), 500
-
     else:
-        print("Loading already created info:", test.gpt_analysis)
         return jsonify({
-            "message": "Query already existing analysis",
+            "message": "Loading already created info:",
             "gpt_analysis": test.gpt_analysis
         }), 200
 
