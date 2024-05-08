@@ -24,7 +24,7 @@
   
   /* Style for the test card hover effect */
   .test-card:hover {
-    box-shadow: 0 0 30px rgb(124, 124, 124);
+    box-shadow: 0 0 100px rgb(124, 124, 124);
   }
   
   /* Style for the test link */
