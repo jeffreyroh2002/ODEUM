@@ -317,7 +317,7 @@ def test_results():
         common_requirements = "refer to user as 'you', don't list traits, make the user learn something new, focus on the mixture of labels"
         prompt_intro = "With the following cluster info and genre preference, give analysis on user's music preference."
         cluster_details = f"Clustering Data: {clustering_info}"
-        data_details = f"Clustering Data: {clustering_info}, liked genre {liked_genre}"
+        data_details = f"Clustering Data: {clustering_info}, liked genre: {liked_genre}"
 
         sub_prompts = [
             {
@@ -331,8 +331,8 @@ def test_results():
                 "key": "analogies"
             },
             {
-                "prompt": f"Suggest 3 songs that the user might like based on the clustering data and liked genre, {data_details}",
-                "requirements": f"use the liked genre only as a guideline, don't mention it in description",
+                "prompt": f"Suggest 3, nuanced songs that matches the cluster ratings and is preferably one of the user's liked genre, {data_details}",
+                "requirements": f"be creative, songs that actually exist, don't have to be popular songs",
                 "key": "recommendations"
             }
         ]
