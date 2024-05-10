@@ -1,0 +1,10 @@
+For 1st deployment
+1. adjust configurations for deployment
+    * need to store openai_api_key somewhere outside of routes.py
+2. remove unnecessary files
+3. only add necessary packages to req.txt
+4. try different approach to deployment
+
+Once deployment complete:
+1. update ui
+2. add google, kakao login
