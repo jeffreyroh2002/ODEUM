@@ -27,7 +27,7 @@ questions = [
     {
         "id": 3,
         "text": "What genres of music do you prefer?",
-        "answers": ["Pop", "Rock", "Hip-Hop", "Jazz", "Electronic", "R&B", "Indie"],
+        "answers": ['Rock', 'Hip Hop', 'Pop Ballad', 'Electronic', 'Jazz', 'Korean Ballad', 'R&B/Soul'],
         "allow_multiple": True
     },
     {
@@ -55,14 +55,12 @@ def process_presurvey_questions():
         
         if not test or test.test_end_time:        
             test_val = Test(
-                test_type = 1,
                 test_start_time = datetime.now(),
                 subject = current_user
             )
             db.session.add(test_val)
             db.session.commit()
-            test = Test.query.filter_by(user_id=current_user.id, test_type=1).order_by(Test.test_start_time.desc()).first()
-            audio_id = 1
+            test = Test.query.filter_by(user_id=current_user.id).order_by(Test.test_start_time.desc()).first()
 
         # Assuming pre_survey_data is a JSON-formatted text field that needs to be updated
         if test.pre_survey_data:
