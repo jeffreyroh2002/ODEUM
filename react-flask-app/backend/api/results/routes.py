@@ -40,7 +40,7 @@ import os
 
 results = Blueprint('results', __name__)
 
-llm = ChatOpenAI(openai_api_key="x", max_tokens=2048, temperature=0, model_name='gpt-3.5-turbo')
+llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY'), max_tokens=2048, temperature=0, model_name='gpt-3.5-turbo')
 
 def prepare_structured_data(test_answers):
     """Extracts and structures data from test answers."""
