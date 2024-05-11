@@ -43,12 +43,13 @@ class User(db.Model, UserMixin):
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    test_type = db.Column(db.Integer, nullable=False)
+    test_type = db.Column(db.Integer, nullable=True)
     test_start_time = db.Column(db.DateTime, nullable=False, default=datetime.now)
     test_end_time = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     pre_survey_data = db.Column(db.Text)  # Using Text to store JSON-formatted string
     liked_artists = db.Column(db.Text)
+    progress = db.Column(db.Text)
     answers = db.relationship("UserAnswer", backref="test", lazy=True)
     clustering_output = db.Column(db.Text)
     gpt_analysis = db.Column(db.Text)
@@ -60,7 +61,7 @@ class Test(db.Model):
 
     @property
     def decoded_pre_survey_answers(self):
-        return json.loads(self.pre_survey_answers)
+        return json.loads(self.pre_survey_data)
 
     @decoded_pre_survey_answers.setter
     def decoded_pre_survey_answers(self, value):

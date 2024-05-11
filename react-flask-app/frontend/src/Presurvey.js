@@ -41,6 +41,9 @@ function Questionnaire() {
     }
   };
 
+  useEffect(() => {
+    console.log(answers)
+  }, [answers]);
   const handleAnswerSubmit = () => {
     // Prepare the data to send all answers at once
     const payload = {
@@ -62,9 +65,12 @@ function Questionnaire() {
   
     // Save answers locally
     setAnswers(prevAnswers => [...prevAnswers, ...selectedAnswers.map(answer => ({ questionId: questions[currentQuestionIndex].id, answer }))]);
-  
+    
     // Move to next question if not the last one
-    if (currentQuestionIndex < questions.length - 1) {
+    console.log(currentQuestionIndex, selectedAnswers[0])
+    if (currentQuestionIndex === 0 && selectedAnswers[0] === 'No') {
+      navigate(`/BeforeTest`)
+    } else if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prevIndex => prevIndex + 1);
       // Reset selected answers for the next question
       setSelectedAnswers([]);

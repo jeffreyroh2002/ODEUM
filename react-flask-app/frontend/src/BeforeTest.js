@@ -9,12 +9,13 @@ export default function BeforeTest() {
     const navigate = useNavigate()
     const [testId, setTestId] = useState(1);
     const [audioId, setAudioId] = useState(1);
+    const [testType, setTestType] = useState(0);
 
     useEffect(() => {
         fetch(`${BASE_URL}/before_test_info`)
         .then(res => res.json())
         .then(data => {
-            console.log(data.audio_id)
+            setTestType(data.test_type);
             setAudioId(data.audio_id);
             setTestId(data.test_id);
         })
@@ -22,7 +23,6 @@ export default function BeforeTest() {
     }, []);
 
     const navigateToQuestionnaire = () => {
-        const testType = 1;
         navigate(`/Questionnaire?audio_id=${audioId}&test_type=${testType}&test_id=${testId}`)
     };
 
