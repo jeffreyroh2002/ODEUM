@@ -30,16 +30,16 @@ def before_test_info():
     test = Test.query.filter_by(user_id=user.id).order_by(Test.test_start_time.desc()).first()
     last_answer = UserAnswer.query.filter(UserAnswer.test_id==test.id, UserAnswer.rating != None) \
                                   .order_by(UserAnswer.audio_id.desc()).first()   
+    print("test: ", test.decoded_pre_survey_answers, "last: ", last_answer)
     #determine the test type
     if not last_answer:
         is_aware_of_musical_taste = test.decoded_pre_survey_answers['1']
-        is_discovering_new_music = test.decoded_pre_survey_answers['2']
         if is_aware_of_musical_taste == ['No']:
             test.test_type = 1
             if not test.progress: test.progress = "searching genre preference"
             db.session.commit()
             audio_id = get_next_audio_for_test_type_1(test.id, question_index = 0)
-        elif is_discovering_new_music == ['Explore new style of music']:
+        elif test.decoded_pre_survey_answers['2'] == ['Explore new style of music']:
             test.test_type = 2
             if not test.progress: test.progress = "searching genre preference"
             db.session.commit()
@@ -48,9 +48,11 @@ def before_test_info():
             test.test_type = 3
             db.session.commit()
             audio_id = get_next_audio_for_test_type_3(test.id, question_index = 0)
-
+        
 
         test = Test.query.filter_by(user_id=user.id).order_by(Test.test_start_time.desc()).first()
+        print("audio id: ", audio_id)
+        print(test.test_type)
         print("test type in before test: ", test.test_type)
         print("audio id in before test: ", audio_id)
 

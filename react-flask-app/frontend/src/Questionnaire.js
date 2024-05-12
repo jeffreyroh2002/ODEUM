@@ -11,7 +11,6 @@ import pauseIcon from './images/dark_blob.png'
 
 export default function Questionnaire() {
     const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
     const [isLoggedIn, setIsLoggedIn] = useState(true);
     function handleLogout() { setIsLoggedIn(false); };
 

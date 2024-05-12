@@ -1,10 +1,11 @@
 from api import db, create_app
 from api.models import AudioFile
-
+from dotenv import load_dotenv
 from google.cloud import storage
 import json
 
 def initialize_audio_database():
+    load_dotenv()
     app = create_app()
     with app.app_context():
         db.drop_all()

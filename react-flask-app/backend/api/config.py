@@ -11,7 +11,7 @@ class Config:
     SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')  #need to set up .env for development mode
     SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
     REDIRECT_URI = os.getenv('REDIRECT_URI', 'https://jeffreyroh2002-odeum-ol6y5xcofwj.ws-us110.gitpod.io/callback')
-
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     GOOGLE_APPLICATION_CREDENTIALS = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
     @staticmethod
