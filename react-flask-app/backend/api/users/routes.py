@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, session
 from flask_login import current_user, login_required, login_user, logout_user
+from flask_cors import CORS, cross_origin
 
 import re  #for signup validation
 
@@ -47,7 +48,7 @@ def signup():
         "first_name": new_user.first_name,
         "email": new_user.email
     })
-
+@cross_origin()
 @users.route('/login', methods=["POST"])
 def login():
     data = request.json
@@ -82,11 +83,11 @@ def logout():
 
 @users.route('/is_logged_in')
 def is_logged_in():
+    print("Received a request to /is_logged_in")
     if current_user.is_authenticated:
         return jsonify({"isLoggedIn": True})
     else:
         return jsonify({"isLoggedIn": False})
-    
 
 @login_required
 @users.route('/get_user_info', methods=["GET"])
