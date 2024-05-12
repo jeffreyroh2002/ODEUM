@@ -37,10 +37,13 @@ from matplotlib.ticker import MaxNLocator
 from collections import defaultdict
 import seaborn as sns
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 results = Blueprint('results', __name__)
 
-llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY'), max_tokens=2048, temperature=0, model_name='gpt-3.5-turbo')
+my_openai_key = os.getenv('OPENAI_API_KEY')
+llm = ChatOpenAI(openai_api_key=my_openai_key, max_tokens=2048, temperature=0, model_name='gpt-3.5-turbo')
 
 def prepare_structured_data(test_answers):
     """Extracts and structures data from test answers."""
