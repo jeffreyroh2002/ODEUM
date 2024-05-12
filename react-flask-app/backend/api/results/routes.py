@@ -37,8 +37,6 @@ from matplotlib.ticker import MaxNLocator
 from collections import defaultdict
 import seaborn as sns
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
 results = Blueprint('results', __name__)
 
